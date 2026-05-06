@@ -28,7 +28,8 @@ public class UserRepository {
             cols.append("id, ");
             vals.append("?, ");
         }
-        cols.append("user_id, email, ").append(passwordColumns).append(", full_name, phone_number, is_active, role, tfa_method, created_at, profile_picture");
+        cols.append("user_id, email, ").append(passwordColumns)
+                .append(", full_name, phone_number, is_active, role, tfa_method, created_at, profile_picture");
         vals.append("?, ?, ").append(getPasswordPlaceholders(passwordColumns)).append(", ?, ?, ?, ?, ?, ?, ?");
 
         String sql = "INSERT INTO users (" + cols.toString() + ") VALUES (" + vals.toString() + ")";
@@ -81,7 +82,7 @@ public class UserRepository {
         List<User> users = new ArrayList<>();
         String sql = "SELECT * FROM users";
         try (Statement st = UserDatabaseConnection.getInstance().getConnection().createStatement();
-             ResultSet rs = st.executeQuery(sql)) {
+                ResultSet rs = st.executeQuery(sql)) {
             while (rs.next()) {
                 users.add(mapResultSetToUser(rs));
             }
@@ -92,7 +93,8 @@ public class UserRepository {
     public void update(User user) throws SQLException {
         Connection connection = UserDatabaseConnection.getInstance().getConnection();
         String passwordAssignments = getPasswordAssignmentsForUpdate(connection);
-        String sql = "UPDATE users SET email = ?, " + passwordAssignments + ", full_name = ?, phone_number = ?, is_active = ?, role = ?, tfa_method = ?, profile_picture = ? WHERE user_id = ?";
+        String sql = "UPDATE users SET email = ?, " + passwordAssignments
+                + ", full_name = ?, phone_number = ?, is_active = ?, role = ?, tfa_method = ?, profile_picture = ? WHERE user_id = ?";
         try (PreparedStatement ps = connection.prepareStatement(sql)) {
             ps.setString(1, user.getEmail());
             int index = 2;
@@ -153,7 +155,8 @@ public class UserRepository {
         String userIdStr = rs.getString("user_id");
         UUID userId = null;
         try {
-            if (userIdStr != null) userId = UUID.fromString(userIdStr);
+            if (userIdStr != null)
+                userId = UUID.fromString(userIdStr);
         } catch (IllegalArgumentException ignored) {
         }
 
@@ -172,7 +175,8 @@ public class UserRepository {
         }
 
         Timestamp createdTs = rs.getTimestamp("created_at");
-        java.time.LocalDateTime createdAt = createdTs != null ? createdTs.toLocalDateTime() : java.time.LocalDateTime.now();
+        java.time.LocalDateTime createdAt = createdTs != null ? createdTs.toLocalDateTime()
+                : java.time.LocalDateTime.now();
 
         return new User(
                 userId,
@@ -184,8 +188,7 @@ public class UserRepository {
                 role,
                 tfa,
                 createdAt,
-                rs.getString("profile_picture")
-        );
+                rs.getString("profile_picture"));
     }
 
     private String getPasswordColumnsForInsert(Connection connection) throws SQLException {
@@ -224,7 +227,8 @@ public class UserRepository {
         return passwordColumns.contains(",") ? "?, ?" : "?";
     }
 
-    private int bindPasswordValues(PreparedStatement ps, int index, Connection connection, String passwordHash) throws SQLException {
+    private int bindPasswordValues(PreparedStatement ps, int index, Connection connection, String passwordHash)
+            throws SQLException {
         boolean hasPasswordHash = hasColumn(connection, PASSWORD_HASH_COLUMN);
         boolean hasLegacyPassword = hasColumn(connection, LEGACY_PASSWORD_COLUMN);
 

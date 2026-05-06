@@ -162,9 +162,9 @@ public class LoginController implements javafx.fxml.Initializable {
         Scene scene = source.getScene();
         if (scene != null && scene.getRoot() instanceof javafx.scene.layout.BorderPane) {
             javafx.scene.layout.BorderPane root = (javafx.scene.layout.BorderPane) scene.getRoot();
-            return root.getCenter() instanceof StackPane && 
-                   root.getCenter().getId() != null && 
-                   root.getCenter().getId().equals("contentArea");
+            return root.getCenter() instanceof StackPane &&
+                    root.getCenter().getId() != null &&
+                    root.getCenter().getId().equals("contentArea");
         }
         return false;
     }
@@ -189,7 +189,8 @@ public class LoginController implements javafx.fxml.Initializable {
             } else {
                 // Fallback: just reload the layout
                 try {
-                    FXMLLoader loader = new FXMLLoader(getClass().getResource("/com/example/pi_dev/main/main_layout.fxml"));
+                    FXMLLoader loader = new FXMLLoader(
+                            getClass().getResource("/com/example/pi_dev/main/main_layout.fxml"));
                     scene.setRoot(loader.load());
                 } catch (IOException e) {
                     e.printStackTrace();

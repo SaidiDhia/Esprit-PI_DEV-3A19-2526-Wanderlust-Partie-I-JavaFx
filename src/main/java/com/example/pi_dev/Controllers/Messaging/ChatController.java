@@ -469,7 +469,7 @@ public class ChatController {
                 try {
                     String fileUrl = msg.getFileUrl();
                     if (fileUrl != null) {
-                        File imageFile = new File(fileUrl);
+                        File imageFile = resolveMessageFile(fileUrl);
                         if (imageFile.exists()) {
                             Image image = new Image(imageFile.toURI().toString());
                             ImageView imageView = new ImageView(image);
@@ -590,13 +590,14 @@ public class ChatController {
             private void displayVideoMessage(Message msg, VBox bubble) {
                 try {
                     String fileUrl = msg.getFileUrl();
-                    if (fileUrl != null && new File(fileUrl).exists()) {
+                    File videoFile = resolveMessageFile(fileUrl);
+                    if (fileUrl != null && videoFile.exists()) {
                         Label videoThumbnail = new Label("🎥");
                         videoThumbnail.setStyle("-fx-font-size: 48px; -fx-text-fill: #2d7a2d; -fx-background-color: #f0f0f0; -fx-background-radius: 8; -fx-padding: 20;");
                         videoThumbnail.setPrefSize(200, 120);
                         videoThumbnail.setAlignment(Pos.CENTER);
                         videoThumbnail.setStyle(videoThumbnail.getStyle() + "-fx-cursor: hand;");
-                        videoThumbnail.setOnMouseClicked(e -> openFile(fileUrl));
+                        videoThumbnail.setOnMouseClicked(e -> openFile(videoFile.getPath()));
                         bubble.getChildren().add(videoThumbnail);
 
                         VBox infoBox = new VBox(2);
@@ -623,11 +624,12 @@ public class ChatController {
             private void displayAudioMessage(Message msg, VBox bubble) {
                 try {
                     String fileUrl = msg.getFileUrl();
-                    if (fileUrl != null && new File(fileUrl).exists()) {
+                    File audioFile = resolveMessageFile(fileUrl);
+                    if (fileUrl != null && audioFile.exists()) {
                         HBox audioBox = new HBox(10);
                         audioBox.setAlignment(Pos.CENTER_LEFT);
                         audioBox.setStyle("-fx-background-color: #f5f5f5; -fx-background-radius: 20; -fx-padding: 8; -fx-cursor: hand;");
-                        audioBox.setOnMouseClicked(e -> openFile(fileUrl));
+                        audioBox.setOnMouseClicked(e -> openFile(audioFile.getPath()));
 
                         Label playIcon = new Label("▶");
                         playIcon.setStyle("-fx-font-size: 20px; -fx-text-fill: #2d7a2d; -fx-min-width: 30;");
@@ -661,7 +663,10 @@ public class ChatController {
                 HBox fileBox = new HBox(8);
                 fileBox.setAlignment(Pos.CENTER_LEFT);
                 fileBox.setStyle("-fx-cursor: hand; -fx-background-color: #f5f5f5; -fx-background-radius: 8; -fx-padding: 8;");
-                fileBox.setOnMouseClicked(e -> openFile(msg.getFileUrl()));
+                fileBox.setOnMouseClicked(e -> {
+                    File resolved = resolveMessageFile(msg.getFileUrl());
+                    openFile(resolved.getPath());
+                });
 
                 Label iconLabel = new Label("📎");
                 iconLabel.setStyle("-fx-font-size: 24px;");
@@ -712,7 +717,7 @@ public class ChatController {
 
             private void showFullImage(String imagePath) {
                 try {
-                    File imageFile = new File(imagePath);
+                    File imageFile = resolveMessageFile(imagePath);
                     if (!imageFile.exists()) {
                         showError("Image file not found");
                         return;
@@ -770,6 +775,17 @@ public class ChatController {
                         showError("Failed to download file: " + e.getMessage());
                     }
                 }
+            }
+
+            private File resolveMessageFile(String storedPath) {
+                File resolved = uploadService.resolveLocalFile(storedPath);
+                if (resolved != null) {
+                    return resolved;
+                }
+                if (storedPath == null || storedPath.isBlank()) {
+                    return new File("");
+                }
+                return new File(storedPath);
             }
         });
 

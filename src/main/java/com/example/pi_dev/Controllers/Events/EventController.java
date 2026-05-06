@@ -3,6 +3,7 @@ package com.example.pi_dev.Controllers.Events;
 import com.example.pi_dev.Services.Events.WeatherService;
 import com.example.pi_dev.Utils.Events.Mydatabase;
 import com.example.pi_dev.Entities.Events.Activite;
+import com.example.pi_dev.Session.Session;
 
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
@@ -29,28 +30,50 @@ import java.util.ResourceBundle;
 
 public class EventController implements Initializable {
 
-    @FXML private ComboBox<String> activiteCombo;
-    @FXML private VBox activitesSelectionneesContainer;
-    @FXML private TextField nomorgField;
-    @FXML private TextField lieuField;
-    @FXML private TextField emailField;
-    @FXML private DatePicker dateDebutPicker;
-    @FXML private DatePicker dateFinPicker;
-    @FXML private TextField prixField;
-    @FXML private TextField capaciteField;
-    @FXML private TextField telephoneorgField;
-    @FXML private TextArea equipementField;
-    @FXML private TextArea descriptionField;
-    @FXML private Label imageStatusLabel;
-    @FXML private Button importerImageButton;
-    @FXML private ImageView imagePrincipaleView;
-    @FXML private HBox photosContainer;
-    @FXML private Button ajouterPhotoButton;
-    @FXML private TextField videoYoutubeField;
-    @FXML private CheckBox check1;
-    @FXML private CheckBox check2;
-    @FXML private CheckBox check3;
-    @FXML private CheckBox check4;
+    @FXML
+    private ComboBox<String> activiteCombo;
+    @FXML
+    private VBox activitesSelectionneesContainer;
+    @FXML
+    private TextField nomorgField;
+    @FXML
+    private TextField lieuField;
+    @FXML
+    private TextField emailField;
+    @FXML
+    private DatePicker dateDebutPicker;
+    @FXML
+    private DatePicker dateFinPicker;
+    @FXML
+    private TextField prixField;
+    @FXML
+    private TextField capaciteField;
+    @FXML
+    private TextField telephoneorgField;
+    @FXML
+    private TextArea equipementField;
+    @FXML
+    private TextArea descriptionField;
+    @FXML
+    private Label imageStatusLabel;
+    @FXML
+    private Button importerImageButton;
+    @FXML
+    private ImageView imagePrincipaleView;
+    @FXML
+    private HBox photosContainer;
+    @FXML
+    private Button ajouterPhotoButton;
+    @FXML
+    private TextField videoYoutubeField;
+    @FXML
+    private CheckBox check1;
+    @FXML
+    private CheckBox check2;
+    @FXML
+    private CheckBox check3;
+    @FXML
+    private CheckBox check4;
 
     private Connection connection;
     private WeatherService weatherService;
@@ -209,27 +232,44 @@ public class EventController implements Initializable {
                 Activite activiteEntity = (Activite) activite;
                 int activiteId = activiteEntity.getId();
 
-                String sql = "INSERT INTO events (id_activite, lieu, organisateur, email, description, materiels_necessaires, prix, capacite_max, places_disponibles, date_debut, date_fin, image, video_youtube, statut, date_creation, date_modification) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+                String sql = "INSERT INTO events (id_activite, lieu, organisateur, email, telephone, description, materiels_necessaires, prix, capacite_max, places_disponibles, date_debut, date_fin, image, video_youtube, statut, date_limite_inscription, date_creation, date_modification, created_by_id) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
                 PreparedStatement pstmt = connection.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS);
 
                 pstmt.setInt(1, activiteId);
                 pstmt.setString(2, lieu);
                 pstmt.setString(3, nomEvent);
                 pstmt.setString(4, email);
-                pstmt.setString(5, description);
-                pstmt.setString(6, equipement);
-                pstmt.setDouble(7, prixValue);
-                pstmt.setInt(8, capaciteValue);
+                pstmt.setString(5, telephoneorgField != null ? telephoneorgField.getText().trim() : "");
+                pstmt.setString(6, description);
+                pstmt.setString(7, equipement);
+                pstmt.setDouble(8, prixValue);
                 pstmt.setInt(9, capaciteValue);
-                pstmt.setDate(10, dateDebutPicker.getValue() != null ? java.sql.Date.valueOf(dateDebutPicker.getValue()) : null);
-                pstmt.setDate(11, dateFinPicker.getValue() != null ? java.sql.Date.valueOf(dateFinPicker.getValue()) : null);
+                pstmt.setInt(10, capaciteValue);
+                pstmt.setDate(11,
+                        dateDebutPicker.getValue() != null ? java.sql.Date.valueOf(dateDebutPicker.getValue()) : null);
+                pstmt.setDate(12,
+                        dateFinPicker.getValue() != null ? java.sql.Date.valueOf(dateFinPicker.getValue()) : null);
                 // Save primary image to disk and persist its relative path instead of raw bytes
                 String primaryImagePath = savePrimaryImageToUploads();
-                pstmt.setString(12, primaryImagePath != null ? primaryImagePath : "");
-                pstmt.setString(13, videoYoutubeField != null ? videoYoutubeField.getText().trim() : "");
-                pstmt.setString(14, "A_VENIR");
-                pstmt.setTimestamp(15, new Timestamp(System.currentTimeMillis()));
-                pstmt.setTimestamp(16, new Timestamp(System.currentTimeMillis()));
+                pstmt.setString(13, primaryImagePath != null ? primaryImagePath : "");
+                pstmt.setString(14, videoYoutubeField != null ? videoYoutubeField.getText().trim() : "");
+                pstmt.setString(15, "A_VENIR");
+                java.sql.Timestamp dateLimiteInscription = null;
+                if (dateDebutPicker.getValue() != null) {
+                    java.time.LocalDate limite = dateDebutPicker.getValue().minusDays(1);
+                    if (limite.isBefore(java.time.LocalDate.now())) {
+                        limite = java.time.LocalDate.now();
+                    }
+                    dateLimiteInscription = java.sql.Timestamp.valueOf(limite.atStartOfDay());
+                } else if (dateFinPicker.getValue() != null) {
+                    dateLimiteInscription = java.sql.Timestamp.valueOf(dateFinPicker.getValue().atStartOfDay());
+                } else {
+                    dateLimiteInscription = new Timestamp(System.currentTimeMillis());
+                }
+                pstmt.setTimestamp(16, dateLimiteInscription);
+                pstmt.setTimestamp(17, new Timestamp(System.currentTimeMillis()));
+                pstmt.setTimestamp(18, new Timestamp(System.currentTimeMillis()));
+                pstmt.setString(19, Session.getCurrentUserId());
 
                 int rowsAffected = pstmt.executeUpdate();
 
@@ -331,7 +371,8 @@ public class EventController implements Initializable {
             @Override
             public void onWeatherReceived(WeatherService.WeatherData weather) {
                 currentWeather = weather;
-                System.out.println("Météo chargée: " + weather.getDescription() + " (" + weather.getTemperatureDisplay() + ")");
+                System.out.println(
+                        "Météo chargée: " + weather.getDescription() + " (" + weather.getTemperatureDisplay() + ")");
             }
 
             @Override
@@ -359,7 +400,8 @@ public class EventController implements Initializable {
                 String titre = activiteEntity.getTitre();
 
                 HBox activiteBox = new HBox(10);
-                activiteBox.setStyle("-fx-background-color: white; -fx-border-color: #ddd; -fx-border-radius: 5; -fx-padding: 8;");
+                activiteBox.setStyle(
+                        "-fx-background-color: white; -fx-border-color: #ddd; -fx-border-radius: 5; -fx-padding: 8;");
                 activiteBox.setAlignment(javafx.geometry.Pos.CENTER_LEFT);
 
                 Label label = new Label((i + 1) + ". " + titre);
@@ -367,7 +409,8 @@ public class EventController implements Initializable {
 
                 final int index = i;
                 Button removeButton = new Button("❌");
-                removeButton.setStyle("-fx-background-color: transparent; -fx-text-fill: #999; -fx-border-color: transparent; -fx-cursor: hand; -fx-padding: 2;");
+                removeButton.setStyle(
+                        "-fx-background-color: transparent; -fx-text-fill: #999; -fx-border-color: transparent; -fx-cursor: hand; -fx-padding: 2;");
                 removeButton.setOnAction(e -> removeActivite(index));
 
                 activiteBox.getChildren().addAll(label, new javafx.scene.layout.Region(), removeButton);
@@ -461,7 +504,8 @@ public class EventController implements Initializable {
                     imageStatusLabel.setText("Image sélectionnée: " + selectedFile.getName());
                 }
 
-                System.out.println("Image principale chargée en mémoire: " + selectedFile.getName() + " (" + imageBytes.length + " bytes)");
+                System.out.println("Image principale chargée en mémoire: " + selectedFile.getName() + " ("
+                        + imageBytes.length + " bytes)");
 
             } catch (IOException e) {
                 System.err.println("Erreur lors du chargement de l'image: " + e.getMessage());
@@ -489,7 +533,8 @@ public class EventController implements Initializable {
 
                     createPhotoThumbnail(photoBytes, selectedFile);
 
-                    System.out.println("Photo supplémentaire chargée en mémoire: " + selectedFile.getName() + " (" + photoBytes.length + " bytes)");
+                    System.out.println("Photo supplémentaire chargée en mémoire: " + selectedFile.getName() + " ("
+                            + photoBytes.length + " bytes)");
 
                 } catch (IOException e) {
                     System.err.println("Erreur lors du chargement de la photo: " + e.getMessage());
@@ -500,7 +545,8 @@ public class EventController implements Initializable {
 
     private String savePrimaryImageToUploads() {
         try {
-            if (imagePrincipaleData == null || imagePrincipaleData.length == 0) return null;
+            if (imagePrincipaleData == null || imagePrincipaleData.length == 0)
+                return null;
             String ext = detectImageExtension(imagePrincipaleData);
             String fileName = "event_" + System.currentTimeMillis() + (ext != null ? ("." + ext) : ".png");
             Path target = Paths.get(UPLOADS_DIR, fileName);
@@ -515,11 +561,14 @@ public class EventController implements Initializable {
     private String detectImageExtension(byte[] bytes) {
         if (bytes.length >= 8) {
             // PNG header: 89 50 4E 47 0D 0A 1A 0A
-            if ((bytes[0] & 0xFF) == 0x89 && bytes[1] == 0x50 && bytes[2] == 0x4E && bytes[3] == 0x47) return "png";
+            if ((bytes[0] & 0xFF) == 0x89 && bytes[1] == 0x50 && bytes[2] == 0x4E && bytes[3] == 0x47)
+                return "png";
             // JPEG header: FF D8
-            if ((bytes[0] & 0xFF) == 0xFF && (bytes[1] & 0xFF) == 0xD8) return "jpg";
+            if ((bytes[0] & 0xFF) == 0xFF && (bytes[1] & 0xFF) == 0xD8)
+                return "jpg";
             // GIF header: GIF87a or GIF89a
-            if (bytes[0] == 'G' && bytes[1] == 'I' && bytes[2] == 'F') return "gif";
+            if (bytes[0] == 'G' && bytes[1] == 'I' && bytes[2] == 'F')
+                return "gif";
         }
         return "png";
     }
@@ -545,7 +594,8 @@ public class EventController implements Initializable {
             nameLabel.setWrapText(true);
 
             Button removeButton = new Button("❌");
-            removeButton.setStyle("-fx-background-color: transparent; -fx-text-fill: red; -fx-cursor: hand; -fx-font-size: 12px;");
+            removeButton.setStyle(
+                    "-fx-background-color: transparent; -fx-text-fill: red; -fx-cursor: hand; -fx-font-size: 12px;");
             removeButton.setOnAction(e -> {
                 photosContainer.getChildren().remove(photoContainer);
                 photosData.remove(photoBytes);

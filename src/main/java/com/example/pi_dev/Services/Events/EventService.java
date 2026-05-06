@@ -22,7 +22,7 @@ public class EventService {
 
     // CREATE
     public void ajouter(Event e) throws SQLException {
-        String sql = "INSERT INTO events (id_activite, lieu, date_debut, date_fin, prix, capacite_max, places_disponibles, organisateur, materiels_necessaires, image, statut, date_creation, date_modification, video_youtube) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+        String sql = "INSERT INTO events (id_activite, lieu, date_debut, date_fin, prix, capacite_max, places_disponibles, organisateur, materiels_necessaires, image, telephone, email, statut, date_limite_inscription, date_creation, date_modification, video_youtube, created_by_id) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
 
         PreparedStatement ps = cnx.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS);
 
@@ -36,10 +36,29 @@ public class EventService {
         ps.setString(8, e.getOrganisateur());
         ps.setString(9, e.getMaterielsNecessaires());
         ps.setString(10, e.getImage());
-        ps.setString(11, e.getStatut() != null ? e.getStatut().name() : "A_VENIR");
-        ps.setTimestamp(12, e.getDateCreation() != null ? e.getDateCreation() : new Timestamp(System.currentTimeMillis()));
-        ps.setTimestamp(13, new Timestamp(System.currentTimeMillis()));
-        ps.setString(14, e.getVideoYoutube());
+        ps.setString(11, e.getTelephone() != null ? String.valueOf(e.getTelephone()) : "");
+        ps.setString(12, e.getEmail());
+        ps.setString(13, e.getStatut() != null ? e.getStatut().name() : "A_VENIR");
+
+        Timestamp dateLimiteInscription;
+        if (e.getDateDebut() != null) {
+            java.time.LocalDate limite = e.getDateDebut().toLocalDate().minusDays(1);
+            if (limite.isBefore(java.time.LocalDate.now())) {
+                limite = java.time.LocalDate.now();
+            }
+            dateLimiteInscription = Timestamp.valueOf(limite.atStartOfDay());
+        } else if (e.getDateFin() != null) {
+            dateLimiteInscription = Timestamp.valueOf(e.getDateFin().toLocalDate().atStartOfDay());
+        } else {
+            dateLimiteInscription = new Timestamp(System.currentTimeMillis());
+        }
+
+        ps.setTimestamp(14, dateLimiteInscription);
+        ps.setTimestamp(15,
+                e.getDateCreation() != null ? e.getDateCreation() : new Timestamp(System.currentTimeMillis()));
+        ps.setTimestamp(16, new Timestamp(System.currentTimeMillis()));
+        ps.setString(17, e.getVideoYoutube());
+        ps.setString(18, com.example.pi_dev.Session.Session.getCurrentUserId());
 
         ps.executeUpdate();
 
@@ -97,7 +116,7 @@ public class EventService {
         ps.executeUpdate();
     }
 
-    //  DELETE PAR ID
+    // DELETE PAR ID
     public void supprimer(int idEvent) throws SQLException {
         photoService.supprimerPhotosEvent(idEvent);
 
@@ -109,7 +128,7 @@ public class EventService {
         ps.executeUpdate();
     }
 
-    //  DELETE PAR ACTIVITE
+    // DELETE PAR ACTIVITE
     public void supprimerParActivite(int idActivite) throws SQLException {
         List<Event> events = getEventsByActivite(idActivite);
 
@@ -188,7 +207,8 @@ public class EventService {
 
     public Event findById(int id) throws SQLException {
 
-        String sql = "SELECT e.*, a.titre, a.description as activite_description, a.type_activite, a.categorie, a.date_creation as activite_date_creation " +
+        String sql = "SELECT e.*, a.titre, a.description as activite_description, a.type_activite, a.categorie, a.date_creation as activite_date_creation "
+                +
                 "FROM events e " +
                 "LEFT JOIN activites a ON e.id_activite = a.id " +
                 "WHERE e.id=?";
@@ -202,7 +222,8 @@ public class EventService {
             e.setIdActivite(rs.getInt("id_activite"));
             e.setPrix(rs.getBigDecimal("prix"));
             e.setPlacesDisponibles(rs.getInt("places_disponibles"));
-            e.setDateDebut(rs.getTimestamp("date_debut") != null ? rs.getTimestamp("date_debut").toLocalDateTime() : null);
+            e.setDateDebut(
+                    rs.getTimestamp("date_debut") != null ? rs.getTimestamp("date_debut").toLocalDateTime() : null);
             e.setDateFin(rs.getTimestamp("date_fin") != null ? rs.getTimestamp("date_fin").toLocalDateTime() : null);
             e.setCapaciteMax(rs.getInt("capacite_max"));
             e.setOrganisateur(rs.getString("organisateur"));
@@ -238,7 +259,9 @@ public class EventService {
                 } else {
                     activite.setCategorie(CategorieActivite.NATURE);
                 }
-                activite.setDateCreation(rs.getTimestamp("activite_date_creation") != null ? Timestamp.valueOf(rs.getTimestamp("activite_date_creation").toLocalDateTime()) : null);
+                activite.setDateCreation(rs.getTimestamp("activite_date_creation") != null
+                        ? Timestamp.valueOf(rs.getTimestamp("activite_date_creation").toLocalDateTime())
+                        : null);
                 e.setActivite(activite);
             }
 

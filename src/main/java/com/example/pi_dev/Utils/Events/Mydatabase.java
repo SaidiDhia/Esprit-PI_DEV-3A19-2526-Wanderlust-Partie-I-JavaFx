@@ -9,7 +9,7 @@ public class Mydatabase {
     Connection con;
     public static Mydatabase instance;
 
-    private Mydatabase(){
+    private Mydatabase() {
         try {
             con = UserDatabaseConnection.getInstance().getConnection();
             System.out.println("connexion etablie (shared UserDatabaseConnection)");
@@ -18,14 +18,14 @@ public class Mydatabase {
         }
     }
 
-    public static Mydatabase getInstance(){
-        if(instance == null){
+    public static Mydatabase getInstance() {
+        if (instance == null) {
             instance = new Mydatabase();
         }
         return instance;
     }
 
-    public Connection getConnextion(){
+    public Connection getConnextion() {
         return con;
     }
 }

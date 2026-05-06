@@ -8,12 +8,14 @@ public class Mydatabase {
 
     public static Mydatabase instance;
     private Connection con;
+
     public static Mydatabase getInstance() {
         if (instance == null) {
             instance = new Mydatabase();
         }
         return instance;
     }
+
     private Mydatabase() {
 
         try {
@@ -23,6 +25,7 @@ public class Mydatabase {
             throw new RuntimeException(e);
         }
     }
+
     public Connection getConnection() {
         return con;
     }

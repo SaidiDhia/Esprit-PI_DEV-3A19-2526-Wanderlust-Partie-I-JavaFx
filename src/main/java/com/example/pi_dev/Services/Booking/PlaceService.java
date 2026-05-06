@@ -130,7 +130,7 @@ public class PlaceService implements IPlaceService {
         String sql = "SELECT * FROM place ORDER BY id DESC";
 
         try (Statement st = con.createStatement();
-             ResultSet rs = st.executeQuery(sql)) {
+                ResultSet rs = st.executeQuery(sql)) {
             while (rs.next()) {
                 list.add(mapPlace(rs));
             }

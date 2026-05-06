@@ -10,8 +10,10 @@ public class Activite {
     private String typeActivite;
     private CategorieActivite categorie;
     private String image;
+    private Integer ageMinimum;
     private Timestamp dateCreation;
     private Timestamp dateModification;
+    private String createdById;
 
     public int getId() {
         return id;
@@ -61,6 +63,14 @@ public class Activite {
         this.image = image;
     }
 
+    public Integer getAgeMinimum() {
+        return ageMinimum;
+    }
+
+    public void setAgeMinimum(Integer ageMinimum) {
+        this.ageMinimum = ageMinimum;
+    }
+
     public Timestamp getDateCreation() {
         return dateCreation;
     }
@@ -77,10 +87,19 @@ public class Activite {
         this.dateModification = dateModification;
     }
 
+    public String getCreatedById() {
+        return createdById;
+    }
+
+    public void setCreatedById(String createdById) {
+        this.createdById = createdById;
+    }
+
     public Activite() {
     }
 
-    public Activite(int id, String titre, String description, String typeActivite, CategorieActivite categorie, String image, Timestamp dateCreation, Timestamp dateModification) {
+    public Activite(int id, String titre, String description, String typeActivite, CategorieActivite categorie,
+            String image, Timestamp dateCreation, Timestamp dateModification) {
         this.id = id;
         this.titre = titre;
         this.description = description;
@@ -91,7 +110,8 @@ public class Activite {
         this.dateModification = dateModification;
     }
 
-    public Activite(int id, String titre, String typeActivite, CategorieActivite categorie, String description, String image) {
+    public Activite(int id, String titre, String typeActivite, CategorieActivite categorie, String description,
+            String image) {
         this.id = id;
         this.titre = titre;
         this.typeActivite = typeActivite;

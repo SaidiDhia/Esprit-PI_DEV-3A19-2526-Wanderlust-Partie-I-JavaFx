@@ -26,7 +26,7 @@ public class PasswordResetService {
         // In a real app, you should inject UserRepository or UserService
         // For now, I'll do a quick DB check or assume valid if calling from UserService
         // But better to do it here.
-        
+
         String userId = getUserIdByEmail(email);
         if (userId == null) {
             System.out.println("User not found for password reset: " + email);
@@ -67,7 +67,8 @@ public class PasswordResetService {
         try (PreparedStatement ps = UserDatabaseConnection.getInstance().getConnection().prepareStatement(sql)) {
             ps.setString(1, email);
             ResultSet rs = ps.executeQuery();
-            if (rs.next()) return rs.getString("user_id");
+            if (rs.next())
+                return rs.getString("user_id");
         } catch (SQLException e) {
             e.printStackTrace();
         }

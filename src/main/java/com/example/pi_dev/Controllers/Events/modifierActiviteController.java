@@ -3,6 +3,7 @@ package com.example.pi_dev.Controllers.Events;
 import com.example.pi_dev.Entities.Events.Activite;
 import com.example.pi_dev.Entities.Events.CategorieActivite;
 import com.example.pi_dev.Entities.Events.TypeActivite;
+import com.example.pi_dev.Session.Session;
 import com.example.pi_dev.Utils.Events.Mydatabase;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
@@ -13,22 +14,36 @@ import javafx.stage.Stage;
 import java.io.File;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
+import java.sql.ResultSet;
 import java.sql.SQLException;
 
 public class modifierActiviteController {
 
-    @FXML private TextField titreField;
-    @FXML private TextArea descriptionArea;
-    @FXML private ComboBox<CategorieActivite> categorieCombo;
-    @FXML private ComboBox<TypeActivite> typeactField;
-    @FXML private TextField imageField1;
-    @FXML private Button importImageButton;
-    @FXML private Button modifierButton;
-    @FXML private Button supprimerButton;
-    @FXML private Button annulerButton;
-    @FXML private Label titleLabel;
+    @FXML
+    private TextField titreField;
+    @FXML
+    private TextArea descriptionArea;
+    @FXML
+    private ComboBox<CategorieActivite> categorieCombo;
+    @FXML
+    private ComboBox<TypeActivite> typeactField;
+    @FXML
+    private TextField imageField1;
+    @FXML
+    private TextField ageMinField;
+    @FXML
+    private Button importImageButton;
+    @FXML
+    private Button modifierButton;
+    @FXML
+    private Button supprimerButton;
+    @FXML
+    private Button annulerButton;
+    @FXML
+    private Label titleLabel;
 
     private Activite currentActivite;
+    private String currentActiviteOwnerId;
     private Connection connection;
     private String selectedImagePath = "";
 
@@ -69,8 +84,7 @@ public class modifierActiviteController {
         FileChooser fileChooser = new FileChooser();
         fileChooser.setTitle("Choisir une image pour l'activité");
         fileChooser.getExtensionFilters().addAll(
-                new FileChooser.ExtensionFilter("Images", "*.jpg", "*.jpeg", "*.png", "*.gif", "*.bmp")
-        );
+                new FileChooser.ExtensionFilter("Images", "*.jpg", "*.jpeg", "*.png", "*.gif", "*.bmp"));
 
         File selectedFile = fileChooser.showOpenDialog(new Stage());
 
@@ -93,6 +107,10 @@ public class modifierActiviteController {
         titreField.setText(activite.getTitre());
         descriptionArea.setText(activite.getDescription());
         imageField1.setText(activite.getImage() != null ? activite.getImage() : "");
+        if (ageMinField != null) {
+            Integer am = activite.getAgeMinimum();
+            ageMinField.setText(am != null ? String.valueOf(am) : "");
+        }
 
         if (activite.getCategorie() != null) {
             categorieCombo.setValue(activite.getCategorie());
@@ -111,10 +129,16 @@ public class modifierActiviteController {
         if (titleLabel != null) {
             titleLabel.setText("Modifier l'activité: " + activite.getTitre());
         }
+
+        loadOwnerAndEnforce();
     }
 
     @FXML
     void modifier(ActionEvent event) {
+        if (!isOwner()) {
+            showAlert("Vous n'êtes pas autorisé à modifier cette activité");
+            return;
+        }
         String titre = titreField.getText().trim();
         String description = descriptionArea.getText().trim();
         TypeActivite type = typeactField.getValue();
@@ -158,14 +182,39 @@ public class modifierActiviteController {
         }
 
         try {
-            String sql = "UPDATE activites SET titre = ?, description = ?, type_activite = ?, categorie = ?, image = ? WHERE id = ?";
+            // Parse age minimum (optional)
+            Integer ageMin = null;
+            String ageText = (ageMinField != null) ? ageMinField.getText().trim() : "";
+            if (!ageText.isEmpty()) {
+                try {
+                    int v = Integer.parseInt(ageText);
+                    if (v < 0) {
+                        showAlert("L'âge minimum ne peut pas être négatif");
+                        ageMinField.requestFocus();
+                        return;
+                    }
+                    ageMin = v;
+                } catch (NumberFormatException nfe) {
+                    showAlert("L'âge minimum doit être un nombre entier");
+                    ageMinField.requestFocus();
+                    return;
+                }
+            }
+
+            String sql = "UPDATE activites SET titre = ?, description = ?, type_activite = ?, categorie = ?, image = ?, age_minimum = ?, date_modification = NOW() WHERE id = ? AND created_by_id = ?";
             PreparedStatement pstmt = connection.prepareStatement(sql);
             pstmt.setString(1, titre);
             pstmt.setString(2, description);
             pstmt.setString(3, type.getNom());
             pstmt.setString(4, categorie.toDbValue());
             pstmt.setString(5, imagePath);
-            pstmt.setInt(6, currentActivite.getId());
+            if (ageMin == null) {
+                pstmt.setNull(6, java.sql.Types.INTEGER);
+            } else {
+                pstmt.setInt(6, ageMin);
+            }
+            pstmt.setInt(7, currentActivite.getId());
+            pstmt.setString(8, Session.getCurrentUserId());
 
             int rowsAffected = pstmt.executeUpdate();
 
@@ -185,9 +234,15 @@ public class modifierActiviteController {
     @FXML
     void supprimer(ActionEvent event) {
         try {
-            String sql = "DELETE FROM activites WHERE id = ?";
+            if (!isOwner()) {
+                showAlert("Vous n'êtes pas autorisé à supprimer cette activité");
+                return;
+            }
+
+            String sql = "DELETE FROM activites WHERE id = ? AND created_by_id = ?";
             PreparedStatement pstmt = connection.prepareStatement(sql);
             pstmt.setInt(1, currentActivite.getId());
+            pstmt.setString(2, Session.getCurrentUserId());
 
             int rowsAffected = pstmt.executeUpdate();
 
@@ -242,5 +297,57 @@ public class modifierActiviteController {
         Alert alert = new Alert(Alert.AlertType.INFORMATION);
         alert.setContentText(message);
         alert.showAndWait();
+    }
+
+    private void loadOwnerAndEnforce() {
+        if (currentActivite == null) {
+            return;
+        }
+        try {
+            String sql = "SELECT created_by_id FROM activites WHERE id = ?";
+            PreparedStatement pstmt = connection.prepareStatement(sql);
+            pstmt.setInt(1, currentActivite.getId());
+            ResultSet rs = pstmt.executeQuery();
+            if (rs.next()) {
+                currentActiviteOwnerId = rs.getString("created_by_id");
+            }
+        } catch (SQLException e) {
+            System.err.println("Erreur lors du chargement de l'auteur: " + e.getMessage());
+        }
+
+        if (!isOwner()) {
+            showAlert("Vous n'êtes pas autorisé à modifier cette activité");
+            disableForm();
+        }
+    }
+
+    private boolean isOwner() {
+        String currentUserId = Session.getCurrentUserId();
+        if (currentUserId == null || currentUserId.isBlank()) {
+            return false;
+        }
+        if (currentActiviteOwnerId == null || currentActiviteOwnerId.isBlank()) {
+            return false;
+        }
+        return currentUserId.equals(currentActiviteOwnerId);
+    }
+
+    private void disableForm() {
+        if (titreField != null)
+            titreField.setDisable(true);
+        if (descriptionArea != null)
+            descriptionArea.setDisable(true);
+        if (categorieCombo != null)
+            categorieCombo.setDisable(true);
+        if (typeactField != null)
+            typeactField.setDisable(true);
+        if (imageField1 != null)
+            imageField1.setDisable(true);
+        if (importImageButton != null)
+            importImageButton.setDisable(true);
+        if (modifierButton != null)
+            modifierButton.setDisable(true);
+        if (supprimerButton != null)
+            supprimerButton.setDisable(true);
     }
 }

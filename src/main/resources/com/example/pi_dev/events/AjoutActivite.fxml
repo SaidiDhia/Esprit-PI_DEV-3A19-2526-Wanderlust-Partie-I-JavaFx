@@ -85,6 +85,13 @@
                               </HBox>
                            </children>
                         </VBox>
+                        <!-- Age minimum -->
+                        <VBox spacing="8">
+                           <children>
+                              <Label style="-fx-font-size: 13px; -fx-font-weight: bold; -fx-text-fill: #0F2C4F;" text="Âge minimum" />
+                              <TextField fx:id="ageMinField" promptText="Âge minimum (laisser vide si aucun)" style="-fx-border-color: #2D70B3; -fx-border-radius: 6; -fx-background-radius: 6; -fx-padding: 10 14; -fx-font-size: 13px;" />
+                           </children>
+                        </VBox>
                         <HBox alignment="CENTER" spacing="12">
                            <children>
                               <Button fx:id="addact" onAction="#ajouter" style="-fx-background-color: #1A4E85; -fx-text-fill: white; -fx-background-radius: 8; -fx-padding: 10 24; -fx-font-size: 13px; -fx-cursor: hand;" text="➕ Ajouter" />

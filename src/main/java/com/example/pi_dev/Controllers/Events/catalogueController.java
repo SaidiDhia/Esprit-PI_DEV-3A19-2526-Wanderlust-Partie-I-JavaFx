@@ -4,6 +4,7 @@ import com.example.pi_dev.Services.Events.WeatherService;
 import com.example.pi_dev.Utils.Events.Mydatabase;
 import com.example.pi_dev.Entities.Events.Event;
 import com.example.pi_dev.Entities.Events.Activite;
+import com.example.pi_dev.Session.Session;
 
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
@@ -43,35 +44,64 @@ public class catalogueController {
     private WeatherService weatherService;
     private WeatherService.WeatherData currentWeather;
 
-    @FXML private Label activitedesc;
-    @FXML private ImageView activiteimg;
-    @FXML private FlowPane flowActivites;
-    @FXML private FlowPane flowEvents;
-    @FXML private ScrollPane scrollPaneActivites;
-    @FXML private ScrollPane scrollPaneEvents;
-    @FXML private Tab tabActivites;
-    @FXML private Tab tabEvents;
-    @FXML private TextField txtRecherche;
-    @FXML private VBox weatherWidgetContainer;
-    @FXML private VBox weatherInfoContainer;
-    @FXML private ComboBox<String> cityComboBox;
-    @FXML private Button refreshWeatherButton;
-    @FXML private Label activitetitre;
-    @FXML private Label activitetype;
-    @FXML private Label capaciteevent;
-    @FXML private Label datedebut;
-    @FXML private Label datefin;
-    @FXML private VBox eventcard;
-    @FXML private ImageView eventimg;
-    @FXML private Button modevent;
-    @FXML private Button modifieract;
-    @FXML private Button orgactivite;
-    @FXML private Button orgevent;
-    @FXML private Label placesdispoevent;
-    @FXML private Label prixevent;
-    @FXML private Button recherche;
-    @FXML private Button suppact;
-    @FXML private Button suppevent;
+    @FXML
+    private Label activitedesc;
+    @FXML
+    private ImageView activiteimg;
+    @FXML
+    private FlowPane flowActivites;
+    @FXML
+    private FlowPane flowEvents;
+    @FXML
+    private ScrollPane scrollPaneActivites;
+    @FXML
+    private ScrollPane scrollPaneEvents;
+    @FXML
+    private Tab tabActivites;
+    @FXML
+    private Tab tabEvents;
+    @FXML
+    private TextField txtRecherche;
+    @FXML
+    private VBox weatherWidgetContainer;
+    @FXML
+    private VBox weatherInfoContainer;
+    @FXML
+    private ComboBox<String> cityComboBox;
+    @FXML
+    private Button refreshWeatherButton;
+    @FXML
+    private Label activitetitre;
+    @FXML
+    private Label activitetype;
+    @FXML
+    private Label capaciteevent;
+    @FXML
+    private Label datedebut;
+    @FXML
+    private Label datefin;
+    @FXML
+    private VBox eventcard;
+    @FXML
+    private ImageView eventimg;
+    @FXML
+    private Button modevent;
+    @FXML
+    private Button modifieract;
+    @FXML
+    private Button orgactivite;
+    @FXML
+    private Button orgevent;
+    @FXML
+    private Label placesdispoevent;
+    @FXML
+    private Label prixevent;
+    @FXML
+    private Button recherche;
+    @FXML
+    private Button suppact;
+    @FXML
+    private Button suppevent;
 
     public void initialize() {
         initializeDatabase();
@@ -100,14 +130,14 @@ public class catalogueController {
 
     private void initializeCities() {
         // ✅ Vérifier que cityComboBox n'est pas null
-        if (cityComboBox == null) return;
+        if (cityComboBox == null)
+            return;
 
         cityComboBox.getItems().addAll(
                 "Tunis", "Sfax", "Sousse", "Kairouan", "Bizerte",
                 "Gabès", "Ariana", "Nabeul", "Monastir", "Mahdia",
                 "Kasserine", "Siliana", "Le Kef", "Jendouba", "Zaghouan",
-                "Tozeur", "Kebili", "Tataouine", "Gafsa", "Médenine"
-        );
+                "Tozeur", "Kebili", "Tataouine", "Gafsa", "Médenine");
 
         cityComboBox.getSelectionModel().select("Tunis");
         cityComboBox.setOnAction(e -> loadWeatherData());
@@ -168,7 +198,8 @@ public class catalogueController {
             Statement stmt = connection.createStatement();
             ResultSet rs;
             try {
-                rs = stmt.executeQuery("SELECT id, titre, description, type_activite, image FROM activites");
+                rs = stmt.executeQuery(
+                        "SELECT id, titre, description, type_activite, image, created_by_id FROM activites");
                 while (rs.next()) {
                     Activite activite = new Activite();
                     activite.setId(rs.getInt("id"));
@@ -176,10 +207,11 @@ public class catalogueController {
                     activite.setDescription(rs.getString("description"));
                     activite.setTypeActivite(rs.getString("type_activite"));
                     activite.setImage(rs.getString("image"));
+                    activite.setCreatedById(rs.getString("created_by_id"));
                     activitesList.add(activite);
                 }
             } catch (SQLException e) {
-                rs = stmt.executeQuery("SELECT id, titre, description, image FROM activites");
+                rs = stmt.executeQuery("SELECT id, titre, description, image, created_by_id FROM activites");
                 while (rs.next()) {
                     Activite activite = new Activite();
                     activite.setId(rs.getInt("id"));
@@ -187,6 +219,7 @@ public class catalogueController {
                     activite.setDescription(rs.getString("description"));
                     activite.setTypeActivite(null);
                     activite.setImage(rs.getString("image"));
+                    activite.setCreatedById(rs.getString("created_by_id"));
                     activitesList.add(activite);
                 }
             }
@@ -204,8 +237,10 @@ public class catalogueController {
                 Event event = new Event();
                 event.setId(rs.getInt("id"));
                 event.setIdActivite(rs.getInt("id_activite"));
-                event.setDateDebut(rs.getTimestamp("date_debut") != null ? rs.getTimestamp("date_debut").toLocalDateTime() : null);
-                event.setDateFin(rs.getTimestamp("date_fin") != null ? rs.getTimestamp("date_fin").toLocalDateTime() : null);
+                event.setDateDebut(
+                        rs.getTimestamp("date_debut") != null ? rs.getTimestamp("date_debut").toLocalDateTime() : null);
+                event.setDateFin(
+                        rs.getTimestamp("date_fin") != null ? rs.getTimestamp("date_fin").toLocalDateTime() : null);
                 event.setPrix(rs.getBigDecimal("prix"));
                 event.setCapaciteMax(rs.getInt("capacite_max"));
                 event.setPlacesDisponibles(rs.getInt("places_disponibles"));
@@ -214,6 +249,10 @@ public class catalogueController {
                 event.setStatut(parseStatutEvent(rs.getString("statut")));
                 event.setDateCreation(rs.getTimestamp("date_creation"));
                 event.setDateModification(rs.getTimestamp("date_modification"));
+                try {
+                    event.setCreatedById(rs.getString("created_by_id"));
+                } catch (Exception ignore) {
+                }
                 eventsList.add(event);
             }
         } catch (SQLException e) {
@@ -297,7 +336,8 @@ public class catalogueController {
     void ouvrirGoogleCalendar(ActionEvent event) {
         try {
             System.out.println("Ouverture de l'interface Google Calendar...");
-            FXMLLoader loader = new FXMLLoader(getClass().getResource("/com/example/pi_dev/events/googleCalendar.fxml"));
+            FXMLLoader loader = new FXMLLoader(
+                    getClass().getResource("/com/example/pi_dev/events/googleCalendar.fxml"));
             Parent root = loader.load();
 
             Stage stage = new Stage();
@@ -378,7 +418,8 @@ public class catalogueController {
 
     private void ouvrirModificationActivite(Activite activite) {
         try {
-            FXMLLoader loader = new FXMLLoader(getClass().getResource("/com/example/pi_dev/events/modifsuppActivite.fxml"));
+            FXMLLoader loader = new FXMLLoader(
+                    getClass().getResource("/com/example/pi_dev/events/modifsuppActivite.fxml"));
             Parent root = loader.load();
             modifierActiviteController controller = loader.getController();
             controller.setActiviteData(activite);
@@ -418,31 +459,48 @@ public class catalogueController {
 
     @FXML
     void supprimerevent(ActionEvent event) {
+        showAlert("Utilisez le bouton supprimer sur la carte de l'événement concerné.");
+    }
+
+    private void supprimerEvent(Event eventItem) {
         Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
-        alert.setTitle("Confirmation");
+        alert.setTitle("Confirmation de suppression");
         alert.setHeaderText("Supprimer l'événement");
-        alert.setContentText("Êtes-vous sûr de vouloir supprimer cet événement ?");
+        alert.setContentText("Voulez-vous vraiment supprimer cet événement ?");
 
         alert.showAndWait().ifPresent(response -> {
             if (response == ButtonType.OK) {
                 try {
-                    PreparedStatement pstmt = connection.prepareStatement("DELETE FROM events WHERE id = ?");
-                    pstmt.setInt(1, getCurrentEventId());
-                    pstmt.executeUpdate();
-                    loadEvents();
+                    String currentUser = Session.getCurrentUserId();
+                    if (currentUser == null || !currentUser.equals(eventItem.getCreatedById())) {
+                        showAlert("Vous n'êtes pas autorisé à supprimer cet événement.");
+                        return;
+                    }
+
+                    PreparedStatement pstmt = connection
+                            .prepareStatement("DELETE FROM events WHERE id = ? AND created_by_id = ?");
+                    pstmt.setInt(1, eventItem.getId());
+                    pstmt.setString(2, currentUser);
+                    int deleted = pstmt.executeUpdate();
+
+                    if (deleted > 0) {
+                        showAlert("Événement supprimé avec succès");
+                        refreshData();
+                    } else {
+                        showAlert("Suppression refusée ou événement introuvable.");
+                    }
                 } catch (SQLException e) {
-                    e.printStackTrace();
+                    showAlert("Erreur lors de la suppression de l'événement");
                 }
             }
         });
     }
 
-    private int getCurrentEventId() { return 1; }
-
     private void addActiviteCard(Activite activite) {
         VBox card = new VBox();
         card.setSpacing(10);
-        card.setStyle("-fx-border-color: #ccc; -fx-border-width: 1; -fx-padding: 10; -fx-background-color: white; -fx-background-radius: 8; -fx-border-radius: 8; -fx-cursor: hand;");
+        card.setStyle(
+                "-fx-border-color: #ccc; -fx-border-width: 1; -fx-padding: 10; -fx-background-color: white; -fx-background-radius: 8; -fx-border-radius: 8; -fx-cursor: hand;");
         card.setPrefWidth(200);
 
         ImageView imageView = new ImageView();
@@ -451,7 +509,8 @@ public class catalogueController {
         imageView.setPreserveRatio(true);
 
         try {
-            if (activite.getImage() != null && !activite.getImage().isEmpty() && !activite.getImage().equals("default.jpg")) {
+            if (activite.getImage() != null && !activite.getImage().isEmpty()
+                    && !activite.getImage().equals("default.jpg")) {
                 File imageFile = new File(activite.getImage());
                 if (imageFile.exists()) {
                     imageView.setImage(new Image(imageFile.toURI().toString()));
@@ -481,15 +540,20 @@ public class catalogueController {
         HBox buttonBox = new HBox(5);
         buttonBox.setAlignment(Pos.CENTER);
 
-        Button modifierButton = new Button("✏️");
-        modifierButton.setStyle("-fx-background-color: #4CAF50; -fx-text-fill: white; -fx-background-radius: 4; -fx-padding: 5 10; -fx-cursor: hand;");
-        modifierButton.setOnAction(e -> ouvrirModificationActivite(activite));
+        String currentUser = Session.getCurrentUserId();
+        if (currentUser != null && currentUser.equals(activite.getCreatedById())) {
+            Button modifierButton = new Button("✏️");
+            modifierButton.setStyle(
+                    "-fx-background-color: #4CAF50; -fx-text-fill: white; -fx-background-radius: 4; -fx-padding: 5 10; -fx-cursor: hand;");
+            modifierButton.setOnAction(e -> ouvrirModificationActivite(activite));
 
-        Button supprimerButton = new Button("🗑️");
-        supprimerButton.setStyle("-fx-background-color: #f44336; -fx-text-fill: white; -fx-background-radius: 4; -fx-padding: 5 10; -fx-cursor: hand;");
-        supprimerButton.setOnAction(e -> supprimerActivite(activite));
+            Button supprimerButton = new Button("🗑️");
+            supprimerButton.setStyle(
+                    "-fx-background-color: #f44336; -fx-text-fill: white; -fx-background-radius: 4; -fx-padding: 5 10; -fx-cursor: hand;");
+            supprimerButton.setOnAction(e -> supprimerActivite(activite));
 
-        buttonBox.getChildren().addAll(modifierButton, supprimerButton);
+            buttonBox.getChildren().addAll(modifierButton, supprimerButton);
+        }
         card.getChildren().addAll(descLabel, buttonBox);
 
         card.setOnMouseClicked(e -> ouvrirDetailsActivite(activite));
@@ -518,17 +582,21 @@ public class catalogueController {
         try {
             VBox card = new VBox();
             card.setSpacing(10);
-            card.setStyle("-fx-border-color: #ccc; -fx-border-width: 1; -fx-padding: 15; -fx-background-color: white; -fx-background-radius: 10; -fx-border-radius: 10; -fx-cursor: hand;");
+            card.setStyle(
+                    "-fx-border-color: #ccc; -fx-border-width: 1; -fx-padding: 15; -fx-background-color: white; -fx-background-radius: 10; -fx-border-radius: 10; -fx-cursor: hand;");
 
             Label titleLabel = new Label(event.getOrganisateur() != null ? event.getOrganisateur() : "");
             titleLabel.setStyle("-fx-font-size: 16px; -fx-font-weight: bold; -fx-text-fill: #1a5f3f;");
 
             Label dateDebutLabel = new Label("📅 Début: " +
-                    (event.getDateDebut() != null ? event.getDateDebut().format(DateTimeFormatter.ofPattern("dd/MM/yyyy")) : "Non défini"));
+                    (event.getDateDebut() != null
+                            ? event.getDateDebut().format(DateTimeFormatter.ofPattern("dd/MM/yyyy"))
+                            : "Non défini"));
             dateDebutLabel.setStyle("-fx-font-size: 12px; -fx-text-fill: #333;");
 
             Label dateFinLabel = new Label("📅 Fin: " +
-                    (event.getDateFin() != null ? event.getDateFin().format(DateTimeFormatter.ofPattern("dd/MM/yyyy")) : "Non défini"));
+                    (event.getDateFin() != null ? event.getDateFin().format(DateTimeFormatter.ofPattern("dd/MM/yyyy"))
+                            : "Non défini"));
             dateFinLabel.setStyle("-fx-font-size: 12px; -fx-text-fill: #333;");
 
             Label prixLabel = new Label("💰 Prix: " + (event.getPrix() != null ? event.getPrix() + " TND" : "0 TND"));
@@ -543,14 +611,23 @@ public class catalogueController {
             HBox buttonBox = new HBox(5);
             buttonBox.setAlignment(Pos.CENTER);
 
-            Button modifierButton = new Button("✏️ Modifier");
-            modifierButton.setStyle("-fx-background-color: #2196F3; -fx-text-fill: white; -fx-background-radius: 20; -fx-border-radius: 20; -fx-padding: 8 16; -fx-cursor: hand;");
-
+            String currentUser = Session.getCurrentUserId();
             final Event eventFinal = event;
-            modifierButton.setOnAction(e -> ouvrirModificationEvent(eventFinal));
+            if (currentUser != null && currentUser.equals(event.getCreatedById())) {
+                Button modifierButton = new Button("✏️ Modifier");
+                modifierButton.setStyle(
+                        "-fx-background-color: #2196F3; -fx-text-fill: white; -fx-background-radius: 20; -fx-border-radius: 20; -fx-padding: 8 16; -fx-cursor: hand;");
+                modifierButton.setOnAction(e -> ouvrirModificationEvent(eventFinal));
 
-            buttonBox.getChildren().add(modifierButton);
-            card.getChildren().addAll(titleLabel, dateDebutLabel, dateFinLabel, prixLabel, capaciteLabel, placesLabel, buttonBox);
+                Button supprimerButton = new Button("🗑️ Supprimer");
+                supprimerButton.setStyle(
+                    "-fx-background-color: #f44336; -fx-text-fill: white; -fx-background-radius: 20; -fx-border-radius: 20; -fx-padding: 8 16; -fx-cursor: hand;");
+                supprimerButton.setOnAction(e -> supprimerEvent(eventFinal));
+
+                buttonBox.getChildren().addAll(modifierButton, supprimerButton);
+            }
+            card.getChildren().addAll(titleLabel, dateDebutLabel, dateFinLabel, prixLabel, capaciteLabel, placesLabel,
+                    buttonBox);
 
             card.setOnMouseClicked(e -> ouvrirReservation(eventFinal));
 
@@ -657,7 +734,8 @@ public class catalogueController {
     }
 
     private void updateWeatherDisplay(WeatherService.WeatherData weather, String city) {
-        if (weatherInfoContainer == null) return;
+        if (weatherInfoContainer == null)
+            return;
 
         weatherInfoContainer.getChildren().clear();
         VBox weatherWidget = weatherService.createWeatherWidget(weather);
@@ -665,7 +743,8 @@ public class catalogueController {
     }
 
     private void showWeatherError(String error, String city) {
-        if (weatherInfoContainer == null) return;
+        if (weatherInfoContainer == null)
+            return;
 
         weatherInfoContainer.getChildren().clear();
         VBox errorWidget = new VBox(10);
@@ -677,7 +756,8 @@ public class catalogueController {
     }
 
     public boolean isEventCompatibleWithWeather(String activityType, LocalDate eventDate) {
-        if (currentWeather == null || activityType == null) return true;
+        if (currentWeather == null || activityType == null)
+            return true;
 
         String condition = currentWeather.getCondition();
 
@@ -685,32 +765,37 @@ public class catalogueController {
             if (activityType.toLowerCase().contains("plong") ||
                     activityType.toLowerCase().contains("bateau") ||
                     activityType.toLowerCase().contains("kayak") ||
-                    activityType.toLowerCase().contains("skydiving")) return false;
+                    activityType.toLowerCase().contains("skydiving"))
+                return false;
         }
 
         if (currentWeather.getWindSpeed() > 10) {
             if (activityType.toLowerCase().contains("parapente") ||
                     activityType.toLowerCase().contains("montgolfière") ||
-                    activityType.toLowerCase().contains("deltaplane")) return false;
+                    activityType.toLowerCase().contains("deltaplane"))
+                return false;
         }
 
         if (condition.contains("storm")) {
             if (activityType.toLowerCase().contains("plong") ||
                     activityType.toLowerCase().contains("escalade") ||
-                    activityType.toLowerCase().contains("randonnée")) return false;
+                    activityType.toLowerCase().contains("randonnée"))
+                return false;
         }
 
         if (currentWeather.getTemperature() > 40) {
             if (activityType.toLowerCase().contains("trekking") ||
                     activityType.toLowerCase().contains("randonnée") ||
-                    activityType.toLowerCase().contains("vélo")) return false;
+                    activityType.toLowerCase().contains("vélo"))
+                return false;
         }
 
         return true;
     }
 
     public void showWeatherWarningForEvent(String activityType, LocalDate eventDate) {
-        if (currentWeather == null || isEventCompatibleWithWeather(activityType, eventDate)) return;
+        if (currentWeather == null || isEventCompatibleWithWeather(activityType, eventDate))
+            return;
 
         Alert alert = new Alert(Alert.AlertType.WARNING);
         alert.setTitle("⚠️ Alerte Météo");
@@ -722,7 +807,8 @@ public class catalogueController {
         if (condition.contains("rain")) {
             riskMessage = "Pluie détectée - Activités nautiques déconseillées";
         } else if (currentWeather.getWindSpeed() > 10) {
-            riskMessage = "Vent fort (" + currentWeather.getWindSpeedDisplay() + ") - Activités aériennes déconseillées";
+            riskMessage = "Vent fort (" + currentWeather.getWindSpeedDisplay()
+                    + ") - Activités aériennes déconseillées";
         } else if (condition.contains("storm")) {
             riskMessage = "Orage détecté - Activités en extérieur déconseillées";
         } else if (currentWeather.getTemperature() > 40) {

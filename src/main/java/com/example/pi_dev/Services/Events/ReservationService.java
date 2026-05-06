@@ -15,10 +15,10 @@ public class ReservationService {
         cnx = Mydatabase.getInstance().getConnextion();
     }
 
-    //  CREATE
+    // CREATE
     public void ajouter(Reservation r) throws SQLException {
 
-        String sql = "INSERT INTO reservations (id_event, nom_complet, email, telephone, nombre_personnes, demandes_speciales, statut) VALUES (?, ?, ?, ?, ?, ?, ?)";
+        String sql = "INSERT INTO reservations (id_event, nom_complet, email, telephone, nombre_personnes, demandes_speciales, statut, prix_total, date_creation) VALUES (?, ?, ?, ?, ?, ?, ?, ?, NOW())";
 
         PreparedStatement ps = cnx.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS);
 
@@ -29,6 +29,26 @@ public class ReservationService {
         ps.setInt(5, r.getNombrePersonnes());
         ps.setString(6, r.getDemandesSpeciales());
         ps.setString(7, r.getStatut().toString());
+
+        // Compute prix_total: prefer the value in Reservation, otherwise compute from
+        // Event price
+        Double prixTotal = r.getPrixTotal();
+        if (prixTotal == null) {
+            try {
+                EventService es = new EventService();
+                com.example.pi_dev.Entities.Events.Event ev = es.findById(r.getIdEvent());
+                if (ev != null && ev.getPrix() != null) {
+                    prixTotal = ev.getPrix().doubleValue()
+                            * (r.getNombrePersonnes() != null ? r.getNombrePersonnes() : 1);
+                } else {
+                    prixTotal = 0.0;
+                }
+            } catch (Exception ex) {
+                prixTotal = 0.0;
+            }
+        }
+
+        ps.setDouble(8, prixTotal);
 
         ps.executeUpdate();
 
@@ -41,7 +61,7 @@ public class ReservationService {
         es.diminuerPlaces(r.getIdEvent(), r.getNombrePersonnes());
     }
 
-    //  READ
+    // READ
     public List<Reservation> afficher() throws SQLException {
         List<Reservation> list = new ArrayList<>();
         String sql = "SELECT * FROM reservations ORDER BY id DESC";
@@ -73,7 +93,7 @@ public class ReservationService {
         return list;
     }
 
-    //  UPDATE
+    // UPDATE
     public void modifier(Reservation r) throws SQLException {
 
         String selectSql = "SELECT nombre_personnes, id_event FROM reservations WHERE id = ?";
@@ -89,7 +109,7 @@ public class ReservationService {
             ancienEvent = rs.getInt("id_event");
         }
 
-        String updateSql = "UPDATE reservations SET id_event=?, nom_complet=?, email=?, telephone=?, nombre_personnes=?, demandes_speciales=?, statut=? WHERE id=?";
+        String updateSql = "UPDATE reservations SET id_event=?, nom_complet=?, email=?, telephone=?, nombre_personnes=?, demandes_speciales=?, statut=?, prix_total=? WHERE id=?";
 
         PreparedStatement ps = cnx.prepareStatement(updateSql);
 
@@ -100,7 +120,25 @@ public class ReservationService {
         ps.setInt(5, r.getNombrePersonnes());
         ps.setString(6, r.getDemandesSpeciales());
         ps.setString(7, r.getStatut().toString());
-        ps.setInt(8, r.getId());
+
+        Double prixTotalUpdate = r.getPrixTotal();
+        if (prixTotalUpdate == null) {
+            try {
+                EventService es = new EventService();
+                com.example.pi_dev.Entities.Events.Event ev = es.findById(r.getIdEvent());
+                if (ev != null && ev.getPrix() != null) {
+                    prixTotalUpdate = ev.getPrix().doubleValue()
+                            * (r.getNombrePersonnes() != null ? r.getNombrePersonnes() : 1);
+                } else {
+                    prixTotalUpdate = 0.0;
+                }
+            } catch (Exception ex) {
+                prixTotalUpdate = 0.0;
+            }
+        }
+
+        ps.setDouble(8, prixTotalUpdate);
+        ps.setInt(9, r.getId());
 
         ps.executeUpdate();
 
@@ -115,7 +153,7 @@ public class ReservationService {
         ajouter(r);
     }
 
-    //  DELETE
+    // DELETE
     public void supprimer(int idReservation) throws SQLException {
 
         String selectSql = "SELECT id_event, nombre_personnes FROM reservations WHERE id=?";

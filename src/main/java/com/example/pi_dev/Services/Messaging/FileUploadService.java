@@ -7,8 +7,8 @@ import java.time.format.DateTimeFormatter;
 
 public class FileUploadService {
 
-    private static final String UPLOAD_DIR = "uploads/";
-    private static final String THUMBNAIL_DIR = "uploads/thumbnails/";
+    private static final String UPLOAD_DIR = "uploads";
+    private static final String THUMBNAIL_DIR = "uploads/thumbnails";
 
     public FileUploadService() {
         // Create directories if they don't exist
@@ -25,10 +25,36 @@ public class FileUploadService {
         String extension = originalFileName.substring(originalFileName.lastIndexOf("."));
         String newFileName = timestamp + "_" + System.currentTimeMillis() + extension;
 
-        Path targetPath = Paths.get(UPLOAD_DIR + newFileName);
+        Path targetPath = Paths.get(UPLOAD_DIR, newFileName);
         Files.copy(sourceFile.toPath(), targetPath, StandardCopyOption.REPLACE_EXISTING);
 
-        return targetPath.toString();
+        // Persist as web path so Symfony and Java share the same representation.
+        return "/uploads/" + newFileName;
+    }
+
+    public File resolveLocalFile(String storedPath) {
+        if (storedPath == null || storedPath.isBlank()) {
+            return null;
+        }
+
+        String normalized = storedPath.trim().replace('\\', '/');
+
+        if (normalized.startsWith("http://") || normalized.startsWith("https://")) {
+            return null;
+        }
+
+        if (normalized.startsWith("/uploads/")) {
+            normalized = "uploads/" + normalized.substring("/uploads/".length());
+        } else if (normalized.startsWith("uploads/")) {
+            // already normalized
+        } else {
+            int uploadsIndex = normalized.indexOf("/uploads/");
+            if (uploadsIndex >= 0) {
+                normalized = "uploads/" + normalized.substring(uploadsIndex + "/uploads/".length());
+            }
+        }
+
+        return new File(normalized);
     }
 
     /**

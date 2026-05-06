@@ -18,7 +18,7 @@ public class ActiviteService {
     // ================= ADD =================
     public void ajouter(Activite a) throws SQLException {
 
-        String sql = "INSERT INTO activites (titre, description, type_activite, image, date_creation, date_modification) VALUES (?, ?, ?, ?, NOW(), NOW())";
+        String sql = "INSERT INTO activites (titre, description, type_activite, image, age_minimum, date_creation, date_modification) VALUES (?, ?, ?, ?, ?, NOW(), NOW())";
 
         PreparedStatement ps = cnx.prepareStatement(sql);
 
@@ -26,6 +26,11 @@ public class ActiviteService {
         ps.setString(2, a.getDescription());
         ps.setString(3, a.getTypeActivite());
         ps.setString(4, a.getImage());
+        if (a.getAgeMinimum() == null) {
+            ps.setNull(5, java.sql.Types.INTEGER);
+        } else {
+            ps.setInt(5, a.getAgeMinimum());
+        }
 
         ps.executeUpdate();
     }
@@ -48,6 +53,12 @@ public class ActiviteService {
             a.setDescription(rs.getString("description"));
             a.setTypeActivite(rs.getString("type_activite"));
             a.setImage(rs.getString("image"));
+            int age = rs.getInt("age_minimum");
+            if (rs.wasNull()) {
+                a.setAgeMinimum(null);
+            } else {
+                a.setAgeMinimum(age);
+            }
             a.setDateCreation(rs.getTimestamp("date_creation"));
             a.setDateModification(rs.getTimestamp("date_modification"));
 
@@ -60,7 +71,7 @@ public class ActiviteService {
     //  UPDATE
     public void modifier(Activite a) throws SQLException {
 
-        String sql = "UPDATE activites SET titre=?, description=?, type_activite=?, image=?, date_modification=NOW() WHERE id=?";
+        String sql = "UPDATE activites SET titre=?, description=?, type_activite=?, image=?, age_minimum=?, date_modification=NOW() WHERE id=?";
 
         PreparedStatement ps = cnx.prepareStatement(sql);
 
@@ -68,7 +79,12 @@ public class ActiviteService {
         ps.setString(2, a.getDescription());
         ps.setString(3, a.getTypeActivite());
         ps.setString(4, a.getImage());
-        ps.setInt(5, a.getId());
+        if (a.getAgeMinimum() == null) {
+            ps.setNull(5, java.sql.Types.INTEGER);
+        } else {
+            ps.setInt(5, a.getAgeMinimum());
+        }
+        ps.setInt(6, a.getId());
 
         ps.executeUpdate();
     }

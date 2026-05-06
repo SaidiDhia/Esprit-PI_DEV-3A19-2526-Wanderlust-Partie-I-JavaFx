@@ -19,7 +19,8 @@ final class PhpPasswordHasher {
     }
 
     static String hashBcrypt(String password, int cost) {
-        String result = runPhp("echo password_hash($argv[1], PASSWORD_BCRYPT, ['cost' => (int)$argv[2]]);", password, String.valueOf(cost));
+        String result = runPhp("echo password_hash($argv[1], PASSWORD_BCRYPT, ['cost' => (int)$argv[2]]);", password,
+                String.valueOf(cost));
         if (result == null || result.isBlank()) {
             throw new IllegalStateException("Unable to hash password using PHP CLI");
         }
@@ -50,7 +51,8 @@ final class PhpPasswordHasher {
         try {
             Process process = processBuilder.start();
             StringBuilder output = new StringBuilder();
-            try (BufferedReader reader = new BufferedReader(new InputStreamReader(process.getInputStream(), StandardCharsets.UTF_8))) {
+            try (BufferedReader reader = new BufferedReader(
+                    new InputStreamReader(process.getInputStream(), StandardCharsets.UTF_8))) {
                 String line;
                 while ((line = reader.readLine()) != null) {
                     output.append(line);

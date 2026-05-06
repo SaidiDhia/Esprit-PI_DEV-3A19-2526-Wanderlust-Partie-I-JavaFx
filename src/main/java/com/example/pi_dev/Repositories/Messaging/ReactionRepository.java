@@ -14,7 +14,7 @@ public class ReactionRepository {
         String sql = "INSERT INTO message_reactions (message_id, user_id, reaction) VALUES (?, ?, ?)";
 
         try (Connection conn = DatabaseConnection.getInstance().getConnection();
-             PreparedStatement stmt = conn.prepareStatement(sql)) {
+                PreparedStatement stmt = conn.prepareStatement(sql)) {
             stmt.setLong(1, messageId);
             stmt.setString(2, userId);
             stmt.setString(3, reaction);
@@ -23,10 +23,11 @@ public class ReactionRepository {
     }
 
     public void removeReaction(long messageId, String userId) throws SQLException {
-        String sql = "DELETE FROM message_reactions WHERE message_id = ? AND CONVERT(user_id USING utf8mb4) COLLATE " + USER_ID_COLLATION + " = CONVERT(? USING utf8mb4) COLLATE " + USER_ID_COLLATION;
+        String sql = "DELETE FROM message_reactions WHERE message_id = ? AND CONVERT(user_id USING utf8mb4) COLLATE "
+                + USER_ID_COLLATION + " = CONVERT(? USING utf8mb4) COLLATE " + USER_ID_COLLATION;
 
         try (Connection conn = DatabaseConnection.getInstance().getConnection();
-             PreparedStatement stmt = conn.prepareStatement(sql)) {
+                PreparedStatement stmt = conn.prepareStatement(sql)) {
             stmt.setLong(1, messageId);
             stmt.setString(2, userId);
             stmt.executeUpdate();
@@ -43,7 +44,7 @@ public class ReactionRepository {
 
         List<Reaction> reactions = new ArrayList<>();
         try (Connection conn = DatabaseConnection.getInstance().getConnection();
-             PreparedStatement stmt = conn.prepareStatement(sql)) {
+                PreparedStatement stmt = conn.prepareStatement(sql)) {
             stmt.setLong(1, messageId);
             ResultSet rs = stmt.executeQuery();
 
@@ -53,8 +54,8 @@ public class ReactionRepository {
                 r.setMessageId(rs.getLong("message_id"));
                 r.setUserId(rs.getString("user_id"));
                 r.setReaction(rs.getString("reaction"));
-                r.setCreatedAt(rs.getTimestamp("created_at") != null ?
-                        rs.getTimestamp("created_at").toLocalDateTime() : null);
+                r.setCreatedAt(
+                        rs.getTimestamp("created_at") != null ? rs.getTimestamp("created_at").toLocalDateTime() : null);
                 r.setUserFullName(rs.getString("full_name"));
                 reactions.add(r);
             }
@@ -63,10 +64,11 @@ public class ReactionRepository {
     }
 
     public String getUserReaction(long messageId, String userId) throws SQLException {
-        String sql = "SELECT reaction FROM message_reactions WHERE message_id = ? AND CONVERT(user_id USING utf8mb4) COLLATE " + USER_ID_COLLATION + " = CONVERT(? USING utf8mb4) COLLATE " + USER_ID_COLLATION;
+        String sql = "SELECT reaction FROM message_reactions WHERE message_id = ? AND CONVERT(user_id USING utf8mb4) COLLATE "
+                + USER_ID_COLLATION + " = CONVERT(? USING utf8mb4) COLLATE " + USER_ID_COLLATION;
 
         try (Connection conn = DatabaseConnection.getInstance().getConnection();
-             PreparedStatement stmt = conn.prepareStatement(sql)) {
+                PreparedStatement stmt = conn.prepareStatement(sql)) {
             stmt.setLong(1, messageId);
             stmt.setString(2, userId);
             ResultSet rs = stmt.executeQuery();

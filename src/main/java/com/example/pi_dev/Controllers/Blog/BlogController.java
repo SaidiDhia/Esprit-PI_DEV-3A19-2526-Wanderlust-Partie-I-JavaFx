@@ -11,6 +11,7 @@ import com.example.pi_dev.Services.Blog.Posting_Services;
 import com.example.pi_dev.Services.Blog.Reaction_Services;
 import com.example.pi_dev.Services.Blog.TranslationService;
 import com.example.pi_dev.Services.Blog.SaveService;
+import com.example.pi_dev.Repositories.Messaging.UserRepository;
 
 import com.example.pi_dev.Entities.Users.User;
 import com.example.pi_dev.Utils.Users.UserSession;
@@ -41,6 +42,10 @@ import javafx.util.Duration;
 
 import java.io.File;
 import java.net.URL;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.nio.file.StandardCopyOption;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
@@ -75,6 +80,7 @@ public class BlogController implements Initializable {
     private final AI_ModerationService moderationService  = new AI_ModerationService();
     private final TranslationService   translationService = new TranslationService();
     private final NotificationService  notificationService = new NotificationService();
+    private final UserRepository       userRepository = new UserRepository();
 
     // ═══════════════════════════════════════════
     // Current User — NOW String (UUID)
@@ -99,6 +105,7 @@ public class BlogController implements Initializable {
     private final Map<Integer, String>        translationCache  = new HashMap<>();
     private final Set<Integer>                translatedPostIds = new HashSet<>();
     private final List<LocalDateTime>         commentTimestamps = new ArrayList<>();
+    private final Map<String, String>         userDisplayNameCache = new HashMap<>();
 
     // ── Notifications (DB-backed) ─────────────────────────────────────
     // We use NotificationService.NotifRecord instead of in-memory Notif.
@@ -349,7 +356,7 @@ public class BlogController implements Initializable {
         HBox header = new HBox(11);
         header.setAlignment(Pos.CENTER_LEFT);
 
-        String ownerLabel = isOwner(post) ? currentUsername : "Utilisateur";
+        String ownerLabel = isOwner(post) ? currentUsername : resolveDisplayName(post.getIdUser());
         Label avatar = new Label(ownerLabel.substring(0, 1).toUpperCase());
         avatar.setMinSize(38, 38); avatar.setMaxSize(38, 38);
         avatar.setAlignment(Pos.CENTER);
@@ -437,7 +444,7 @@ public class BlogController implements Initializable {
 
     private Node buildImageNode(String path) {
         try {
-            File f = new File(path);
+            File f = resolveLocalMediaFile(path);
             String url = f.exists() ? f.toURI().toString() : path;
             Image img = new Image(url, 660, 0, true, true, true);
             ImageView iv = new ImageView(img);
@@ -448,7 +455,7 @@ public class BlogController implements Initializable {
 
     private Node buildVideoPlayer(String path) {
         try {
-            File f = new File(path);
+            File f = resolveLocalMediaFile(path);
             String url = f.exists() ? f.toURI().toString() : path;
             Media media = new Media(url);
             MediaPlayer player = new MediaPlayer(media);
@@ -1009,7 +1016,7 @@ public class BlogController implements Initializable {
     @FXML
     private void handlePublishPost() {
         String content = newPostContent.getText().trim();
-        String media   = newPostMediaPath.getText().trim();
+        String media   = normalizeMediaForPersistence(newPostMediaPath.getText().trim());
         if (content.isEmpty()) {
             showError(postErrorLabel, "⚠  Le contenu ne peut pas être vide.");
             shakeNode(newPostContent);
@@ -1050,7 +1057,91 @@ public class BlogController implements Initializable {
                 "*.png","*.jpg","*.jpeg","*.gif","*.bmp","*.webp",
                 "*.mp4","*.avi","*.mov","*.mkv","*.webm","*.flv"));
         File file = chooser.showOpenDialog(newPostContent.getScene().getWindow());
-        if (file != null) newPostMediaPath.setText(file.getAbsolutePath());
+        if (file != null) {
+            String persisted = copyMediaToSharedUploads(file);
+            newPostMediaPath.setText(persisted != null ? persisted : file.getAbsolutePath());
+        }
+    }
+
+    private String normalizeMediaForPersistence(String media) {
+        if (media == null || media.isBlank()) {
+            return media;
+        }
+
+        String normalized = media.trim().replace('\\', '/');
+        if (normalized.startsWith("/uploads/")) {
+            return normalized;
+        }
+        if (normalized.startsWith("uploads/")) {
+            return "/" + normalized;
+        }
+
+        File local = new File(media);
+        if (local.exists() && local.isFile()) {
+            String persisted = copyMediaToSharedUploads(local);
+            if (persisted != null) {
+                return persisted;
+            }
+        }
+
+        return media;
+    }
+
+    private String copyMediaToSharedUploads(File source) {
+        try {
+            String original = source.getName();
+            String ext = "";
+            int dot = original.lastIndexOf('.');
+            if (dot >= 0) {
+                ext = original.substring(dot);
+            }
+
+            String fileName = System.currentTimeMillis() + "_" + Math.abs(original.hashCode()) + ext;
+            Path uploadsDir = Paths.get("uploads");
+            Files.createDirectories(uploadsDir);
+
+            Path target = uploadsDir.resolve(fileName);
+            Files.copy(source.toPath(), target, StandardCopyOption.REPLACE_EXISTING);
+            return "/uploads/" + fileName;
+        } catch (Exception e) {
+            return null;
+        }
+    }
+
+    private File resolveLocalMediaFile(String storedPath) {
+        if (storedPath == null || storedPath.isBlank()) {
+            return new File("");
+        }
+
+        String normalized = storedPath.trim().replace('\\', '/');
+        if (normalized.startsWith("/uploads/")) {
+            normalized = "uploads/" + normalized.substring("/uploads/".length());
+        }
+        if (normalized.startsWith("uploads/")) {
+            return new File(normalized);
+        }
+        return new File(storedPath);
+    }
+
+    private String resolveDisplayName(String userId) {
+        if (userId == null || userId.isBlank()) {
+            return "Utilisateur";
+        }
+        if (userDisplayNameCache.containsKey(userId)) {
+            return userDisplayNameCache.get(userId);
+        }
+
+        try {
+            String fullName = userRepository.getUserFullName(userId);
+            if (fullName != null && !fullName.isBlank()) {
+                userDisplayNameCache.put(userId, fullName);
+                return fullName;
+            }
+        } catch (Exception ignored) {
+        }
+
+        userDisplayNameCache.put(userId, "Utilisateur");
+        return "Utilisateur";
     }
 
     @FXML private void handleRefresh() { loadPosts(); }

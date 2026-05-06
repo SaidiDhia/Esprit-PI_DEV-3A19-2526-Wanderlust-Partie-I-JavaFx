@@ -50,7 +50,8 @@ public class UserService implements IUserService {
         user.setPasswordHash(hashPassword(user.getPasswordHash()));
         user.setCreatedAt(LocalDateTime.now());
         // Default active
-        if (user.getIsActive() == null) user.setIsActive(true);
+        if (user.getIsActive() == null)
+            user.setIsActive(true);
 
         try {
             userRepository.create(user);
@@ -143,11 +144,12 @@ public class UserService implements IUserService {
         String barCodeUrl = twoFactorService.getGoogleAuthenticatorBarCode(secretKey, email, "PI_DEV_APP");
         return twoFactorService.generateQRCodeImage(barCodeUrl);
     }
-    
+
     // 2. Email 2FA
     public void setupTwoFactorEmail(UUID userId) throws SQLException {
-        // For email setup, we just verify we can send an email. 
-        // We might not need to store a "secret" yet, but let's store a marker or temp code.
+        // For email setup, we just verify we can send an email.
+        // We might not need to store a "secret" yet, but let's store a marker or temp
+        // code.
         // Actually, let's just send a code immediately to verify they own the email.
         sendTwoFactorCodeEmail(userId);
     }
@@ -156,29 +158,31 @@ public class UserService implements IUserService {
         // Generate 6-digit code
         int code = 100000 + new java.util.Random().nextInt(900000);
         long expiry = System.currentTimeMillis() + (5 * 60 * 1000); // 5 mins
-        
+
         // Store in tfa_secrets as "EMAIL:<code>:<expiry>"
         String secretValue = "EMAIL:" + code + ":" + expiry;
         userRepository.saveTfaSecret(userId, secretValue);
-        
+
         // Send Email
         User user = getUserById(userId);
         if (user != null) {
             emailService.sendEmail(user.getEmail(), "Your 2FA Code", "Your verification code is: " + code);
         }
     }
-    
+
     // 3. Face 2FA Setup
     // This is called when the user configures Face ID. It saves the snapshot image.
     public void setupTwoFactorFace(UUID userId, byte[] imageBytes) throws SQLException {
         try {
             // 1. Save the image to the local file system (e.g. ~/.pi_dev_faces/)
             String fileName = "face_" + userId + ".png";
-            java.nio.file.Path path = java.nio.file.Paths.get(System.getProperty("user.home"), ".pi_dev_faces", fileName);
+            java.nio.file.Path path = java.nio.file.Paths.get(System.getProperty("user.home"), ".pi_dev_faces",
+                    fileName);
             java.nio.file.Files.createDirectories(path.getParent());
             java.nio.file.Files.write(path, imageBytes);
 
-            // 2. Store the absolute path in the DB so we know where this user's reference photo is
+            // 2. Store the absolute path in the DB so we know where this user's reference
+            // photo is
             String secretValue = "FACE:" + path.toAbsolutePath().toString();
             userRepository.saveTfaSecret(userId, secretValue);
         } catch (IOException e) {
@@ -191,10 +195,12 @@ public class UserService implements IUserService {
     public boolean verifyTwoFactor(UUID userId, int code) {
         try {
             User user = getUserById(userId);
-            if (user == null || user.getTfaMethod() == null) return true; // Should not happen if 2FA required
-            
+            if (user == null || user.getTfaMethod() == null)
+                return true; // Should not happen if 2FA required
+
             String storedSecret = userRepository.getTfaSecret(userId);
-            if (storedSecret == null) return false;
+            if (storedSecret == null)
+                return false;
 
             if (user.getTfaMethod() == TFAMethod.QR) {
                 return twoFactorService.validateCode(storedSecret, code);
@@ -205,7 +211,7 @@ public class UserService implements IUserService {
                     if (parts.length == 3) {
                         int storedCode = Integer.parseInt(parts[1]);
                         long expiry = Long.parseLong(parts[2]);
-                        
+
                         if (System.currentTimeMillis() > expiry) {
                             System.out.println("Email code expired.");
                             return false;
@@ -214,29 +220,32 @@ public class UserService implements IUserService {
                     }
                 }
             }
-            
+
             return false;
         } catch (SQLException e) {
             e.printStackTrace();
             return false;
         }
     }
-    
+
     /**
      * Face 2FA Verify
-     * This is called during Login to verify the newly captured photo against the stored reference photo.
+     * This is called during Login to verify the newly captured photo against the
+     * stored reference photo.
      * It uses the DeepFace API (reference photo = img1, login capture = img2).
      */
     public boolean verifyTwoFactorFace(UUID userId, byte[] capturedImage) {
         try {
             // 1. Get the path of the configured image safely stored during setup
             String storedSecret = userRepository.getTfaSecret(userId);
-            if (storedSecret == null || !storedSecret.startsWith("FACE:")) return false;
-            if (capturedImage == null || capturedImage.length == 0) return false;
+            if (storedSecret == null || !storedSecret.startsWith("FACE:"))
+                return false;
+            if (capturedImage == null || capturedImage.length == 0)
+                return false;
 
             // 2. Extract the actual filesystem path
             String storedPath = storedSecret.substring(5).trim();
-            
+
             // 3. Send both the stored image and the new snapshot to DeepFace implementation
             DeepFaceService deepFace = new DeepFaceService();
             return deepFace.verify(storedPath, capturedImage);
@@ -272,10 +281,10 @@ public class UserService implements IUserService {
 
     public boolean resetPassword(String token, String newPassword) {
         String hashedPassword = hashPassword(newPassword);
-        
+
         // Use the modified resetPassword which returns the userId
         String userIdStr = passwordResetService.resetPassword(token, hashedPassword);
-        
+
         if (userIdStr != null) {
             // Success! Now disable 2FA
             try {
@@ -291,7 +300,7 @@ public class UserService implements IUserService {
             }
             return true;
         }
-        
+
         return false;
     }
 
@@ -303,14 +312,14 @@ public class UserService implements IUserService {
                 // Disable 2FA on password change as requested
                 user.setTfaMethod(null);
                 updateUser(user);
-                
+
                 // Clear TFA secret just in case
                 try {
                     userRepository.saveTfaSecret(userId, null); // Or delete logic if we had it
                 } catch (SQLException e) {
                     e.printStackTrace();
                 }
-                
+
                 return true;
             }
         }
@@ -327,12 +336,14 @@ public class UserService implements IUserService {
     }
 
     private String hashPassword(String password) {
-        if (password == null) throw new IllegalArgumentException("Password cannot be null");
+        if (password == null)
+            throw new IllegalArgumentException("Password cannot be null");
         return PhpPasswordHasher.hashBcrypt(password, 13);
     }
 
     private boolean verifyPassword(String password, String storedHash) {
-        if (storedHash == null || storedHash.isBlank()) return false;
+        if (storedHash == null || storedHash.isBlank())
+            return false;
         if (storedHash.startsWith("$2a$") || storedHash.startsWith("$2b$") || storedHash.startsWith("$2y$")) {
             return PhpPasswordHasher.verifyBcrypt(password, storedHash);
         }

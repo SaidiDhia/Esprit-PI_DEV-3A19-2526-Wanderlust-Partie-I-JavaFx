@@ -18,14 +18,24 @@ import java.sql.Types;
 
 public class AjoutActiviteController {
 
-    @FXML private TextField titreField;
-    @FXML private TextArea descriptionArea;
-    @FXML private ComboBox<CategorieActivite> categorieCombo;
-    @FXML private ComboBox<TypeActivite> typeactField;
-    @FXML private TextField imageField1;
-    @FXML private Button importImageButton;
-    @FXML private Button ajouterButton;
-    @FXML private Button annulerButton;
+    @FXML
+    private TextField titreField;
+    @FXML
+    private TextArea descriptionArea;
+    @FXML
+    private ComboBox<CategorieActivite> categorieCombo;
+    @FXML
+    private ComboBox<TypeActivite> typeactField;
+    @FXML
+    private TextField imageField1;
+    @FXML
+    private TextField ageMinField;
+    @FXML
+    private Button importImageButton;
+    @FXML
+    private Button ajouterButton;
+    @FXML
+    private Button annulerButton;
 
     private Connection connection;
     private String selectedImagePath = "";
@@ -68,8 +78,7 @@ public class AjoutActiviteController {
         FileChooser fileChooser = new FileChooser();
         fileChooser.setTitle("Choisir une image pour l'activité");
         fileChooser.getExtensionFilters().addAll(
-                new FileChooser.ExtensionFilter("Images", "*.jpg", "*.jpeg", "*.png", "*.gif", "*.bmp")
-        );
+                new FileChooser.ExtensionFilter("Images", "*.jpg", "*.jpeg", "*.png", "*.gif", "*.bmp"));
 
         File selectedFile = fileChooser.showOpenDialog(new Stage());
 
@@ -126,7 +135,26 @@ public class AjoutActiviteController {
         }
 
         try {
-            String sql = "INSERT INTO activites (titre, description, type_activite, categorie, image, status, created_by_id, date_creation, date_modification) VALUES (?, ?, ?, ?, ?, ?, ?, NOW(), NOW())";
+            // Parse age minimum (optional)
+            Integer ageMin = null;
+            String ageText = (ageMinField != null) ? ageMinField.getText().trim() : "";
+            if (!ageText.isEmpty()) {
+                try {
+                    int v = Integer.parseInt(ageText);
+                    if (v < 0) {
+                        showAlert("L'âge minimum ne peut pas être négatif");
+                        ageMinField.requestFocus();
+                        return;
+                    }
+                    ageMin = v;
+                } catch (NumberFormatException nfe) {
+                    showAlert("L'âge minimum doit être un nombre entier");
+                    ageMinField.requestFocus();
+                    return;
+                }
+            }
+
+            String sql = "INSERT INTO activites (titre, description, type_activite, categorie, image, status, age_minimum, created_by_id, date_creation, date_modification) VALUES (?, ?, ?, ?, ?, ?, ?, ?, NOW(), NOW())";
             PreparedStatement pstmt = connection.prepareStatement(sql);
             pstmt.setString(1, titre);
             pstmt.setString(2, description);
@@ -134,12 +162,20 @@ public class AjoutActiviteController {
             pstmt.setString(4, categorie.toDbValue());
             pstmt.setString(5, imagePath);
             pstmt.setString(6, "accepte");
+
+            if (ageMin == null) {
+                pstmt.setNull(7, Types.INTEGER);
+            } else {
+                pstmt.setInt(7, ageMin);
+            }
+
             String currentUserId = Session.getCurrentUserId();
             if (currentUserId == null || currentUserId.isBlank()) {
-                pstmt.setNull(7, Types.CHAR);
+                pstmt.setNull(8, Types.CHAR);
             } else {
-                pstmt.setString(7, currentUserId);
+                pstmt.setString(8, currentUserId);
             }
+
             pstmt.executeUpdate();
 
             showAlert("Activité ajoutée avec succès");

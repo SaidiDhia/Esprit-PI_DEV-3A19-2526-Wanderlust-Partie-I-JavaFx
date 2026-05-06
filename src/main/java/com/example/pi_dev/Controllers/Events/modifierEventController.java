@@ -3,6 +3,7 @@ package com.example.pi_dev.Controllers.Events;
 import com.example.pi_dev.Entities.Events.Event;
 import com.example.pi_dev.Entities.Events.Activite;
 import com.example.pi_dev.Services.Events.WeatherService;
+import com.example.pi_dev.Session.Session;
 import com.example.pi_dev.Utils.Events.Mydatabase;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
@@ -29,33 +30,56 @@ import java.util.ResourceBundle;
 
 public class modifierEventController implements Initializable {
 
-    @FXML private ComboBox<String> activiteCombo;
-    @FXML private VBox activitesSelectionneesContainer;
-    @FXML private TextField nomorgField;
-    @FXML private TextField lieuField;
-    @FXML private TextField emailField;
-    @FXML private TextField telephoneorgField;
-    @FXML private DatePicker dateDebutPicker;
-    @FXML private DatePicker dateFinPicker;
-    @FXML private TextField prixField;
-    @FXML private TextField capaciteField;
-    @FXML private TextArea equipementField;
-    @FXML private TextArea descriptionField;
-    @FXML private Label imageStatusLabel;
-    @FXML private Button importerImageButton;
-    @FXML private ImageView imagePrincipaleView;
-    @FXML private HBox photosContainer;
-    @FXML private Button ajouterPhotoButton;
-    @FXML private TextField videoYoutubeField;
-    @FXML private CheckBox check1;
-    @FXML private CheckBox check2;
-    @FXML private CheckBox check3;
-    @FXML private CheckBox check4;
+    @FXML
+    private ComboBox<String> activiteCombo;
+    @FXML
+    private VBox activitesSelectionneesContainer;
+    @FXML
+    private TextField nomorgField;
+    @FXML
+    private TextField lieuField;
+    @FXML
+    private TextField emailField;
+    @FXML
+    private TextField telephoneorgField;
+    @FXML
+    private DatePicker dateDebutPicker;
+    @FXML
+    private DatePicker dateFinPicker;
+    @FXML
+    private TextField prixField;
+    @FXML
+    private TextField capaciteField;
+    @FXML
+    private TextArea equipementField;
+    @FXML
+    private TextArea descriptionField;
+    @FXML
+    private Label imageStatusLabel;
+    @FXML
+    private Button importerImageButton;
+    @FXML
+    private ImageView imagePrincipaleView;
+    @FXML
+    private HBox photosContainer;
+    @FXML
+    private Button ajouterPhotoButton;
+    @FXML
+    private TextField videoYoutubeField;
+    @FXML
+    private CheckBox check1;
+    @FXML
+    private CheckBox check2;
+    @FXML
+    private CheckBox check3;
+    @FXML
+    private CheckBox check4;
 
     private Connection connection;
     private WeatherService weatherService;
     private List<Object> activitesList = new ArrayList<>();
     private Event currentEvent;
+    private String currentEventOwnerId;
     private List<String> photosPaths = new ArrayList<>();
     private String imagePrincipalePath;
     private static final String UPLOADS_DIR = "uploads/events/";
@@ -129,12 +153,16 @@ public class modifierEventController implements Initializable {
                 currentEvent.setMaterielsNecessaires(rs.getString("materiels_necessaires"));
                 currentEvent.setPrix(rs.getBigDecimal("prix"));
                 currentEvent.setCapaciteMax(rs.getInt("capacite_max"));
-                currentEvent.setDateDebut(rs.getTimestamp("date_debut") != null ? rs.getTimestamp("date_debut").toLocalDateTime() : null);
-                currentEvent.setDateFin(rs.getTimestamp("date_fin") != null ? rs.getTimestamp("date_fin").toLocalDateTime() : null);
+                currentEvent.setDateDebut(
+                        rs.getTimestamp("date_debut") != null ? rs.getTimestamp("date_debut").toLocalDateTime() : null);
+                currentEvent.setDateFin(
+                        rs.getTimestamp("date_fin") != null ? rs.getTimestamp("date_fin").toLocalDateTime() : null);
                 currentEvent.setImage(rs.getString("image"));
                 currentEvent.setVideoYoutube(rs.getString("video_youtube"));
+                currentEventOwnerId = rs.getString("created_by_id");
 
                 setEventData(currentEvent);
+                enforceOwnership();
             }
         } catch (SQLException e) {
             System.err.println("Erreur lors du chargement de l'événement: " + e.getMessage());
@@ -223,7 +251,12 @@ public class modifierEventController implements Initializable {
     @FXML
     void modifierEvent(ActionEvent event) {
         try {
-            if (!check1.isSelected() || !check2.isSelected() || !check3.isSelected() || !check4.isSelected()) {
+            if (!isOwner()) {
+                showAlert("Vous n'êtes pas autorisé à modifier cet événement");
+                return;
+            }
+
+            if (!areValidationChecksSelected()) {
                 showAlert("Veuillez cocher toutes les cases de validation avant de soumettre");
                 return;
             }
@@ -297,7 +330,7 @@ public class modifierEventController implements Initializable {
 
             int activiteId = getSelectedActiviteId();
 
-            String sql = "UPDATE events SET id_activite = ?, lieu = ?, organisateur = ?, email = ?, telephone = ?, description = ?, materiels_necessaires = ?, date_debut = ?, date_fin = ?, prix = ?, capacite_max = ?, places_disponibles = ?, statut = ?, date_modification = CURRENT_TIMESTAMP, video_youtube = ?, image = ? WHERE id = ?";
+            String sql = "UPDATE events SET id_activite = ?, lieu = ?, organisateur = ?, email = ?, telephone = ?, description = ?, materiels_necessaires = ?, date_debut = ?, date_fin = ?, prix = ?, capacite_max = ?, places_disponibles = ?, statut = ?, date_modification = CURRENT_TIMESTAMP, video_youtube = ?, image = ? WHERE id = ? AND created_by_id = ?";
 
             PreparedStatement pstmt = connection.prepareStatement(sql);
             pstmt.setInt(1, activiteId);
@@ -307,15 +340,23 @@ public class modifierEventController implements Initializable {
             pstmt.setString(5, telephoneorgField.getText().trim());
             pstmt.setString(6, description);
             pstmt.setString(7, equipement);
-            pstmt.setTimestamp(8, dateDebutPicker.getValue() != null ? java.sql.Timestamp.valueOf(dateDebutPicker.getValue().atStartOfDay()) : null);
-            pstmt.setTimestamp(9, dateFinPicker.getValue() != null ? java.sql.Timestamp.valueOf(dateFinPicker.getValue().atStartOfDay()) : null);
+            pstmt.setTimestamp(8,
+                    dateDebutPicker.getValue() != null
+                            ? java.sql.Timestamp.valueOf(dateDebutPicker.getValue().atStartOfDay())
+                            : null);
+            pstmt.setTimestamp(9,
+                    dateFinPicker.getValue() != null
+                            ? java.sql.Timestamp.valueOf(dateFinPicker.getValue().atStartOfDay())
+                            : null);
             pstmt.setDouble(10, prixValue);
             pstmt.setInt(11, capaciteValue);
             pstmt.setInt(12, capaciteValue);
             pstmt.setString(13, "A_VENIR");
             pstmt.setString(14, videoYoutube);
-            pstmt.setString(15, imagePrincipalePath != null ? imagePrincipalePath : (currentEvent != null ? currentEvent.getImage() : ""));
+            pstmt.setString(15, imagePrincipalePath != null ? imagePrincipalePath
+                    : (currentEvent != null ? currentEvent.getImage() : ""));
             pstmt.setInt(16, currentEvent != null ? currentEvent.getId() : 0);
+            pstmt.setString(17, Session.getCurrentUserId());
 
             int rowsAffected = pstmt.executeUpdate();
 
@@ -333,6 +374,63 @@ public class modifierEventController implements Initializable {
             e.printStackTrace();
             showAlert("Erreur lors de la modification de l'événement: " + e.getMessage());
         }
+    }
+
+    private boolean areValidationChecksSelected() {
+        boolean c1 = check1 == null || check1.isSelected();
+        boolean c2 = check2 == null || check2.isSelected();
+        boolean c3 = check3 == null || check3.isSelected();
+        boolean c4 = check4 == null || check4.isSelected();
+        return c1 && c2 && c3 && c4;
+    }
+
+    private void enforceOwnership() {
+        if (!isOwner()) {
+            showAlert("Vous n'êtes pas autorisé à modifier cet événement");
+            disableForm();
+        }
+    }
+
+    private boolean isOwner() {
+        String currentUserId = Session.getCurrentUserId();
+        if (currentUserId == null || currentUserId.isBlank()) {
+            return false;
+        }
+        if (currentEventOwnerId == null || currentEventOwnerId.isBlank()) {
+            return false;
+        }
+        return currentUserId.equals(currentEventOwnerId);
+    }
+
+    private void disableForm() {
+        if (nomorgField != null)
+            nomorgField.setDisable(true);
+        if (lieuField != null)
+            lieuField.setDisable(true);
+        if (emailField != null)
+            emailField.setDisable(true);
+        if (telephoneorgField != null)
+            telephoneorgField.setDisable(true);
+        if (dateDebutPicker != null)
+            dateDebutPicker.setDisable(true);
+        if (dateFinPicker != null)
+            dateFinPicker.setDisable(true);
+        if (prixField != null)
+            prixField.setDisable(true);
+        if (capaciteField != null)
+            capaciteField.setDisable(true);
+        if (equipementField != null)
+            equipementField.setDisable(true);
+        if (descriptionField != null)
+            descriptionField.setDisable(true);
+        if (videoYoutubeField != null)
+            videoYoutubeField.setDisable(true);
+        if (activiteCombo != null)
+            activiteCombo.setDisable(true);
+        if (importerImageButton != null)
+            importerImageButton.setDisable(true);
+        if (ajouterPhotoButton != null)
+            ajouterPhotoButton.setDisable(true);
     }
 
     private int getSelectedActiviteId() {
@@ -359,8 +457,7 @@ public class modifierEventController implements Initializable {
         FileChooser fileChooser = new FileChooser();
         fileChooser.setTitle("Choisir une image pour l'événement");
         fileChooser.getExtensionFilters().addAll(
-                new FileChooser.ExtensionFilter("Images", "*.png", "*.jpg", "*.jpeg", "*.gif")
-        );
+                new FileChooser.ExtensionFilter("Images", "*.png", "*.jpg", "*.jpeg", "*.gif"));
 
         File selectedFile = fileChooser.showOpenDialog(null);
         if (selectedFile != null) {
@@ -416,12 +513,18 @@ public class modifierEventController implements Initializable {
             HBox container = new HBox(5);
             container.setStyle("-fx-background-color: #f0f0f0; -fx-border-radius: 5; -fx-padding: 5;");
             ImageView thumb = new ImageView(new Image(originalFile.toURI().toString()));
-            thumb.setFitHeight(60); thumb.setFitWidth(60); thumb.setPreserveRatio(true);
+            thumb.setFitHeight(60);
+            thumb.setFitWidth(60);
+            thumb.setPreserveRatio(true);
             Button del = new Button("❌");
             del.setStyle("-fx-background-color: transparent; -fx-border: none; -fx-cursor: hand;");
-            del.setOnAction(e -> { photosContainer.getChildren().remove(container); photosPaths.remove(photoPath); });
+            del.setOnAction(e -> {
+                photosContainer.getChildren().remove(container);
+                photosPaths.remove(photoPath);
+            });
             container.getChildren().addAll(thumb, del);
-            if (photosContainer != null) photosContainer.getChildren().add(container);
+            if (photosContainer != null)
+                photosContainer.getChildren().add(container);
         } catch (Exception e) {
             System.err.println("Erreur vignette: " + e.getMessage());
         }
@@ -438,7 +541,10 @@ public class modifierEventController implements Initializable {
         alert.setTitle("Annuler la modification");
         alert.setHeaderText("Êtes-vous sûr de vouloir annuler ?");
         alert.setContentText("Toutes les modifications non sauvegardées seront perdues.");
-        alert.showAndWait().ifPresent(r -> { if (r == ButtonType.OK) fermerFenetre(); });
+        alert.showAndWait().ifPresent(r -> {
+            if (r == ButtonType.OK)
+                fermerFenetre();
+        });
     }
 
     @FXML

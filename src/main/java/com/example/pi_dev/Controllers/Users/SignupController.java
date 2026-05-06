@@ -63,12 +63,16 @@ public class SignupController {
     @FXML
     private PasswordField confirmPasswordField;
 
-
-    @FXML private Label fullNameError;
-    @FXML private Label emailError;
-    @FXML private Label phoneError;
-    @FXML private Label passwordError;
-    @FXML private Label confirmPasswordError;
+    @FXML
+    private Label fullNameError;
+    @FXML
+    private Label emailError;
+    @FXML
+    private Label phoneError;
+    @FXML
+    private Label passwordError;
+    @FXML
+    private Label confirmPasswordError;
 
     @FXML
     private Label errorLabel;
@@ -106,12 +110,17 @@ public class SignupController {
 
         double strength = 0;
         int criteriaMet = 0;
-        
-        if (password.length() >= 8) criteriaMet++;
-        if (password.matches(".*[a-z].*")) criteriaMet++;
-        if (password.matches(".*[A-Z].*")) criteriaMet++;
-        if (password.matches(".*[0-9].*")) criteriaMet++;
-        if (password.matches(".*[!@#$%^&*(),.?\":{}|<>].*")) criteriaMet++;
+
+        if (password.length() >= 8)
+            criteriaMet++;
+        if (password.matches(".*[a-z].*"))
+            criteriaMet++;
+        if (password.matches(".*[A-Z].*"))
+            criteriaMet++;
+        if (password.matches(".*[0-9].*"))
+            criteriaMet++;
+        if (password.matches(".*[!@#$%^&*(),.?\":{}|<>].*"))
+            criteriaMet++;
 
         strength = criteriaMet / 5.0;
         animateStrengthBar(strength);
@@ -122,7 +131,7 @@ public class SignupController {
         // Update colors and labels based on progress
         if (strength <= 0.2) {
             strengthBar.getStyleClass().add("very-weak");
-            strengthBar.setStyle("-fx-accent: #EF4444;"); 
+            strengthBar.setStyle("-fx-accent: #EF4444;");
             strengthLabel.setText("Strength: Very Weak");
             strengthLabel.setStyle("-fx-text-fill: #EF4444;");
         } else if (strength <= 0.4) {
@@ -160,8 +169,9 @@ public class SignupController {
     void handleUploadPhoto() {
         FileChooser fileChooser = new FileChooser();
         fileChooser.setTitle("Select Profile Picture");
-        fileChooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("Image Files", "*.png", "*.jpg", "*.jpeg"));
-        
+        fileChooser.getExtensionFilters()
+                .add(new FileChooser.ExtensionFilter("Image Files", "*.png", "*.jpg", "*.jpeg"));
+
         File file = fileChooser.showOpenDialog(profileCircle.getScene().getWindow());
         if (file != null) {
             selectedImageFile = file;
@@ -172,7 +182,8 @@ public class SignupController {
 
     @FXML
     void handleSignup(ActionEvent event) {
-        if (!validateInput()) return;
+        if (!validateInput())
+            return;
 
         User newUser = new User();
         newUser.setUserId(UUID.randomUUID());
@@ -187,8 +198,9 @@ public class SignupController {
         if (selectedImageFile != null) {
             try {
                 File uploadDir = new File("uploads/profiles");
-                if (!uploadDir.exists()) uploadDir.mkdirs();
-                
+                if (!uploadDir.exists())
+                    uploadDir.mkdirs();
+
                 String fileName = UUID.randomUUID().toString() + "_" + selectedImageFile.getName();
                 File destFile = new File(uploadDir, fileName);
                 Files.copy(selectedImageFile.toPath(), destFile.toPath(), StandardCopyOption.REPLACE_EXISTING);
@@ -244,7 +256,7 @@ public class SignupController {
     private boolean validateInput() {
         clearErrors();
         boolean isValid = true;
-        
+
         String fullName = fullNameField.getText().trim();
         String email = emailField.getText().trim();
         String phone = phoneField.getText().trim();
@@ -321,16 +333,17 @@ public class SignupController {
         Scene scene = source.getScene();
         if (scene != null && scene.getRoot() instanceof javafx.scene.layout.BorderPane) {
             javafx.scene.layout.BorderPane root = (javafx.scene.layout.BorderPane) scene.getRoot();
-            return root.getCenter() instanceof javafx.scene.layout.StackPane && 
-                   root.getCenter().getId() != null && 
-                   root.getCenter().getId().equals("contentArea");
+            return root.getCenter() instanceof javafx.scene.layout.StackPane &&
+                    root.getCenter().getId() != null &&
+                    root.getCenter().getId().equals("contentArea");
         }
         return false;
     }
 
     private void replaceInMainLayout(Parent root, ActionEvent event) {
         Node source = (Node) event.getSource();
-        javafx.scene.layout.StackPane contentArea = (javafx.scene.layout.StackPane) source.getScene().lookup("#contentArea");
+        javafx.scene.layout.StackPane contentArea = (javafx.scene.layout.StackPane) source.getScene()
+                .lookup("#contentArea");
         if (contentArea != null) {
             contentArea.getChildren().setAll(root);
         }

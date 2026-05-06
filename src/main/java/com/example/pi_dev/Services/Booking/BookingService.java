@@ -158,7 +158,7 @@ public class BookingService implements IBookingService {
         List<Booking> list = new ArrayList<>();
 
         try (Statement st = con.createStatement();
-             ResultSet rs = st.executeQuery(sql)) {
+                ResultSet rs = st.executeQuery(sql)) {
             while (rs.next()) {
                 list.add(mapBooking(rs));
             }
@@ -228,7 +228,7 @@ public class BookingService implements IBookingService {
         List<Booking> list = new ArrayList<>();
 
         try (Statement st = con.createStatement();
-             ResultSet rs = st.executeQuery(sql)) {
+                ResultSet rs = st.executeQuery(sql)) {
             while (rs.next()) {
                 list.add(mapBooking(rs));
             }
@@ -315,7 +315,7 @@ public class BookingService implements IBookingService {
         List<BookingView> list = new ArrayList<>();
 
         try (Statement st = con.createStatement();
-             ResultSet rs = st.executeQuery(sql)) {
+                ResultSet rs = st.executeQuery(sql)) {
             while (rs.next()) {
                 list.add(new BookingView(mapBooking(rs), rs.getString("place_title")));
             }
@@ -334,7 +334,7 @@ public class BookingService implements IBookingService {
         List<BookingView> list = new ArrayList<>();
 
         try (Statement st = con.createStatement();
-             ResultSet rs = st.executeQuery(sql)) {
+                ResultSet rs = st.executeQuery(sql)) {
             while (rs.next()) {
                 list.add(new BookingView(mapBooking(rs), rs.getString("place_title")));
             }
@@ -486,7 +486,8 @@ public class BookingService implements IBookingService {
         // Host ID column (added recently by user)
         try {
             b.setHostId(rs.getString("host_id"));
-        } catch (SQLException ignored) { /* column not yet in DB */ }
+        } catch (SQLException ignored) {
+            /* column not yet in DB */ }
 
         b.setStartDate(rs.getDate("start_date").toLocalDate());
         b.setEndDate(rs.getDate("end_date").toLocalDate());

@@ -27,11 +27,9 @@ public class Event {
     private Timestamp dateCreation;
     private Timestamp dateModification;
     private Integer telephone;
-
+    private String createdById;
 
     private Activite activite;
-
-
 
     public enum StatutEvent {
         A_VENIR,
@@ -44,8 +42,9 @@ public class Event {
         this.photos = new ArrayList<>(); // Initialiser la liste des photos
     }
 
-    public Event(int idActivite, String lieu, String adresseComplete, String email, String description, LocalDateTime dateDebut,
-                 LocalDateTime dateFin, double capaciteMax, int prix) {
+    public Event(int idActivite, String lieu, String adresseComplete, String email, String description,
+            LocalDateTime dateDebut,
+            LocalDateTime dateFin, double capaciteMax, int prix) {
 
         this.idActivite = idActivite;
         this.lieu = lieu;
@@ -62,50 +61,125 @@ public class Event {
 
     // Getters & Setters
 
-    public int getId() { return id; }
-    public void setId(int id) { this.id = id; }
+    public int getId() {
+        return id;
+    }
 
-    public int getIdActivite() { return idActivite; }
-    public void setIdActivite(int idActivite) { this.idActivite = idActivite; }
+    public void setId(int id) {
+        this.id = id;
+    }
 
-    public String getLieu() { return lieu; }
-    public void setLieu(String lieu) { this.lieu = lieu; }
+    public int getIdActivite() {
+        return idActivite;
+    }
 
-    public String getEmail() { return email; }
-    public void setEmail(String email) { this.email = email; }
+    public void setIdActivite(int idActivite) {
+        this.idActivite = idActivite;
+    }
 
-    public String getDescription() { return description; }
-    public void setDescription(String description) { this.description = description; }
+    public String getLieu() {
+        return lieu;
+    }
 
-    public LocalDateTime getDateDebut() { return dateDebut; }
-    public void setDateDebut(LocalDateTime dateDebut) { this.dateDebut = dateDebut; }
+    public void setLieu(String lieu) {
+        this.lieu = lieu;
+    }
 
-    public LocalDateTime getDateFin() { return dateFin; }
-    public void setDateFin(LocalDateTime dateFin) { this.dateFin = dateFin; }
+    public String getEmail() {
+        return email;
+    }
 
-    public BigDecimal getPrix() { return prix; }
-    public void setPrix(BigDecimal prix) { this.prix = prix; }
+    public void setEmail(String email) {
+        this.email = email;
+    }
 
-    public Integer getCapaciteMax() { return capaciteMax; }
-    public void setCapaciteMax(Integer capaciteMax) { this.capaciteMax = capaciteMax; }
+    public String getDescription() {
+        return description;
+    }
 
-    public Integer getPlacesDisponibles() { return placesDisponibles; }
-    public void setPlacesDisponibles(Integer placesDisponibles) { this.placesDisponibles = placesDisponibles; }
+    public void setDescription(String description) {
+        this.description = description;
+    }
 
-    public String getOrganisateur() { return organisateur; }
-    public void setOrganisateur(String organisateur) { this.organisateur = organisateur; }
+    public LocalDateTime getDateDebut() {
+        return dateDebut;
+    }
 
-    public String getMaterielsNecessaires() { return materielsNecessaires; }
-    public void setMaterielsNecessaires(String materielsNecessaires) { this.materielsNecessaires = materielsNecessaires; }
+    public void setDateDebut(LocalDateTime dateDebut) {
+        this.dateDebut = dateDebut;
+    }
 
-    public String getImage() { return image; }
-    public void setImage(String image) { this.image = image; }
+    public LocalDateTime getDateFin() {
+        return dateFin;
+    }
 
-    public String getVideoYoutube() { return videoYoutube; }
-    public void setVideoYoutube(String videoYoutube) { this.videoYoutube = videoYoutube; }
+    public void setDateFin(LocalDateTime dateFin) {
+        this.dateFin = dateFin;
+    }
 
-    public List<String> getPhotos() { return photos; }
-    public void setPhotos(List<String> photos) { this.photos = photos; }
+    public BigDecimal getPrix() {
+        return prix;
+    }
+
+    public void setPrix(BigDecimal prix) {
+        this.prix = prix;
+    }
+
+    public Integer getCapaciteMax() {
+        return capaciteMax;
+    }
+
+    public void setCapaciteMax(Integer capaciteMax) {
+        this.capaciteMax = capaciteMax;
+    }
+
+    public Integer getPlacesDisponibles() {
+        return placesDisponibles;
+    }
+
+    public void setPlacesDisponibles(Integer placesDisponibles) {
+        this.placesDisponibles = placesDisponibles;
+    }
+
+    public String getOrganisateur() {
+        return organisateur;
+    }
+
+    public void setOrganisateur(String organisateur) {
+        this.organisateur = organisateur;
+    }
+
+    public String getMaterielsNecessaires() {
+        return materielsNecessaires;
+    }
+
+    public void setMaterielsNecessaires(String materielsNecessaires) {
+        this.materielsNecessaires = materielsNecessaires;
+    }
+
+    public String getImage() {
+        return image;
+    }
+
+    public void setImage(String image) {
+        this.image = image;
+    }
+
+    public String getVideoYoutube() {
+        return videoYoutube;
+    }
+
+    public void setVideoYoutube(String videoYoutube) {
+        this.videoYoutube = videoYoutube;
+    }
+
+    public List<String> getPhotos() {
+        return photos;
+    }
+
+    public void setPhotos(List<String> photos) {
+        this.photos = photos;
+    }
 
     // Méthodes utilitaires pour gérer les photos
     public void addPhoto(String photoPath) {
@@ -132,12 +206,12 @@ public class Event {
         if (videoYoutube == null || videoYoutube.isEmpty()) {
             return null;
         }
-        
+
         // Extraire l'ID de la vidéo YouTube
         String pattern = "(?<=youtu.be/|watch\\?v=|/videos/|embed\\/)[^#\\&\\?]*";
         java.util.regex.Pattern compiledPattern = java.util.regex.Pattern.compile(pattern);
         java.util.regex.Matcher matcher = compiledPattern.matcher(videoYoutube);
-        
+
         if (matcher.find()) {
             return matcher.group();
         }
@@ -161,16 +235,44 @@ public class Event {
         this.telephone = telephone;
     }
 
-    public StatutEvent getStatut() { return statut; }
-    public void setStatut(StatutEvent statut) { this.statut = statut; }
+    public String getCreatedById() {
+        return createdById;
+    }
 
-    public Timestamp getDateCreation() { return dateCreation; }
-    public void setDateCreation(Timestamp dateCreation) { this.dateCreation = dateCreation; }
+    public void setCreatedById(String createdById) {
+        this.createdById = createdById;
+    }
 
-    public Timestamp getDateModification() { return dateModification; }
-    public void setDateModification(Timestamp dateModification) { this.dateModification = dateModification; }
+    public StatutEvent getStatut() {
+        return statut;
+    }
 
-    public Activite getActivite() { return activite; }
-    public void setActivite(Activite activite) { this.activite = activite; }
+    public void setStatut(StatutEvent statut) {
+        this.statut = statut;
+    }
+
+    public Timestamp getDateCreation() {
+        return dateCreation;
+    }
+
+    public void setDateCreation(Timestamp dateCreation) {
+        this.dateCreation = dateCreation;
+    }
+
+    public Timestamp getDateModification() {
+        return dateModification;
+    }
+
+    public void setDateModification(Timestamp dateModification) {
+        this.dateModification = dateModification;
+    }
+
+    public Activite getActivite() {
+        return activite;
+    }
+
+    public void setActivite(Activite activite) {
+        this.activite = activite;
+    }
 
 }
