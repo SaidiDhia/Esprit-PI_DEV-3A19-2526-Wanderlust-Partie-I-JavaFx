@@ -1,0 +1,140 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.ScrollPane?>
+<?import javafx.scene.control.Separator?>
+<?import javafx.scene.control.ScrollPane?>
+<?import javafx.scene.image.ImageView?>
+<?import javafx.scene.layout.AnchorPane?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.VBox?>
+<?import javafx.scene.web.WebView?>
+
+<AnchorPane xmlns="http://javafx.com/javafx/17"
+            xmlns:fx="http://javafx.com/fxml/1"
+            fx:controller="com.example.pi_dev.Controllers.Booking.Front.PlaceDetailsController"
+            stylesheets="@../../style.css">
+
+    <ScrollPane fitToWidth="true" styleClass="scroll-pane"
+                AnchorPane.topAnchor="0" AnchorPane.bottomAnchor="0"
+                AnchorPane.leftAnchor="0" AnchorPane.rightAnchor="0">
+        <content>
+            <VBox spacing="0" style="-fx-background-color: #F9FAFB;">
+
+                <!-- Back button row -->
+                <HBox style="-fx-background-color: white; -fx-padding: 12 24 12 24;">
+                    <Button styleClass="btn" style="-fx-background-color: transparent; -fx-border-color: #D1D5DB; -fx-border-width: 1; -fx-border-radius: 8; -fx-background-radius: 8; -fx-text-fill: #374151;" text="← Back to Browse" onAction="#handleBack"/>
+                </HBox>
+
+                <VBox spacing="24" style="-fx-padding: 32 40 40 40;">
+
+                    <!-- Main content: image + pricing card -->
+                    <HBox spacing="24" alignment="TOP_LEFT">
+
+                        <!-- Left: Big Image + Thumbnail Gallery -->
+                        <VBox HBox.hgrow="ALWAYS" spacing="8">
+                            <ImageView fx:id="placeImage" fitWidth="700" fitHeight="380"
+                                       preserveRatio="false"
+                                       style="-fx-effect: dropshadow(gaussian, rgba(0,0,0,0.1), 10, 0, 0, 3);"/>
+
+                            <!-- Thumbnail gallery (horizontal scroll) -->
+                            <ScrollPane hbarPolicy="AS_NEEDED" vbarPolicy="NEVER"
+                                        fitToHeight="true" prefHeight="85"
+                                        style="-fx-background: transparent; -fx-background-color: transparent; -fx-padding: 0;">
+                                <content>
+                                    <HBox fx:id="thumbnailsContainer" spacing="8"
+                                          style="-fx-padding: 4 0 4 0;"/>
+                                </content>
+                            </ScrollPane>
+                        </VBox>
+
+                        <!-- Right: Pricing Card -->
+                        <VBox styleClass="card" spacing="16" minWidth="280" maxWidth="300">
+                            <padding><Insets top="24" right="24" bottom="24" left="24"/></padding>
+
+                            <Label fx:id="priceLabel" styleClass="text-h1"
+                                   style="-fx-text-fill: #2563EB;"/>
+
+                            <!-- Rating display -->
+                            <Label fx:id="ratingLabel" styleClass="text-p"
+                                   style="-fx-text-fill: #F59E0B; -fx-font-weight: bold;" text=""/>
+
+                            <Separator/>
+
+                            <VBox spacing="10">
+                                <HBox spacing="8">
+                                    <Label styleClass="text-p" style="-fx-font-weight: bold;" text="Category:"/>
+                                    <Label fx:id="categoryLabel" styleClass="text-p"/>
+                                </HBox>
+                                <HBox spacing="8">
+                                    <Label styleClass="text-p" style="-fx-font-weight: bold;" text="Rooms:"/>
+                                    <Label fx:id="capacityLabel" styleClass="text-p"/>
+                                </HBox>
+                                <HBox spacing="8">
+                                    <Label styleClass="text-p" style="-fx-font-weight: bold;" text="Max Guests:"/>
+                                    <Label fx:id="maxGuestsLabel" styleClass="text-p"/>
+                                </HBox>
+                                <HBox spacing="8">
+                                    <Label styleClass="text-p" style="-fx-font-weight: bold;" text="Location:"/>
+                                    <Label fx:id="cityLabel" styleClass="text-p" wrapText="true"/>
+                                </HBox>
+                            </VBox>
+
+                            <Separator/>
+
+                            <Button styleClass="btn" style="-fx-background-color: #2563EB; -fx-text-fill: white; -fx-background-radius: 8; -fx-border-radius: 8; -fx-padding: 8 16 8 16; -fx-font-weight: bold; -fx-cursor: hand;"
+                                    text="Book This Place" maxWidth="Infinity" onAction="#handleBookThisPlace"/>
+
+                            <!-- Add Review button (shown only when canReview == true) -->
+                            <Button fx:id="reviewBtn" visible="false" managed="false"
+                                    text="⭐ Add Review"
+                                    maxWidth="Infinity"
+                                    style="-fx-background-color: #F59E0B; -fx-text-fill: white; -fx-background-radius: 8; -fx-border-radius: 8; -fx-padding: 8 16 8 16; -fx-font-weight: bold; -fx-cursor: hand;"
+                                    onAction="#handleAddReview"/>
+                        </VBox>
+                    </HBox>
+
+                    <!-- Title -->
+                    <Label fx:id="titleLabel" styleClass="text-h1"/>
+
+                    <!-- About section -->
+                    <VBox styleClass="card" spacing="12">
+                        <padding><Insets top="20" right="24" bottom="20" left="24"/></padding>
+                        <Label styleClass="text-h2" text="About this place"/>
+                        <Label fx:id="descriptionLabel" styleClass="text-p" wrapText="true"/>
+                    </VBox>
+
+                    <!-- Property Details -->
+                    <VBox styleClass="card" spacing="12">
+                        <padding><Insets top="20" right="24" bottom="20" left="24"/></padding>
+                        <Label styleClass="text-h2" text="Property Details"/>
+                        <HBox spacing="8">
+                            <Label styleClass="text-p" style="-fx-font-weight: bold;" text="Full Address:"/>
+                            <Label fx:id="addressLabel" styleClass="text-p" wrapText="true"/>
+                        </HBox>
+                    </VBox>
+
+                    <!-- Map section -->
+                    <VBox styleClass="card" spacing="12">
+                        <padding><Insets top="20" right="24" bottom="20" left="24"/></padding>
+                        <Label styleClass="text-h2" text="📍 Location on Map"/>
+                        <Label fx:id="mapStatusLabel" styleClass="text-p"
+                               style="-fx-text-fill: #6B7280;" text=""/>
+                        <WebView fx:id="mapWebView" prefHeight="300" minHeight="300"/>
+                    </VBox>
+
+                    <!-- Reviews section -->
+                    <VBox styleClass="card" spacing="12">
+                        <padding><Insets top="20" right="24" bottom="20" left="24"/></padding>
+                        <Label styleClass="text-h2" text="⭐ Reviews"/>
+                        <VBox fx:id="reviewsContainer" spacing="12"/>
+                    </VBox>
+
+                </VBox>
+            </VBox>
+        </content>
+    </ScrollPane>
+
+</AnchorPane>

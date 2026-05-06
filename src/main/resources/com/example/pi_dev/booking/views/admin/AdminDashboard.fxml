@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.Tab?>
+<?import javafx.scene.control.TabPane?>
+<?import javafx.scene.layout.AnchorPane?>
+<?import javafx.scene.layout.VBox?>
+
+<AnchorPane xmlns="http://javafx.com/javafx/17"
+            xmlns:fx="http://javafx.com/fxml/1"
+            fx:controller="com.example.pi_dev.Controllers.Booking.Admin.AdminDashboardController"
+            stylesheets="@../../style.css">
+
+    <VBox spacing="24" style="-fx-background-color: #F9FAFB; -fx-padding: 32 40 40 40;"
+          AnchorPane.topAnchor="0" AnchorPane.bottomAnchor="0"
+          AnchorPane.leftAnchor="0" AnchorPane.rightAnchor="0">
+
+        <!-- Header -->
+        <VBox spacing="4">
+            <Label styleClass="text-h1" text="Admin Dashboard"/>
+            <Label styleClass="section-subtitle" text="Manage place approvals, booking confirmations and all listings"/>
+        </VBox>
+
+        <!-- Tab Pane -->
+        <TabPane fx:id="tabPane" VBox.vgrow="ALWAYS" tabClosingPolicy="UNAVAILABLE">
+            <tabs>
+                <Tab fx:id="rentingsTab"      text="🏠 Rentings (Place Approvals)"/>
+                <Tab fx:id="reservationsTab"  text="📅 Reservations (Booking Approvals)"/>
+                <Tab fx:id="allPlacesTab"     text="📋 All Places"/>
+            </tabs>
+        </TabPane>
+
+    </VBox>
+
+</AnchorPane>

@@ -1,0 +1,390 @@
+/* ==================== ROOT STYLES ==================== */
+.root {
+    -fx-font-family: "Segoe UI", Arial, sans-serif;
+    -fx-background-color: #1a1a1a;
+}
+
+/* ==================== HEADER STYLES ==================== */
+.header-green {
+    -fx-background-color: #0d3a2a;
+}
+
+.header-title {
+    -fx-font-size: 24px;
+    -fx-font-weight: bold;
+    -fx-text-fill: #e0e0e0;
+}
+
+.header-subtitle {
+    -fx-font-size: 14px;
+    -fx-text-fill: #5cb85c;
+}
+
+/* ==================== TAB PANE STYLES ==================== */
+.tab-pane {
+    -fx-background-color: transparent;
+    -fx-tab-min-width: 120;
+}
+
+.tab-pane .tab-header-area {
+    -fx-background-color: transparent;
+}
+
+.tab {
+    -fx-background-color: #2d2d2d;
+    -fx-background-radius: 20 20 0 0;
+    -fx-padding: 8 20;
+}
+
+.tab:selected {
+    -fx-background-color: #2d7a2d;
+}
+
+.tab .tab-label {
+    -fx-font-size: 14px;
+    -fx-font-weight: bold;
+    -fx-text-fill: #b0b0b0;
+}
+
+.tab:selected .tab-label {
+    -fx-text-fill: white;
+}
+
+/* ==================== SEARCH FIELD ==================== */
+.search-field {
+    -fx-background-color: #333333;
+    -fx-border-color: #5cb85c;
+    -fx-border-radius: 25;
+    -fx-background-radius: 25;
+    -fx-padding: 10 20;
+    -fx-font-size: 14px;
+    -fx-text-fill: white;
+    -fx-prompt-text-fill: #888888;
+}
+
+.search-field:focused {
+    -fx-border-color: #2d7a2d;
+    -fx-border-width: 2;
+}
+
+/* ==================== LIST VIEW STYLES ==================== */
+.list-view {
+    -fx-background-color: #252526;
+    -fx-background-radius: 12;
+    -fx-border-color: #3a3a3a;
+    -fx-border-radius: 12;
+}
+
+.list-view .list-cell {
+    -fx-background-color: transparent;
+    -fx-padding: 8 12;
+    -fx-border-color: transparent;
+    -fx-text-fill: #e0e0e0;
+}
+
+.list-view .list-cell:hover {
+    -fx-background-color: #3a3d41;
+}
+
+.list-view .list-cell:selected {
+    -fx-background-color: #37373D;
+}
+
+/* Conversation title */
+.conv-title {
+    -fx-font-size: 14px;
+    -fx-font-weight: bold;
+    -fx-text-fill: #e0e0e0;
+}
+
+/* Conversation subtitle */
+.conv-subtitle {
+    -fx-font-size: 11px;
+    -fx-text-fill: #aaaaaa;
+}
+
+/* Last message preview */
+.last-message-preview {
+    -fx-font-size: 10px;
+    -fx-text-fill: #888888;
+}
+
+/* ==================== CONVERSATION TITLE LABEL ==================== */
+.conversation-title {
+    -fx-font-size: 16px;
+    -fx-font-weight: bold;
+    -fx-text-fill: #e0e0e0;
+}
+
+/* ==================== MESSAGE LIST ==================== */
+.message-list {
+    -fx-background-color: #1a1a1a;
+    -fx-border-color: transparent;
+}
+
+.message-list .list-cell {
+    -fx-background-color: transparent;
+    -fx-padding: 5;
+}
+
+/* ==================== MESSAGE INPUT ==================== */
+.message-input {
+    -fx-background-color: #333333;
+    -fx-border-color: #5cb85c;
+    -fx-border-radius: 25;
+    -fx-background-radius: 25;
+    -fx-padding: 12 20;
+    -fx-font-size: 14px;
+    -fx-text-fill: white;
+    -fx-prompt-text-fill: #888888;
+}
+
+.message-input:focused {
+    -fx-border-color: #2d7a2d;
+    -fx-border-width: 2;
+}
+
+/* ==================== MESSAGE STYLES ==================== */
+
+/* Message header (username + time) */
+.message-header {
+    -fx-font-size: 10px;
+    -fx-text-fill: #aaaaaa;
+}
+
+/* Message bubble base style */
+.message-bubble {
+    -fx-padding: 8 12;
+    -fx-background-radius: 15;
+    -fx-font-size: 13px;
+    -fx-wrap-text: true;
+    -fx-max-width: 300;
+    -fx-text-fill: #ededed;
+}
+
+/* Drop shadow for all message bubbles */
+.mine .message-bubble,
+.theirs .message-bubble {
+    -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.3), 4, 0, 0, 1);
+}
+
+/* My messages (sent) - Dark theme blue */
+.mine {
+    -fx-background-color: #2B6CB0;
+    -fx-background-radius: 15 15 2 15;
+    -fx-padding: 5;
+}
+
+/* Other messages (received) */
+.theirs {
+    -fx-background-color: #3A3D41;
+    -fx-background-radius: 15 15 15 2;
+    -fx-padding: 5;
+}
+
+/* ==================== BUTTON STYLES ==================== */
+.button {
+    -fx-background-radius: 25;
+    -fx-background-color: #2d7a2d;
+    -fx-text-fill: white;
+    -fx-font-weight: bold;
+    -fx-font-size: 14px;
+    -fx-padding: 12 24;
+    -fx-cursor: hand;
+}
+
+.button:hover {
+    -fx-background-color: #1a5f3f;
+    -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.4), 5, 0, 0, 2);
+}
+
+.button:pressed {
+    -fx-background-color: #0d4a2a;
+}
+
+/* Secondary button style */
+.button-secondary {
+    -fx-background-color: #5cb85c;
+    -fx-padding: 8 20;
+    -fx-font-size: 13px;
+    -fx-background-radius: 20;
+}
+
+.button-secondary:hover {
+    -fx-background-color: #4a7a4a;
+}
+
+/* Danger button */
+.button-danger {
+    -fx-background-color: #b04a4a;
+}
+
+.button-danger:hover {
+    -fx-background-color: #c05a5a;
+}
+
+/* Theme button */
+.theme-button {
+    -fx-background-color: #2d7a2d;
+    -fx-text-fill: white;
+    -fx-background-radius: 25;
+    -fx-padding: 8 16;
+    -fx-font-size: 16px;
+    -fx-cursor: hand;
+}
+
+.theme-button:hover {
+    -fx-background-color: #1a5f3f;
+}
+
+/* ==================== MENU BUTTON STYLES ==================== */
+.menu-button {
+    -fx-font-size: 18px;
+    -fx-font-weight: bold;
+    -fx-background-color: transparent;
+    -fx-cursor: hand;
+    -fx-text-fill: #aaaaaa;
+    -fx-padding: 0 6 0 6;
+}
+
+.menu-button:hover {
+    -fx-text-fill: white;
+    -fx-scale-x: 1.2;
+    -fx-scale-y: 1.2;
+}
+
+/* Context menu styling */
+.context-menu {
+    -fx-background-color: #2d2d2d;
+    -fx-background-radius: 8;
+    -fx-border-radius: 8;
+    -fx-border-color: #4a4a4a;
+    -fx-padding: 5;
+}
+
+.menu-item {
+    -fx-padding: 8 20;
+}
+
+.menu-item .label {
+    -fx-text-fill: #e0e0e0;
+}
+
+.menu-item:hover {
+    -fx-background-color: #3a3d41;
+    -fx-background-radius: 5;
+}
+
+/* ==================== CONTACT CARD STYLES ==================== */
+.contact-card {
+    -fx-background-color: #2d2d2d;
+    -fx-background-radius: 12;
+    -fx-border-radius: 12;
+    -fx-border-color: #4a4a4a;
+    -fx-padding: 15;
+    -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.3), 5, 0, 0, 2);
+    -fx-alignment: center;
+}
+
+.contact-card:hover {
+    -fx-effect: dropshadow(three-pass-box, rgba(92,184,92,0.3), 8, 0, 0, 3);
+    -fx-border-color: #5cb85c;
+}
+
+.contact-name {
+    -fx-font-size: 16px;
+    -fx-font-weight: bold;
+    -fx-text-fill: #e0e0e0;
+}
+
+.contact-status {
+    -fx-font-size: 12px;
+    -fx-text-fill: #5cb85c;
+}
+
+.contact-avatar {
+    -fx-font-size: 36px;
+}
+
+/* ==================== PLACEHOLDER STYLES ==================== */
+.placeholder-text {
+    -fx-text-fill: #888888;
+    -fx-font-size: 14px;
+}
+
+/* ==================== DIALOG STYLES ==================== */
+.dialog-pane {
+    -fx-background-color: #2d2d2d;
+}
+
+.dialog-pane .label {
+    -fx-text-fill: #e0e0e0;
+}
+
+.dialog-label {
+    -fx-font-size: 13px;
+    -fx-font-weight: bold;
+    -fx-text-fill: #e0e0e0;
+    -fx-padding: 5 0 0 0;
+}
+
+.dialog-field {
+    -fx-background-color: #3d3d3d;
+    -fx-border-color: #5cb85c;
+    -fx-border-radius: 5;
+    -fx-padding: 8;
+    -fx-text-fill: white;
+}
+
+.dialog-content {
+    -fx-background-color: #2d2d2d;
+}
+
+.participants-list {
+    -fx-background-color: #3d3d3d;
+    -fx-border-color: #5cb85c;
+    -fx-border-radius: 5;
+    -fx-text-fill: white;
+}
+
+.participants-list .list-cell {
+    -fx-background-color: #3d3d3d;
+    -fx-text-fill: white;
+}
+
+/* ==================== SCROLL BAR STYLES ==================== */
+.scroll-bar:vertical {
+    -fx-pref-width: 8;
+}
+
+.scroll-bar .thumb {
+    -fx-background-color: #4a6f4a;
+    -fx-background-radius: 10;
+}
+
+.scroll-bar .thumb:hover {
+    -fx-background-color: #5cb85c;
+}
+
+.scroll-bar .track {
+    -fx-background-color: #2d2d2d;
+}
+
+/* ==================== FOOTER STYLES ==================== */
+.footer {
+    -fx-background-color: #0d3a2a;
+    -fx-padding: 20;
+    -fx-border-color: #2d7a2d;
+    -fx-border-width: 2 0 0 0;
+}
+
+.footer-text {
+    -fx-font-size: 12px;
+    -fx-text-fill: #90ee90;
+}
+
+.footer-title {
+    -fx-font-size: 16px;
+    -fx-font-weight: bold;
+    -fx-text-fill: #e0e0e0;
+}

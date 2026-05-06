@@ -1,0 +1,333 @@
+/* ===== HomeStay Rentals - Global Stylesheet ===== */
+
+/* Import Google Font */
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+
+.root {
+    -fx-font-family: "Inter", "Segoe UI", sans-serif;
+    -fx-background-color: #F9FAFB;
+}
+
+/* ===== NAVBAR ===== */
+.navbar {
+    -fx-background-color: linear-gradient(to right, #1e3a5f, #2563EB);
+    -fx-padding: 0 24 0 24;
+    -fx-min-height: 60px;
+    -fx-max-height: 60px;
+}
+
+.navbar-brand {
+    -fx-font-size: 20px;
+    -fx-font-weight: bold;
+    -fx-text-fill: white;
+}
+
+.nav-btn {
+    -fx-background-color: transparent;
+    -fx-text-fill: rgba(255,255,255,0.85);
+    -fx-font-size: 13px;
+    -fx-padding: 6 14 6 14;
+    -fx-cursor: hand;
+    -fx-border-radius: 6;
+    -fx-background-radius: 6;
+}
+
+.nav-btn:hover {
+    -fx-background-color: rgba(255,255,255,0.15);
+    -fx-text-fill: white;
+}
+
+/* ===== HERO ===== */
+.hero-section {
+    -fx-background-color: linear-gradient(to bottom right, #1e3a5f, #2563EB, #7c3aed);
+    -fx-padding: 60 40 60 40;
+}
+
+.hero-title {
+    -fx-font-size: 38px;
+    -fx-font-weight: bold;
+    -fx-text-fill: white;
+    -fx-text-alignment: center;
+}
+
+.hero-subtitle {
+    -fx-font-size: 16px;
+    -fx-text-fill: rgba(255,255,255,0.8);
+    -fx-text-alignment: center;
+}
+
+/* ===== SEARCH BAR ===== */
+.search-bar {
+    -fx-background-color: white;
+    -fx-background-radius: 30;
+    -fx-border-radius: 30;
+    -fx-padding: 6 16 6 16;
+    -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.15), 10, 0, 0, 2);
+}
+
+.search-field {
+    -fx-background-color: transparent;
+    -fx-border-color: transparent;
+    -fx-font-size: 14px;
+    -fx-min-width: 300px;
+}
+
+.search-btn {
+    -fx-background-color: #2563EB;
+    -fx-text-fill: white;
+    -fx-background-radius: 20;
+    -fx-border-radius: 20;
+    -fx-padding: 8 20 8 20;
+    -fx-cursor: hand;
+    -fx-font-weight: bold;
+}
+
+.search-btn:hover {
+    -fx-background-color: #1d4ed8;
+}
+
+/* ===== SECTION HEADER ===== */
+.section-title {
+    -fx-font-size: 22px;
+    -fx-font-weight: bold;
+    -fx-text-fill: #111827;
+}
+
+.section-subtitle {
+    -fx-font-size: 14px;
+    -fx-text-fill: #6B7280;
+}
+
+/* ===== PLACE CARD ===== */
+.place-card {
+    -fx-background-color: white;
+    -fx-background-radius: 12;
+    -fx-border-radius: 12;
+    -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.08), 12, 0, 0, 3);
+    -fx-cursor: hand;
+}
+
+.place-card:hover {
+    -fx-effect: dropshadow(gaussian, rgba(37,99,235,0.2), 16, 0, 0, 4);
+    -fx-translate-y: -2;
+}
+
+.card-image {
+    -fx-background-radius: 12 12 0 0;
+}
+
+.card-title {
+    -fx-font-size: 15px;
+    -fx-font-weight: bold;
+    -fx-text-fill: #111827;
+}
+
+.card-desc {
+    -fx-font-size: 12px;
+    -fx-text-fill: #6B7280;
+}
+
+.card-meta {
+    -fx-font-size: 12px;
+    -fx-text-fill: #9CA3AF;
+}
+
+/* ===== CHIPS ===== */
+.chip {
+    -fx-background-color: #EFF6FF;
+    -fx-text-fill: #2563EB;
+    -fx-background-radius: 20;
+    -fx-border-radius: 20;
+    -fx-padding: 3 10 3 10;
+    -fx-font-size: 11px;
+    -fx-font-weight: bold;
+}
+
+.chip-price {
+    -fx-background-color: #F0FDF4;
+    -fx-text-fill: #16a34a;
+}
+
+/* ===== BUTTONS ===== */
+.btn {
+    -fx-background-radius: 8;
+    -fx-border-radius: 8;
+    -fx-padding: 8 16 8 16;
+    -fx-font-size: 13px;
+    -fx-cursor: hand;
+    -fx-font-weight: 600;
+}
+
+.btn-primary {
+    -fx-background-color: #2563EB;
+    -fx-text-fill: white;
+}
+
+.btn-primary:hover {
+    -fx-background-color: #1d4ed8;
+}
+
+.btn-outline {
+    -fx-background-color: transparent;
+    -fx-border-color: #D1D5DB;
+    -fx-border-width: 1;
+    -fx-text-fill: #374151;
+}
+
+.btn-outline:hover {
+    -fx-background-color: #F3F4F6;
+}
+
+.btn-success {
+    -fx-background-color: #16a34a;
+    -fx-text-fill: white;
+}
+
+.btn-success:hover {
+    -fx-background-color: #15803d;
+}
+
+.btn-danger {
+    -fx-background-color: #DC2626;
+    -fx-text-fill: white;
+}
+
+.btn-danger:hover {
+    -fx-background-color: #b91c1c;
+}
+
+.btn-sm {
+    -fx-padding: 4 10 4 10;
+    -fx-font-size: 12px;
+}
+
+/* ===== FORM INPUTS ===== */
+.text-input {
+    -fx-background-color: white;
+    -fx-border-color: #D1D5DB;
+    -fx-border-width: 1;
+    -fx-border-radius: 8;
+    -fx-background-radius: 8;
+    -fx-padding: 8 12 8 12;
+    -fx-font-size: 14px;
+}
+
+.text-input:focused {
+    -fx-border-color: #2563EB;
+    -fx-effect: dropshadow(gaussian, rgba(37,99,235,0.2), 6, 0, 0, 0);
+}
+
+/* ===== CARD (form card) ===== */
+.card {
+    -fx-background-color: white;
+    -fx-background-radius: 12;
+    -fx-border-radius: 12;
+    -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.07), 12, 0, 0, 3);
+}
+
+/* ===== TABLE ===== */
+.table-view {
+    -fx-background-color: white;
+    -fx-border-color: #E5E7EB;
+    -fx-border-radius: 10;
+    -fx-background-radius: 10;
+}
+
+.table-view .column-header-background {
+    -fx-background-color: #F9FAFB;
+}
+
+.table-view .column-header .label {
+    -fx-font-weight: bold;
+    -fx-text-fill: #374151;
+    -fx-font-size: 13px;
+}
+
+.table-row-cell:odd {
+    -fx-background-color: #FAFAFA;
+}
+
+.table-row-cell:selected {
+    -fx-background-color: #EFF6FF;
+}
+
+/* ===== LABELS ===== */
+.text-h1 {
+    -fx-font-size: 28px;
+    -fx-font-weight: bold;
+    -fx-text-fill: #111827;
+}
+
+.text-h2 {
+    -fx-font-size: 20px;
+    -fx-font-weight: bold;
+    -fx-text-fill: #1F2937;
+}
+
+.text-p {
+    -fx-font-size: 14px;
+    -fx-text-fill: #374151;
+}
+
+.error-label {
+    -fx-text-fill: #DC2626;
+    -fx-font-size: 13px;
+}
+
+.success-label {
+    -fx-text-fill: #16a34a;
+    -fx-font-size: 13px;
+}
+
+/* ===== DIALOG ===== */
+.dialog-card {
+    -fx-background-color: white;
+    -fx-background-radius: 16;
+    -fx-border-radius: 16;
+    -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.15), 20, 0, 0, 6);
+    -fx-padding: 32;
+}
+
+.dialog-title {
+    -fx-font-size: 20px;
+    -fx-font-weight: bold;
+    -fx-text-fill: #111827;
+}
+
+/* ===== STATUS BADGES ===== */
+.status-pending   { -fx-text-fill: #d97706; -fx-font-weight: bold; }
+.status-approved  { -fx-text-fill: #16a34a; -fx-font-weight: bold; }
+.status-denied    { -fx-text-fill: #DC2626; -fx-font-weight: bold; }
+.status-confirmed { -fx-text-fill: #2563EB; -fx-font-weight: bold; }
+.status-rejected  { -fx-text-fill: #DC2626; -fx-font-weight: bold; }
+
+/* ===== SCROLL PANE ===== */
+.scroll-pane {
+    -fx-background-color: transparent;
+    -fx-background: transparent;
+}
+
+.scroll-pane > .viewport {
+    -fx-background-color: transparent;
+}
+
+/* ===== TAB PANE ===== */
+.tab-pane .tab-header-area .tab {
+    -fx-background-color: #F3F4F6;
+    -fx-padding: 8 20 8 20;
+}
+
+.tab-pane .tab-header-area .tab:selected {
+    -fx-background-color: white;
+    -fx-border-color: #2563EB;
+    -fx-border-width: 0 0 2 0;
+}
+
+.tab-pane .tab .tab-label {
+    -fx-font-weight: 600;
+    -fx-text-fill: #374151;
+}
+
+.tab-pane .tab:selected .tab-label {
+    -fx-text-fill: #2563EB;
+}

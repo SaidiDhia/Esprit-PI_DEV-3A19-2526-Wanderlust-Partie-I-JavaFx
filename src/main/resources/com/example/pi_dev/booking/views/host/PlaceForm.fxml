@@ -1,0 +1,141 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.ScrollPane?>
+<?import javafx.scene.control.Separator?>
+<?import javafx.scene.control.TextArea?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.layout.AnchorPane?>
+<?import javafx.scene.layout.FlowPane?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.VBox?>
+
+<AnchorPane xmlns="http://javafx.com/javafx/17"
+            xmlns:fx="http://javafx.com/fxml/1"
+            fx:controller="com.example.pi_dev.Controllers.Booking.Host.PlaceFormController"
+            stylesheets="@../../style.css">
+
+    <ScrollPane fitToWidth="true" styleClass="scroll-pane"
+                AnchorPane.topAnchor="0" AnchorPane.bottomAnchor="0"
+                AnchorPane.leftAnchor="0" AnchorPane.rightAnchor="0">
+        <content>
+            <VBox alignment="TOP_CENTER" spacing="28" style="-fx-background-color: #F9FAFB;">
+                <padding><Insets top="40" right="50" bottom="50" left="50"/></padding>
+
+                <!-- Header -->
+                <VBox alignment="CENTER" spacing="6" maxWidth="800">
+                    <Label styleClass="text-h1" text="List Your Space"/>
+                    <Label styleClass="text-p" style="-fx-text-fill: #6B7280;"
+                           text="Share your beautiful place with the world"/>
+                </VBox>
+
+                <!-- Form Card -->
+                <VBox maxWidth="800" spacing="22" styleClass="card">
+                    <padding><Insets top="36" right="36" bottom="36" left="36"/></padding>
+
+                    <!-- Title -->
+                    <VBox spacing="8">
+                        <Label styleClass="text-p" style="-fx-font-weight: bold;" text="Title *"/>
+                        <TextField fx:id="titleField" promptText="e.g., Cozy Mountain Cabin" styleClass="text-input"/>
+                    </VBox>
+
+                    <!-- Description -->
+                    <VBox spacing="8">
+                        <Label styleClass="text-p" style="-fx-font-weight: bold;" text="Description *"/>
+                        <TextArea fx:id="descriptionArea" prefHeight="120" wrapText="true"
+                                  promptText="Describe what makes your place special..."
+                                  styleClass="text-input"/>
+                    </VBox>
+
+                    <!-- Price / Capacity / Max Guests -->
+                    <HBox spacing="16">
+                        <VBox spacing="8" HBox.hgrow="ALWAYS">
+                            <Label styleClass="text-p" style="-fx-font-weight: bold;" text="Price per Day ($) *"/>
+                            <TextField fx:id="priceField" promptText="0.00" styleClass="text-input"/>
+                        </VBox>
+                        <VBox spacing="8" HBox.hgrow="ALWAYS">
+                            <Label styleClass="text-p" style="-fx-font-weight: bold;" text="Capacity (Rooms) *"/>
+                            <TextField fx:id="capacityField" promptText="e.g. 2" styleClass="text-input"/>
+                        </VBox>
+                        <VBox spacing="8" HBox.hgrow="ALWAYS">
+                            <Label styleClass="text-p" style="-fx-font-weight: bold;" text="Max Guests *"/>
+                            <TextField fx:id="maxGuestsField" promptText="e.g. 4" styleClass="text-input"/>
+                        </VBox>
+                    </HBox>
+
+                    <!-- Address / City -->
+                    <HBox spacing="16">
+                        <VBox spacing="8" HBox.hgrow="ALWAYS">
+                            <Label styleClass="text-p" style="-fx-font-weight: bold;" text="Address *"/>
+                            <TextField fx:id="addressField" promptText="Street name and number" styleClass="text-input"/>
+                        </VBox>
+                        <VBox spacing="8" HBox.hgrow="ALWAYS">
+                            <Label styleClass="text-p" style="-fx-font-weight: bold;" text="City *"/>
+                            <TextField fx:id="cityField" promptText="City" styleClass="text-input"/>
+                        </VBox>
+                    </HBox>
+
+                    <!-- Geolocation validation -->
+                    <HBox spacing="12" alignment="CENTER_LEFT">
+                        <Button text="📍 Validate address" styleClass="btn"
+                                style="-fx-background-color: #0EA5E9; -fx-text-fill: white; -fx-background-radius: 8; -fx-border-radius: 8; -fx-padding: 6 14 6 14; -fx-cursor: hand;"
+                                onAction="#handleValidateAddress"/>
+                        <Label fx:id="geoStatusLabel" styleClass="text-p" style="-fx-text-fill: #6B7280;" text=""/>
+                    </HBox>
+
+                    <!-- Category -->
+                    <VBox spacing="8">
+                        <Label styleClass="text-p" style="-fx-font-weight: bold;" text="Category *"/>
+                        <TextField fx:id="categoryField" promptText="e.g. Apartment, House, Villa" styleClass="text-input"/>
+                    </VBox>
+
+                    <!-- Image URL (hidden, set programmatically) -->
+                    <TextField fx:id="imageUrlField" visible="false" managed="false"/>
+
+                    <Separator opacity="0.35"/>
+
+                    <!-- ── Photos Section ──────────────────────────────────── -->
+                    <VBox spacing="12">
+                        <Label styleClass="text-p" style="-fx-font-weight: bold;" text="📷 Photos"/>
+                        <Label styleClass="text-p" style="-fx-text-fill: #6B7280; -fx-font-size: 12px;"
+                               text="Upload photos from your computer. Click a thumbnail to set it as primary (⭐)."/>
+
+                        <!-- Add Photos button + count -->
+                        <HBox spacing="12" alignment="CENTER_LEFT">
+                            <Button text="📷 Add Photos" styleClass="btn"
+                                    style="-fx-background-color: #7C3AED; -fx-text-fill: white; -fx-background-radius: 8; -fx-border-radius: 8; -fx-padding: 7 16 7 16; -fx-cursor: hand; -fx-font-weight: bold;"
+                                    onAction="#handleAddPhotos"/>
+                            <Label fx:id="photoCountLabel" styleClass="text-p"
+                                   style="-fx-text-fill: #6B7280;" text="No photos selected"/>
+                        </HBox>
+
+                        <!-- Thumbnail preview grid -->
+                        <FlowPane fx:id="photosPreview" hgap="10" vgap="10"
+                                  style="-fx-background-color: #F3F4F6; -fx-background-radius: 10; -fx-padding: 10;"
+                                  minHeight="100"/>
+                    </VBox>
+
+                    <Separator opacity="0.35"/>
+
+                    <!-- Feedback Labels -->
+                    <Label fx:id="errorLabel"   styleClass="error-label"   text="" wrapText="true"/>
+                    <Label fx:id="successLabel" styleClass="success-label" text="" wrapText="true"/>
+
+                    <!-- Actions -->
+                    <HBox alignment="CENTER_RIGHT" spacing="14">
+                        <Button text="Cancel" styleClass="btn"
+                                style="-fx-background-color: transparent; -fx-border-color: #D1D5DB; -fx-border-width: 1; -fx-border-radius: 8; -fx-background-radius: 8; -fx-text-fill: #374151;"
+                                onAction="#handleCancel"/>
+                        <Button fx:id="submitBtn" text="Submit for Approval" prefWidth="200"
+                                styleClass="btn" style="-fx-background-color: #2563EB; -fx-text-fill: white;"
+                                onAction="#handleSubmit"/>
+                    </HBox>
+
+                </VBox>
+            </VBox>
+        </content>
+    </ScrollPane>
+
+</AnchorPane>

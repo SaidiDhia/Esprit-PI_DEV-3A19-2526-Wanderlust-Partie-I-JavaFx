@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.text.Font?>
+
+<BorderPane xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1"
+            fx:controller="com.example.pi_dev.Controllers.Marketplace.OrdersManagementController"
+            stylesheets="@../css/style.css"
+            styleClass="root" minHeight="650">
+
+    <top>
+        <HBox spacing="15" alignment="CENTER_LEFT" styleClass="top-bar">
+            <padding><Insets top="15" right="15" bottom="15" left="15"/></padding>
+            <Button text="← Back" styleClass="btn-back" onAction="#goBack"/>
+            <Region HBox.hgrow="ALWAYS"/>
+            <Label text="📦  My Orders Management" styleClass="page-title">
+                <font><Font name="System Bold" size="20"/></font>
+            </Label>
+            <Region HBox.hgrow="ALWAYS"/>
+
+            <!-- Filter -->
+            <ComboBox fx:id="statusFilter" promptText="All Orders"
+                      style="-fx-background-radius:8;-fx-border-color:#E0E0E0;-fx-border-radius:8;-fx-padding:6 10;"/>
+        </HBox>
+    </top>
+
+    <center>
+        <VBox spacing="0">
+
+            <!-- Stats bar -->
+            <HBox spacing="15" alignment="CENTER_LEFT"
+                  style="-fx-background-color:#F5F5F5;-fx-padding:12 25;-fx-border-color:#E0E0E0;-fx-border-width:0 0 1 0;">
+                <Label text="📊 Summary:" style="-fx-font-weight:bold;-fx-font-size:13px;"/>
+                <Label fx:id="statPending"  text="⏳ Pending: 0"   style="-fx-text-fill:#FF8F00;-fx-font-size:13px;-fx-font-weight:bold;"/>
+                <Label text="│" style="-fx-text-fill:#CCC;"/>
+                <Label fx:id="statConfirmed" text="✅ Confirmed: 0" style="-fx-text-fill:#2E7D32;-fx-font-size:13px;-fx-font-weight:bold;"/>
+                <Label text="│" style="-fx-text-fill:#CCC;"/>
+                <Label fx:id="statCancelled" text="❌ Cancelled: 0" style="-fx-text-fill:#C62828;-fx-font-size:13px;-fx-font-weight:bold;"/>
+                <Region HBox.hgrow="ALWAYS"/>
+                <Button text="🔄 Refresh" onAction="#loadOrders"
+                        style="-fx-background-color:#E3F2FD;-fx-text-fill:#1565C0;-fx-background-radius:8;-fx-border-color:#90CAF9;-fx-border-radius:8;-fx-padding:6 14;-fx-cursor:hand;"/>
+            </HBox>
+
+            <!-- Orders list -->
+            <ScrollPane fitToWidth="true" VBox.vgrow="ALWAYS" styleClass="scroll-pane">
+                <VBox fx:id="ordersContainer" spacing="12">
+                    <padding><Insets top="20" right="25" bottom="20" left="25"/></padding>
+
+                    <!-- Empty state -->
+                    <VBox fx:id="emptyState" alignment="CENTER" spacing="10" visible="false" managed="false">
+                        <padding><Insets top="60"/></padding>
+                        <Label text="📭" style="-fx-font-size:48px;"/>
+                        <Label text="No orders yet" style="-fx-font-size:18px;-fx-text-fill:#999;-fx-font-weight:bold;"/>
+                        <Label text="Orders for your products will appear here"
+                               style="-fx-font-size:13px;-fx-text-fill:#BBB;"/>
+                    </VBox>
+                </VBox>
+            </ScrollPane>
+        </VBox>
+    </center>
+</BorderPane>

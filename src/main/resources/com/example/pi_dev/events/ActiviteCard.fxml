@@ -1,0 +1,141 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.ScrollPane?>
+<?import javafx.scene.control.Separator?>
+<?import javafx.scene.image.Image?>
+<?import javafx.scene.image.ImageView?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.Region?>
+<?import javafx.scene.layout.VBox?>
+
+<VBox style="-fx-background-color: linear-gradient(to bottom, #CAD4DC, #ffffff); -fx-padding: 0;" xmlns="http://javafx.com/javafx/25" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.example.pi_dev.Controllers.Events.ActiviteCardController">
+    <children>
+        <!-- Header with logo (fixed) -->
+        <HBox alignment="CENTER_LEFT" style="-fx-background-color: linear-gradient(to bottom right, #86A7BF, #2D70B3); -fx-padding: 20; -fx-spacing: 20;">
+            <children>
+                <ImageView fitHeight="50" fitWidth="50">
+                    <image>
+                        <Image url="@../images/wanderlust-logo.png" />
+                    </image>
+                </ImageView>
+                <VBox spacing="5">
+                    <children>
+                        <Label style="-fx-font-size: 24px; -fx-font-weight: bold; -fx-text-fill: white;" text="Wanderlust" />
+                        <Label style="-fx-font-size: 14px; -fx-text-fill: #86A7BF;" text="Détails de l'activité" />
+                    </children>
+                </VBox>
+                <Region HBox.hgrow="ALWAYS" />
+                <HBox alignment="CENTER" spacing="15">
+                    <children>
+                        <Button fx:id="catalog" onAction="#goToCatalogue" style="-fx-background-color: transparent; -fx-text-fill: white; -fx-border-color: transparent; -fx-border-width: 0 0 2 0; -fx-font-size: 14px; -fx-cursor: hand;" text="🌿 Catalogue" />
+                    </children>
+                </HBox>
+            </children>
+        </HBox>
+
+        <ScrollPane fitToWidth="true" hbarPolicy="NEVER" style="-fx-background-color: transparent; -fx-border-color: transparent;" VBox.vgrow="ALWAYS">
+            <content>
+                <VBox maxWidth="900" style="-fx-padding: 30; -fx-spacing: 25;">
+                    <children>
+                        <!-- Carte principale moderne -->
+                        <VBox spacing="25" style="-fx-background-color: white; -fx-background-radius: 20; -fx-border-color: #E2E8F0; -fx-border-width: 1; -fx-padding: 35; -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.08), 15, 0, 0);">
+                            <children>
+                                <!-- Section image avec badge -->
+                                <VBox alignment="CENTER" spacing="15">
+                                    <children>
+                                        <HBox alignment="TOP_RIGHT">
+                                            <children>
+                                                <Region HBox.hgrow="ALWAYS" />
+                                                <VBox alignment="CENTER" style="-fx-background-color: #10B981; -fx-background-radius: 20; -fx-padding: 8 15;">
+                                                    <children>
+                                                        <Label style="-fx-font-size: 11px; -fx-font-weight: bold; -fx-text-fill: white;" text="DISPONIBLE" />
+                                                    </children>
+                                                </VBox>
+                                            </children>
+                                        </HBox>
+                                        <ImageView fx:id="activiteImageView" fitHeight="280" fitWidth="400" style="-fx-background-radius: 15; -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.15), 20, 0, 0);" />
+                                        <VBox alignment="CENTER" spacing="8">
+                                            <children>
+                                                <Label fx:id="titreLabel" style="-fx-font-size: 28px; -fx-font-weight: bold; -fx-text-fill: #0F2C4F; -fx-alignment: center;" text="Titre de l'activité" />
+                                                <HBox alignment="CENTER" spacing="10">
+                                                    <children>
+                                                        <VBox alignment="CENTER" style="-fx-background-color: #EBF8FF; -fx-background-radius: 12; -fx-padding: 6 12;">
+                                                            <children>
+                                                                <Label fx:id="categorieLabel" style="-fx-font-size: 12px; -fx-font-weight: 600; -fx-text-fill: #0369A1;" text="MER" />
+                                                            </children>
+                                                        </VBox>
+                                                        <Label fx:id="typeLabel" style="-fx-font-size: 16px; -fx-text-fill: #64748B; -fx-alignment: center;" text="Type d'activité" />
+                                                    </children>
+                                                </HBox>
+                                            </children>
+                                        </VBox>
+                                    </children>
+                                </VBox>
+
+                                <Separator style="-fx-background-color: #F1F5F9;" />
+
+                                <!-- Section description -->
+                                <VBox spacing="15">
+                                    <children>
+                                        <HBox alignment="CENTER_LEFT" spacing="10">
+                                            <children>
+                                                <Label style="-fx-font-size: 18px; -fx-font-weight: bold; -fx-text-fill: #0F2C4F;" text="📝" />
+                                                <Label style="-fx-font-size: 18px; -fx-font-weight: bold; -fx-text-fill: #0F2C4F;" text="Description" />
+                                            </children>
+                                        </HBox>
+                                        <VBox style="-fx-background-color: #F8FAFC; -fx-background-radius: 12; -fx-padding: 20;">
+                                            <children>
+                                                <Label fx:id="descriptionLabel" style="-fx-font-size: 15px; -fx-text-fill: #475569; -fx-wrap-text: true; -fx-line-spacing: 2;" text="Description de l'activité sera affichée ici" />
+                                            </children>
+                                        </VBox>
+                                    </children>
+                                </VBox>
+
+                                <Separator style="-fx-background-color: #F1F5F9;" />
+
+                                <!-- Section météo -->
+                                <VBox spacing="15">
+                                    <children>
+                                        <HBox alignment="CENTER_LEFT" spacing="10">
+                                            <children>
+                                                <Label style="-fx-font-size: 18px; -fx-font-weight: bold; -fx-text-fill: #0F2C4F;" text="🌤️" />
+                                                <Label style="-fx-font-size: 18px; -fx-font-weight: bold; -fx-text-fill: #0F2C4F;" text="Conditions météo" />
+                                            </children>
+                                        </HBox>
+                                        <VBox fx:id="weatherWidgetContainer" style="-fx-background-color: #F8FAFC; -fx-background-radius: 12; -fx-padding: 15;">
+                                            <children>
+                                                <Label style="-fx-font-size: 14px; -fx-text-fill: #64748B; -fx-alignment: center;" text="Chargement des données météo..." />
+                                            </children>
+                                        </VBox>
+                                    </children>
+                                </VBox>
+
+                                <Separator style="-fx-background-color: #F1F5F9;" />
+
+                                <!-- Section actions -->
+                                <VBox spacing="20">
+                                    <children>
+                                        <HBox alignment="CENTER_LEFT" spacing="10">
+                                            <children>
+                                                <Label style="-fx-font-size: 18px; -fx-font-weight: bold; -fx-text-fill: #0F2C4F;" text="🎯" />
+                                                <Label style="-fx-font-size: 18px; -fx-font-weight: bold; -fx-text-fill: #0F2C4F;" text="Actions disponibles" />
+                                            </children>
+                                        </HBox>
+                                        <HBox alignment="CENTER" spacing="20">
+                                            <children>
+                                                <Button fx:id="disponibleButton" onAction="#marquerDisponible" prefHeight="55" prefWidth="200" style="-fx-background-color: #4CAF50; -fx-text-fill: white; -fx-background-radius: 15; -fx-border-radius: 15; -fx-padding: 15 25; -fx-font-size: 16px; -fx-font-weight: 600; -fx-cursor: hand;" text="✅ Marquer disponible" />
+                                                <Button fx:id="partagerButton" onAction="#partagerActivite" prefHeight="55" prefWidth="180" style="-fx-background-color: transparent; -fx-text-fill: #86A7BF; -fx-border-color: #86A7BF; -fx-border-width: 2; -fx-background-radius: 15; -fx-border-radius: 15; -fx-padding: 15 25; -fx-font-size: 16px; -fx-font-weight: 600; -fx-cursor: hand;" text="📤 Partager" />
+                                            </children>
+                                        </HBox>
+                                    </children>
+                                </VBox>
+                            </children>
+                        </VBox>
+                    </children>
+                </VBox>
+            </content>
+        </ScrollPane>
+    </children>
+</VBox>

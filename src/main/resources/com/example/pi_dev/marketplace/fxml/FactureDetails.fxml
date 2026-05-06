@@ -1,0 +1,112 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.text.Font?>
+
+<BorderPane xmlns="http://javafx.com/javafx/18" 
+            xmlns:fx="http://javafx.com/fxml/1" 
+            fx:controller="com.example.pi_dev.Controllers.Marketplace.FactureDetailsController"
+            stylesheets="@../css/style.css"
+            styleClass="root">
+
+    <!-- Top Bar -->
+    <top>
+        <HBox spacing="15" alignment="CENTER_LEFT" styleClass="top-bar">
+            <padding>
+                <Insets top="15" right="15" bottom="15" left="15"/>
+            </padding>
+            <Button text="← Back" styleClass="btn-back" onAction="#goBack"/>
+            <Region HBox.hgrow="ALWAYS"/>
+            <Label fx:id="titleLabel" text="Invoice Details" styleClass="page-title">
+                <font>
+                    <Font name="System Bold" size="20"/>
+                </font>
+            </Label>
+            <Region HBox.hgrow="ALWAYS"/>
+            <Button text="📥 Download PDF" styleClass="btn-download" onAction="#downloadPDF"/>
+        </HBox>
+    </top>
+
+    <!-- Invoice Details -->
+    <center>
+        <ScrollPane fitToWidth="true" fitToHeight="true" styleClass="scroll-pane">
+            <VBox spacing="25">
+                <padding>
+                    <Insets top="40" right="40" bottom="40" left="40"/>
+                </padding>
+
+                <!-- Invoice Header Card -->
+                <VBox spacing="15" styleClass="invoice-header-card">
+                    <padding>
+                        <Insets top="25" right="25" bottom="25" left="25"/>
+                    </padding>
+                    <HBox alignment="CENTER_LEFT" spacing="10">
+                        <Label text="🧾" style="-fx-font-size: 32px;"/>
+                        <VBox spacing="5">
+                            <Label fx:id="invoiceNumberLabel" text="Invoice #12345" styleClass="invoice-number">
+                                <font>
+                                    <Font name="System Bold" size="18"/>
+                                </font>
+                            </Label>
+                            <Label fx:id="invoiceDateLabel" text="Date: 2025-02-15" style="-fx-text-fill: #666;"/>
+                        </VBox>
+                    </HBox>
+
+                    <Separator/>
+
+                    <HBox spacing="50">
+                        <VBox spacing="8">
+                            <Label text="Status:" style="-fx-text-fill: #666; -fx-font-size: 12px;"/>
+                            <Label fx:id="statusLabel" text="COMPLETED" styleClass="status-completed">
+                                <font>
+                                    <Font name="System Bold" size="14"/>
+                                </font>
+                            </Label>
+                        </VBox>
+
+                        <VBox spacing="8">
+                            <Label text="Payment Method:" style="-fx-text-fill: #666; -fx-font-size: 12px;"/>
+                            <Label fx:id="paymentLabel" text="Credit Card" style="-fx-font-weight: bold; -fx-font-size: 14px;"/>
+                        </VBox>
+                    </HBox>
+                </VBox>
+
+                <!-- Products List -->
+                <VBox spacing="15">
+                    <Label text="Purchased Items" styleClass="section-title">
+                        <font>
+                            <Font name="System Bold" size="16"/>
+                        </font>
+                    </Label>
+
+                    <!-- Products Container -->
+                    <VBox fx:id="productsContainer" spacing="12"/>
+                </VBox>
+
+                <!-- Total Section -->
+                <VBox spacing="10" styleClass="total-section">
+                    <padding>
+                        <Insets top="20" right="20" bottom="20" left="20"/>
+                    </padding>
+                    <Separator/>
+                    <HBox alignment="CENTER_RIGHT" spacing="30">
+                        <Label text="TOTAL:" styleClass="total-label">
+                            <font>
+                                <Font name="System Bold" size="18"/>
+                            </font>
+                        </Label>
+                        <Label fx:id="totalLabel" text="0.00 DT" styleClass="total-price">
+                            <font>
+                                <Font name="System Bold" size="24"/>
+                            </font>
+                        </Label>
+                    </HBox>
+                </VBox>
+
+            </VBox>
+        </ScrollPane>
+    </center>
+
+</BorderPane>

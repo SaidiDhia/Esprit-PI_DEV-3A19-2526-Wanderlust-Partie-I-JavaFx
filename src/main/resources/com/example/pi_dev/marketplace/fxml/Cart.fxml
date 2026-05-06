@@ -1,0 +1,120 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.text.Font?>
+
+<BorderPane xmlns="http://javafx.com/javafx/21"
+            xmlns:fx="http://javafx.com/fxml/1"
+            fx:controller="com.example.pi_dev.Controllers.Marketplace.CartController"
+            stylesheets="@../css/style.css"
+
+            styleClass="root"
+            minHeight="650">
+
+    <!-- Top Bar -->
+    <top>
+        <HBox spacing="15" alignment="CENTER_LEFT" styleClass="top-bar">
+            <padding>
+                <Insets top="15" right="15" bottom="15" left="15"/>
+            </padding>
+
+            <Button text="← Back to Products"
+                    styleClass="btn-back"
+                    onAction="#goBack"/>
+
+            <Region HBox.hgrow="ALWAYS"/>
+
+            <Label text="Your Shopping Cart" styleClass="page-title">
+                <font>
+                    <Font name="System Bold" size="20"/>
+                </font>
+            </Label>
+
+            <Region HBox.hgrow="ALWAYS"/>
+        </HBox>
+    </top>
+
+    <!-- Cart Items Center -->
+    <center>
+        <VBox VBox.vgrow="ALWAYS">
+
+            <ScrollPane fitToWidth="true"
+                        VBox.vgrow="ALWAYS"
+                        styleClass="scroll-pane">
+
+                <VBox spacing="15">
+                    <padding>
+                        <Insets top="30" right="30" bottom="30" left="30"/>
+                    </padding>
+
+                    <!-- Cart Items -->
+                    <VBox fx:id="cartItemsContainer" spacing="15"/>
+
+                    <!-- Empty Cart -->
+                    <VBox fx:id="emptyCartMessage"
+                          alignment="CENTER"
+                          spacing="10"
+                          visible="false"
+                          managed="false">
+
+                        <Label text="🛒" style="-fx-font-size: 48px;"/>
+
+                        <Label text="Your cart is empty"
+                               styleClass="empty-message">
+                            <font>
+                                <Font size="18"/>
+                            </font>
+                        </Label>
+
+                    </VBox>
+
+                </VBox>
+
+            </ScrollPane>
+
+        </VBox>
+    </center>
+
+    <!-- Bottom Bar -->
+    <bottom>
+        <VBox spacing="10" styleClass="bottom-bar">
+            <padding>
+                <Insets top="20" right="20" bottom="20" left="20"/>
+            </padding>
+
+            <Separator/>
+
+            <HBox spacing="20" alignment="CENTER_RIGHT">
+
+                <Label text="Total:" styleClass="total-label">
+                    <font>
+                        <Font name="System Bold" size="18"/>
+                    </font>
+                </Label>
+
+                <Label fx:id="totalLabel"
+                       text="0.00 DT"
+                       styleClass="total-price">
+                    <font>
+                        <Font name="System Bold" size="24"/>
+                    </font>
+                </Label>
+
+                <Region HBox.hgrow="ALWAYS"/>
+
+                <Button text="🛒 Buy Now"
+                        styleClass="btn-buy"
+                        onAction="#buy"
+                        minWidth="150">
+                    <font>
+                        <Font name="System Bold" size="16"/>
+                    </font>
+                </Button>
+
+            </HBox>
+        </VBox>
+    </bottom>
+
+</BorderPane>

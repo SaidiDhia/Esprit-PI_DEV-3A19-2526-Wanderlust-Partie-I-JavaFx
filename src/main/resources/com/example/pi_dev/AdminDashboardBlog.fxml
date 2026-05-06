@@ -1,0 +1,334 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<StackPane xmlns="http://javafx.com/javafx/21"
+           xmlns:fx="http://javafx.com/fxml/1"
+           fx:controller="com.example.pi_dev.Controllers.Blog.AdminDashboardBlogController"
+           stylesheets="@../css/admin.css">
+
+    <!-- ══════════════════════════════════════════════════════════
+         ROOT  –  full-screen dark-blue sidebar layout
+    ═══════════════════════════════════════════════════════════ -->
+    <HBox>
+
+        <!-- ═══════════════════════════════
+             LEFT SIDEBAR
+        ════════════════════════════════ -->
+        <VBox minWidth="220" prefWidth="220"
+              style="-fx-background-color:#1E3A8A;">
+
+            <!-- Logo / title -->
+            <VBox alignment="CENTER" spacing="4"
+                  style="-fx-padding:28 20 24 20; -fx-border-color:#2D59C7; -fx-border-width:0 0 1 0;">
+                <Label text="🛡 Admin"
+                       style="-fx-font-size:22px; -fx-font-weight:bold; -fx-text-fill:#FFFFFF;
+                              -fx-font-family:'Segoe UI',Arial;"/>
+                <Label text="Tableau de bord Blog"
+                       style="-fx-font-size:10px; -fx-text-fill:#93C5FD; -fx-font-family:'Segoe UI',Arial;"/>
+            </VBox>
+
+            <!-- Nav stats row -->
+            <HBox alignment="CENTER" spacing="10"
+                  style="-fx-padding:14 14 14 14; -fx-border-color:#2D59C7; -fx-border-width:0 0 1 0;">
+
+                <VBox alignment="CENTER" spacing="2"
+                      style="-fx-background-color:#2D59C7; -fx-background-radius:10; -fx-padding:8 12 8 12;">
+                    <Label fx:id="statPostsLabel" text="0"
+                           style="-fx-font-size:18px; -fx-font-weight:bold; -fx-text-fill:#FFFFFF;"/>
+                    <Label text="Posts"
+                           style="-fx-font-size:9px; -fx-text-fill:#93C5FD;"/>
+                </VBox>
+
+                <VBox alignment="CENTER" spacing="2"
+                      style="-fx-background-color:#2D59C7; -fx-background-radius:10; -fx-padding:8 12 8 12;">
+                    <Label fx:id="statCommentsLabel" text="0"
+                           style="-fx-font-size:18px; -fx-font-weight:bold; -fx-text-fill:#FFFFFF;"/>
+                    <Label text="Comm."
+                           style="-fx-font-size:9px; -fx-text-fill:#93C5FD;"/>
+                </VBox>
+
+                <VBox alignment="CENTER" spacing="2"
+                      style="-fx-background-color:#2D59C7; -fx-background-radius:10; -fx-padding:8 12 8 12;">
+                    <Label fx:id="statReactionsLabel" text="0"
+                           style="-fx-font-size:18px; -fx-font-weight:bold; -fx-text-fill:#FFFFFF;"/>
+                    <Label text="Réact."
+                           style="-fx-font-size:9px; -fx-text-fill:#93C5FD;"/>
+                </VBox>
+            </HBox>
+
+            <!-- Tab buttons -->
+            <VBox spacing="2" style="-fx-padding:12 0 0 0;">
+
+                <Button fx:id="tabPostsBtn"
+                        text="📄  Publications"
+                        maxWidth="Infinity"
+                        onAction="#handleTabPosts"
+                        style="-fx-background-color:#2D59C7; -fx-background-radius:0;
+                               -fx-text-fill:#FFFFFF; -fx-font-size:13px;
+                               -fx-font-family:'Segoe UI',Arial; -fx-alignment:CENTER_LEFT;
+                               -fx-padding:12 20 12 20; -fx-cursor:HAND;
+                               -fx-border-color:#60A5FA; -fx-border-width:0 0 0 3; -fx-border-radius:0;"/>
+
+                <Button fx:id="tabCommentsBtn"
+                        text="💬  Commentaires"
+                        maxWidth="Infinity"
+                        onAction="#handleTabComments"
+                        style="-fx-background-color:transparent; -fx-background-radius:0;
+                               -fx-text-fill:#BFDBFE; -fx-font-size:13px;
+                               -fx-font-family:'Segoe UI',Arial; -fx-alignment:CENTER_LEFT;
+                               -fx-padding:12 20 12 20; -fx-cursor:HAND;
+                               -fx-border-color:transparent; -fx-border-width:0 0 0 3; -fx-border-radius:0;"/>
+
+                <Button fx:id="tabReactionsBtn"
+                        text="♥  Réactions"
+                        maxWidth="Infinity"
+                        onAction="#handleTabReactions"
+                        style="-fx-background-color:transparent; -fx-background-radius:0;
+                               -fx-text-fill:#BFDBFE; -fx-font-size:13px;
+                               -fx-font-family:'Segoe UI',Arial; -fx-alignment:CENTER_LEFT;
+                               -fx-padding:12 20 12 20; -fx-cursor:HAND;
+                               -fx-border-color:transparent; -fx-border-width:0 0 0 3; -fx-border-radius:0;"/>
+            </VBox>
+
+            <!-- Spacer -->
+            <Region VBox.vgrow="ALWAYS"/>
+
+            <!-- Refresh button at bottom of sidebar -->
+            <Button text="🔄  Actualiser"
+                    maxWidth="Infinity"
+                    onAction="#handleRefreshAll"
+                    style="-fx-background-color:#1E40AF; -fx-background-radius:0;
+                           -fx-text-fill:#93C5FD; -fx-font-size:12px;
+                           -fx-font-family:'Segoe UI',Arial; -fx-alignment:CENTER_LEFT;
+                           -fx-padding:14 20 14 20; -fx-cursor:HAND;
+                           -fx-border-color:#2D59C7; -fx-border-width:1 0 0 0; -fx-border-radius:0;"/>
+        </VBox>
+
+        <!-- ═══════════════════════════════
+             MAIN CONTENT AREA
+        ════════════════════════════════ -->
+        <StackPane HBox.hgrow="ALWAYS"
+                   style="-fx-background-color:#F0F4FF;">
+
+            <!-- Toast overlay (on top of everything) -->
+            <StackPane fx:id="toastPane"
+                       alignment="BOTTOM_CENTER"
+                       mouseTransparent="true"
+                       style="-fx-padding:0 0 32 0;"/>
+
+            <!-- Content panels -->
+            <VBox HBox.hgrow="ALWAYS">
+
+                <!-- ══════════════════════
+                     TOP HEADER BAR
+                ══════════════════════ -->
+                <HBox alignment="CENTER_LEFT" spacing="12"
+                      style="-fx-background-color:#FFFFFF;
+                             -fx-effect:dropshadow(gaussian,rgba(0,0,0,0.06),8,0,0,2);
+                             -fx-padding:14 24 14 24;">
+                    <Label text="Blog · Gestion du contenu"
+                           style="-fx-font-size:15px; -fx-font-weight:bold;
+                                  -fx-text-fill:#1E3A8A; -fx-font-family:'Segoe UI',Arial;"/>
+                </HBox>
+
+                <!-- ══════════════════════
+                     TAB PANES
+                ══════════════════════ -->
+                <ScrollPane fitToWidth="true" VBox.vgrow="ALWAYS"
+                            style="-fx-background-color:transparent; -fx-background:#F0F4FF;">
+                    <VBox spacing="0" style="-fx-padding:24 24 24 24;">
+
+                        <!-- ─────────────────────
+                             POSTS TAB
+                        ───────────────────── -->
+                        <VBox fx:id="postsTab" spacing="0"
+                              style="-fx-background-color:#FFFFFF; -fx-background-radius:14;
+                                     -fx-effect:dropshadow(gaussian,rgba(0,0,0,0.06),16,0,0,2);">
+
+                            <!-- Posts header toolbar -->
+                            <HBox alignment="CENTER_LEFT" spacing="12"
+                                  style="-fx-padding:16 20 16 20;
+                                         -fx-border-color:#F3F4F6; -fx-border-width:0 0 1 0;">
+                                <Label text="📄 Publications"
+                                       style="-fx-font-size:14px; -fx-font-weight:bold;
+                                              -fx-text-fill:#111827; -fx-font-family:'Segoe UI',Arial;"/>
+                                <Label fx:id="postsCountBadge" text="0"
+                                       style="-fx-background-color:#DBEAFE; -fx-background-radius:12;
+                                              -fx-text-fill:#1E40AF; -fx-font-size:11px;
+                                              -fx-font-weight:bold; -fx-padding:2 8 2 8;"/>
+                                <Region HBox.hgrow="ALWAYS"/>
+                                <TextField fx:id="postSearchField"
+                                           promptText="🔍  Rechercher…"
+                                           onKeyReleased="#handlePostSearch"
+                                           prefWidth="220"
+                                           style="-fx-font-size:12px; -fx-font-family:'Segoe UI',Arial;
+                                                  -fx-background-color:#F8FAFF; -fx-background-radius:20;
+                                                  -fx-border-color:#BFDBFE; -fx-border-radius:20;
+                                                  -fx-border-width:1.5; -fx-padding:7 14 7 14;"/>
+                                <Button text="+ Nouvelle"
+                                        onAction="#handleNewPost"
+                                        style="-fx-background-color:#1E40AF; -fx-background-radius:8;
+                                               -fx-text-fill:white; -fx-font-size:12px;
+                                               -fx-font-family:'Segoe UI',Arial;
+                                               -fx-padding:7 16 7 16; -fx-cursor:HAND;"/>
+                            </HBox>
+
+                            <!-- Posts table header -->
+                            <HBox style="-fx-background-color:#F8FAFF; -fx-padding:10 16 10 16;
+                                         -fx-border-color:#F3F4F6; -fx-border-width:0 0 1 0;">
+                                <Label text="#" minWidth="50"
+                                       style="-fx-font-size:10px; -fx-font-weight:bold;
+                                              -fx-text-fill:#9CA3AF; -fx-font-family:'Segoe UI',Arial;"/>
+                                <Label text="CONTENU" HBox.hgrow="ALWAYS"
+                                       style="-fx-font-size:10px; -fx-font-weight:bold;
+                                              -fx-text-fill:#9CA3AF; -fx-font-family:'Segoe UI',Arial;"/>
+                                <Label text="UTILISATEUR" minWidth="130"
+                                       style="-fx-font-size:10px; -fx-font-weight:bold;
+                                              -fx-text-fill:#9CA3AF; -fx-font-family:'Segoe UI',Arial;"/>
+                                <Label text="STATUT" minWidth="80"
+                                       style="-fx-font-size:10px; -fx-font-weight:bold;
+                                              -fx-text-fill:#9CA3AF; -fx-font-family:'Segoe UI',Arial;"/>
+                                <Label text="DATE" minWidth="130"
+                                       style="-fx-font-size:10px; -fx-font-weight:bold;
+                                              -fx-text-fill:#9CA3AF; -fx-font-family:'Segoe UI',Arial;"/>
+                                <Label text="ACTIONS" minWidth="120"
+                                       style="-fx-font-size:10px; -fx-font-weight:bold;
+                                              -fx-text-fill:#9CA3AF; -fx-font-family:'Segoe UI',Arial;"/>
+                            </HBox>
+
+                            <!-- Posts table rows (populated by controller) -->
+                            <VBox fx:id="postsTableContainer"/>
+                        </VBox>
+
+                        <!-- ─────────────────────
+                             COMMENTS TAB
+                        ───────────────────── -->
+                        <VBox fx:id="commentsTab" spacing="0"
+                              visible="false" managed="false"
+                              style="-fx-background-color:#FFFFFF; -fx-background-radius:14;
+                                     -fx-effect:dropshadow(gaussian,rgba(0,0,0,0.06),16,0,0,2);">
+
+                            <!-- Comments header toolbar -->
+                            <HBox alignment="CENTER_LEFT" spacing="12"
+                                  style="-fx-padding:16 20 16 20;
+                                         -fx-border-color:#F3F4F6; -fx-border-width:0 0 1 0;">
+                                <Label text="💬 Commentaires"
+                                       style="-fx-font-size:14px; -fx-font-weight:bold;
+                                              -fx-text-fill:#111827; -fx-font-family:'Segoe UI',Arial;"/>
+                                <Label fx:id="commentsCountBadge" text="0"
+                                       style="-fx-background-color:#DBEAFE; -fx-background-radius:12;
+                                              -fx-text-fill:#1E40AF; -fx-font-size:11px;
+                                              -fx-font-weight:bold; -fx-padding:2 8 2 8;"/>
+                                <Region HBox.hgrow="ALWAYS"/>
+                                <TextField fx:id="commentSearchField"
+                                           promptText="🔍  Rechercher…"
+                                           onKeyReleased="#handleCommentSearch"
+                                           prefWidth="220"
+                                           style="-fx-font-size:12px; -fx-font-family:'Segoe UI',Arial;
+                                                  -fx-background-color:#F8FAFF; -fx-background-radius:20;
+                                                  -fx-border-color:#BFDBFE; -fx-border-radius:20;
+                                                  -fx-border-width:1.5; -fx-padding:7 14 7 14;"/>
+                            </HBox>
+
+                            <!-- Comments table header -->
+                            <HBox style="-fx-background-color:#F8FAFF; -fx-padding:10 16 10 16;
+                                         -fx-border-color:#F3F4F6; -fx-border-width:0 0 1 0;">
+                                <Label text="#" minWidth="50"
+                                       style="-fx-font-size:10px; -fx-font-weight:bold;
+                                              -fx-text-fill:#9CA3AF; -fx-font-family:'Segoe UI',Arial;"/>
+                                <Label text="CONTENU" HBox.hgrow="ALWAYS"
+                                       style="-fx-font-size:10px; -fx-font-weight:bold;
+                                              -fx-text-fill:#9CA3AF; -fx-font-family:'Segoe UI',Arial;"/>
+                                <Label text="UTILISATEUR" minWidth="130"
+                                       style="-fx-font-size:10px; -fx-font-weight:bold;
+                                              -fx-text-fill:#9CA3AF; -fx-font-family:'Segoe UI',Arial;"/>
+                                <Label text="POST ID" minWidth="70"
+                                       style="-fx-font-size:10px; -fx-font-weight:bold;
+                                              -fx-text-fill:#9CA3AF; -fx-font-family:'Segoe UI',Arial;"/>
+                                <Label text="RÉPONSE À" minWidth="70"
+                                       style="-fx-font-size:10px; -fx-font-weight:bold;
+                                              -fx-text-fill:#9CA3AF; -fx-font-family:'Segoe UI',Arial;"/>
+                                <Label text="DATE" minWidth="130"
+                                       style="-fx-font-size:10px; -fx-font-weight:bold;
+                                              -fx-text-fill:#9CA3AF; -fx-font-family:'Segoe UI',Arial;"/>
+                                <Label text="ACTIONS" minWidth="100"
+                                       style="-fx-font-size:10px; -fx-font-weight:bold;
+                                              -fx-text-fill:#9CA3AF; -fx-font-family:'Segoe UI',Arial;"/>
+                            </HBox>
+
+                            <!-- Comments table rows -->
+                            <VBox fx:id="commentsTableContainer"/>
+                        </VBox>
+
+                        <!-- ─────────────────────
+                             REACTIONS TAB
+                        ───────────────────── -->
+                        <VBox fx:id="reactionsTab" spacing="0"
+                              visible="false" managed="false"
+                              style="-fx-background-color:#FFFFFF; -fx-background-radius:14;
+                                     -fx-effect:dropshadow(gaussian,rgba(0,0,0,0.06),16,0,0,2);">
+
+                            <!-- Reactions header toolbar -->
+                            <HBox alignment="CENTER_LEFT" spacing="12"
+                                  style="-fx-padding:16 20 16 20;
+                                         -fx-border-color:#F3F4F6; -fx-border-width:0 0 1 0;">
+                                <Label text="♥ Réactions"
+                                       style="-fx-font-size:14px; -fx-font-weight:bold;
+                                              -fx-text-fill:#111827; -fx-font-family:'Segoe UI',Arial;"/>
+                                <Label fx:id="reactionsCountBadge" text="0"
+                                       style="-fx-background-color:#FEE2E2; -fx-background-radius:12;
+                                              -fx-text-fill:#991B1B; -fx-font-size:11px;
+                                              -fx-font-weight:bold; -fx-padding:2 8 2 8;"/>
+                                <Region HBox.hgrow="ALWAYS"/>
+                                <TextField fx:id="reactionSearchField"
+                                           promptText="🔍  Rechercher…"
+                                           onKeyReleased="#handleReactionSearch"
+                                           prefWidth="220"
+                                           style="-fx-font-size:12px; -fx-font-family:'Segoe UI',Arial;
+                                                  -fx-background-color:#F8FAFF; -fx-background-radius:20;
+                                                  -fx-border-color:#BFDBFE; -fx-border-radius:20;
+                                                  -fx-border-width:1.5; -fx-padding:7 14 7 14;"/>
+                            </HBox>
+
+                            <!-- Reactions table header -->
+                            <HBox style="-fx-background-color:#F8FAFF; -fx-padding:10 16 10 16;
+                                         -fx-border-color:#F3F4F6; -fx-border-width:0 0 1 0;">
+                                <Label text="#" minWidth="60"
+                                       style="-fx-font-size:10px; -fx-font-weight:bold;
+                                              -fx-text-fill:#9CA3AF; -fx-font-family:'Segoe UI',Arial;"/>
+                                <Label text="TYPE" minWidth="90"
+                                       style="-fx-font-size:10px; -fx-font-weight:bold;
+                                              -fx-text-fill:#9CA3AF; -fx-font-family:'Segoe UI',Arial;"/>
+                                <Label text="UTILISATEUR" HBox.hgrow="ALWAYS"
+                                       style="-fx-font-size:10px; -fx-font-weight:bold;
+                                              -fx-text-fill:#9CA3AF; -fx-font-family:'Segoe UI',Arial;"/>
+                                <Label text="POST ID" minWidth="80"
+                                       style="-fx-font-size:10px; -fx-font-weight:bold;
+                                              -fx-text-fill:#9CA3AF; -fx-font-family:'Segoe UI',Arial;"/>
+                                <Label text="COMMENTAIRE ID" minWidth="120"
+                                       style="-fx-font-size:10px; -fx-font-weight:bold;
+                                              -fx-text-fill:#9CA3AF; -fx-font-family:'Segoe UI',Arial;"/>
+                                <Label text="DATE" minWidth="130"
+                                       style="-fx-font-size:10px; -fx-font-weight:bold;
+                                              -fx-text-fill:#9CA3AF; -fx-font-family:'Segoe UI',Arial;"/>
+                                <Label text="ACTIONS" minWidth="80"
+                                       style="-fx-font-size:10px; -fx-font-weight:bold;
+                                              -fx-text-fill:#9CA3AF; -fx-font-family:'Segoe UI',Arial;"/>
+                            </HBox>
+
+                            <!-- Reactions table rows -->
+                            <VBox fx:id="reactionsTableContainer"/>
+                        </VBox>
+
+                    </VBox>
+                </ScrollPane>
+
+            </VBox>
+        </StackPane>
+
+    </HBox>
+
+</StackPane>

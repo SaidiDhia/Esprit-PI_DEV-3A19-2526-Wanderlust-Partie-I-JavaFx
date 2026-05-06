@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.text.*?>
+
+<VBox alignment="CENTER" prefHeight="750.0" prefWidth="1000.0" spacing="20.0" style="-fx-background-color: #f8f9fa; -fx-padding: 30;" xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.example.pi_dev.Controllers.Events.PanierController">
+   <children>
+      <!-- Header -->
+      <HBox alignment="CENTER_LEFT" spacing="15">
+         <children>
+            <Text style="-fx-font-size: 28px; -fx-font-weight: bold; -fx-fill: #0F2C4F;" text="🛒 Mon Panier" />
+            <Region HBox.hgrow="ALWAYS" />
+            <Button fx:id="retourCatalogueButton" onAction="#goToCatalogue" style="-fx-background-color: #ffebee; -fx-text-fill: #cc6666; -fx-background-radius: 20; -fx-border-radius: 20; -fx-padding: 10 20; -fx-font-size: 14px; -fx-cursor: hand;" text="📚 Retour au catalogue" />
+            <Button fx:id="viderPanierButton" onAction="#viderPanier" style="-fx-background-color: #ff6b6b; -fx-text-fill: white; -fx-background-radius: 20; -fx-border-radius: 20; -fx-padding: 10 20; -fx-font-size: 14px; -fx-cursor: hand;" text="🗑️ Vider le panier" />
+         </children>
+      </HBox>
+      
+      <!-- Contenu du panier -->
+      <ScrollPane fitToWidth="true" hbarPolicy="NEVER" vbarPolicy="ALWAYS" VBox.vgrow="ALWAYS">
+         <content>
+            <VBox fx:id="panierContainer" spacing="15" style="-fx-padding: 10;">
+               <!-- Message si panier vide -->
+               <HBox fx:id="panierVideBox" alignment="CENTER" style="-fx-padding: 50;">
+                  <children>
+                     <VBox alignment="CENTER" spacing="15">
+                        <children>
+                           <Text style="-fx-font-size: 48px; -fx-fill: #999;" text="🛒" />
+                           <Text style="-fx-font-size: 20px; -fx-fill: #666; -fx-font-weight: bold;" text="Votre panier est vide" />
+                           <Text style="-fx-font-size: 16px; -fx-fill: #999;" text="Ajoutez des réservations depuis le catalogue" />
+                        </children>
+                     </VBox>
+                  </children>
+               </HBox>
+            </VBox>
+         </content>
+      </ScrollPane>
+      
+      <!-- Pied de page avec total -->
+      <HBox alignment="CENTER_LEFT" spacing="20" style="-fx-background-color: white; -fx-padding: 20; -fx-background-radius: 10; -fx-border-color: #ddd; -fx-border-width: 1;">
+         <children>
+            <Region HBox.hgrow="ALWAYS" />
+            <VBox alignment="CENTER_RIGHT" spacing="5">
+               <children>
+                  <Text style="-fx-font-size: 18px; -fx-font-weight: bold; -fx-fill: #0F2C4F;" text="Total : " />
+                  <Text fx:id="totalLabel" style="-fx-font-size: 24px; -fx-font-weight: bold; -fx-fill: #1A4E85;" text="0 TND" />
+               </children>
+            </VBox>
+            <Button fx:id="validerPanierButton" onAction="#validerPanier" style="-fx-background-color: #2D70B3; -fx-text-fill: white; -fx-background-radius: 25; -fx-border-radius: 25; -fx-padding: 15 30; -fx-font-size: 16px; -fx-font-weight: bold; -fx-cursor: hand;" text="✅ Valider le panier" />
+         </children>
+      </HBox>
+      
+   </children>
+</VBox>

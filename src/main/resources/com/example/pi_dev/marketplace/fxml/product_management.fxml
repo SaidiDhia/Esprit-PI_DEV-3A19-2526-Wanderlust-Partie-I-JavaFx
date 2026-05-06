@@ -1,0 +1,99 @@
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.BorderPane?>
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.control.ComboBox?>
+<?import javafx.scene.control.ScrollPane?>
+<?import javafx.scene.layout.VBox?>
+<?import javafx.scene.layout.FlowPane?>
+<?import javafx.scene.layout.Region?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.text.Font?>
+<BorderPane xmlns="http://javafx.com/javafx/21"
+            xmlns:fx="http://javafx.com/fxml/1"
+            fx:controller="com.example.pi_dev.Controllers.Marketplace.ProductManagementController"
+            stylesheets="@../css/style.css"
+            styleClass="root">
+
+    <!-- TOP BAR -->
+    <top>
+        <HBox spacing="15" alignment="CENTER" styleClass="top-bar">
+            <padding>
+                <Insets top="15" right="20" bottom="15" left="20"/>
+            </padding>
+
+            <!-- LEFT: Navigation Buttons -->
+            <HBox spacing="10" alignment="CENTER_LEFT">
+                <Button text="📝 Invoices"
+                        styleClass="nav-btn"
+                        onAction="#goToFactureList"/>
+
+                <Button text="🛍️ Available Products"
+                        styleClass="nav-btn"
+                        onAction="#goToAvailableProduct"/>
+                <Button text="📊 Dashboard" onAction="#openDashboard"
+                        style="-fx-background-color: #2E7D32; -fx-text-fill: white;
+                   -fx-background-radius: 8; -fx-padding: 8 16;
+                   -fx-font-weight: bold; -fx-cursor: hand;"/>
+
+            </HBox>
+
+            <!-- CENTER: Page Title (grows to take available space) -->
+            <Region HBox.hgrow="ALWAYS"/>
+
+            <Label text="Product Management" styleClass="page-title">
+                <font>
+                    <Font name="System Bold" size="20"/>
+                </font>
+            </Label>
+
+            <Region HBox.hgrow="ALWAYS"/>
+
+            <!-- RIGHT: Actions and Filters -->
+            <HBox spacing="10" alignment="CENTER_RIGHT">
+                <Button text="➕ Add Product"
+                        styleClass="button"
+                        onAction="#handleAdd"/>
+                <Button text="📦 My Orders" onAction="#openOrders" styleClass="btn-back"/>
+
+                <TextField fx:id="searchField"
+                           promptText="🔍 Search product..."
+                           onKeyReleased="#handleSearch"
+                           styleClass="search-field"
+                           prefWidth="200"/>
+
+                <ComboBox fx:id="typeFilter"
+                          promptText="All Types"
+                          onAction="#handleFilter"
+                          styleClass="combo"
+                          prefWidth="130"/>
+
+                <ComboBox fx:id="categoryFilter"
+                          promptText="All Categories"
+                          onAction="#handleFilter"
+                          styleClass="combo"
+                          prefWidth="150"/>
+            </HBox>
+
+        </HBox>
+    </top>
+
+    <!-- PRODUCTS GRID -->
+    <center>
+        <ScrollPane fitToWidth="true" fitToHeight="true" styleClass="scroll-pane">
+            <VBox spacing="20">
+                <padding>
+                    <Insets top="20" right="20" bottom="20" left="20"/>
+                </padding>
+
+                <FlowPane fx:id="productFlow"
+                          hgap="20"
+                          vgap="20"
+                          alignment="TOP_LEFT"
+                          prefWrapLength="1000"/>
+            </VBox>
+        </ScrollPane>
+    </center>
+
+</BorderPane>

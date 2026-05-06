@@ -1,0 +1,133 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.Hyperlink?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.PasswordField?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.layout.BorderPane?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.VBox?>
+<?import javafx.scene.layout.StackPane?>
+<?import javafx.scene.layout.Region?>
+<?import javafx.scene.image.ImageView?>
+<?import javafx.scene.image.Image?>
+<?import javafx.scene.shape.Rectangle?>
+
+<BorderPane prefHeight="800.0" prefWidth="1200.0" stylesheets="@style.css" xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.example.pi_dev.Controllers.Users.LoginController" style="-fx-background-color: #F8FAFC;">
+    <top>
+        <!-- Top Navbar -->
+        <VBox styleClass="auth-top-navbar">
+            <children>
+                <HBox alignment="CENTER_LEFT" spacing="30.0">
+                    <children>
+                        <!-- Logo Placeholder -->
+                        <HBox alignment="CENTER" spacing="10.0">
+                            <StackPane style="-fx-background-color: white; -fx-background-radius: 8; -fx-padding: 5;">
+                                <Label text="🏕️" style="-fx-font-size: 24px;" />
+                            </StackPane>
+                            <VBox>
+                                <Label text="WonderLust" styleClass="text-h2" style="-fx-text-fill: white;" />
+                                <Label text="Travel &amp; Camping" style="-fx-text-fill: white; -fx-font-size: 10px; -fx-opacity: 0.8;" />
+                            </VBox>
+                        </HBox>
+                        
+                        <Region HBox.hgrow="ALWAYS" />
+                        
+                        <!-- Nav Links -->
+                        <HBox alignment="CENTER" spacing="25.0">
+                            <Label text="🏠 Home" styleClass="auth-top-navbar-link" onMouseClicked="#goToMainHome" />
+                            <Label text="🧭 Explore" styleClass="auth-top-navbar-link" />
+                            <Label text="⚙️ Settings" styleClass="auth-top-navbar-link" />
+                        </HBox>
+                        
+                        <Region HBox.hgrow="ALWAYS" />
+                        
+                        <!-- Auth Action -->
+                        <Button text="Sign Up" onAction="#goToSignup" style="-fx-background-color: white; -fx-text-fill: #2563eb; -fx-font-weight: bold; -fx-background-radius: 20; -fx-padding: 8 20;" />
+                    </children>
+                </HBox>
+            </children>
+        </VBox>
+    </top>
+
+    <center>
+        <HBox alignment="CENTER" spacing="40.0" style="-fx-padding: 40;">
+            <!-- Left Side: Image Card -->
+            <StackPane HBox.hgrow="ALWAYS" maxWidth="500.0" style="-fx-background-radius: 24; -fx-border-radius: 24; overflow: hidden; -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.1), 20, 0, 0, 10);">
+                <!-- Replace with actual Image implementation -->
+                <ImageView fitHeight="600.0" fitWidth="500.0" preserveRatio="false">
+                    <image>
+                        <Image url="@auth_login_bg.png" />
+                    </image>
+                </ImageView>
+                <!-- Gradient Overlay -->
+                <Rectangle width="500" height="600" style="-fx-fill: linear-gradient(to bottom, transparent 40%, #1e3a8a 100%); -fx-opacity: 0.8;" />
+                <VBox alignment="BOTTOM_LEFT" style="-fx-padding: 40;">
+                    <Label text="Discover Your Next Adventure" style="-fx-text-fill: white; -fx-font-size: 28px; -fx-font-weight: bold;" wrapText="true" />
+                    <Label text="Join thousands of travelers exploring the world" style="-fx-text-fill: white; -fx-font-size: 14px; -fx-opacity: 0.9; -fx-padding: 10 0 0 0;" wrapText="true" />
+                </VBox>
+            </StackPane>
+
+            <!-- Right Side: Form Card -->
+            <VBox alignment="CENTER" HBox.hgrow="ALWAYS" maxWidth="450.0" spacing="30.0">
+                
+                <!-- Main Form Card -->
+                <VBox styleClass="auth-form-card" spacing="20.0" alignment="CENTER">
+                    
+                    <VBox alignment="CENTER" spacing="8.0" style="-fx-padding: 0 0 10 0;">
+                        <Label styleClass="auth-badge" text="✨ Welcome Back to WonderLust" />
+                        <Label styleClass="text-h1" text="Sign In" style="-fx-font-size: 32px; -fx-padding: 10 0 0 0;" />
+                        <Label styleClass="text-p" text="Continue your journey with us" style="-fx-text-fill: #6B7280;" />
+                    </VBox>
+                
+                    <VBox spacing="20.0">
+                        <VBox spacing="8.0">
+                            <Label styleClass="text-p" text="Email Address" style="-fx-font-weight: bold; -fx-text-fill: #374151;" />
+                            <HBox alignment="CENTER_LEFT" spacing="10.0" styleClass="input-container-box">
+                                <Label text="✉️" style="-fx-text-fill: #6B7280;" />
+                                <TextField fx:id="emailField" promptText="you@example.com" styleClass="input-container-field" HBox.hgrow="ALWAYS" />
+                            </HBox>
+                        </VBox>
+            
+                        <VBox spacing="8.0">
+                            <HBox alignment="CENTER_LEFT">
+                                <Label styleClass="text-p" text="Password" style="-fx-font-weight: bold; -fx-text-fill: #374151;" HBox.hgrow="ALWAYS" maxWidth="1.7976931348623157E308"/>
+                                <Hyperlink onAction="#goToForgotPassword" text="Forgot password?" styleClass="nav-link" style="-fx-font-size: 13px; -fx-text-fill: #3B82F6;"/>
+                            </HBox>
+                            <HBox alignment="CENTER_LEFT" spacing="10.0" styleClass="input-container-box">
+                                <Label text="🔒" style="-fx-text-fill: #6B7280;" />
+                                <PasswordField fx:id="passwordField" promptText="••••••••" styleClass="input-container-field" HBox.hgrow="ALWAYS" />
+                            </HBox>
+                        </VBox>
+            
+                        <Label fx:id="errorLabel" styleClass="error-label" wrapText="true" />
+            
+                        <Button onAction="#handleLogin" styleClass="btn-solid-blue" text="Sign In" maxWidth="1.7976931348623157E308" style="-fx-font-size: 15px; -fx-padding: 12;" />
+                    </VBox>
+                    
+                    <!-- Social Login Options -->
+                    <VBox alignment="CENTER" spacing="20.0" style="-fx-padding: 15 0 0 0;">
+                         <HBox alignment="CENTER" spacing="10.0">
+                              <Rectangle width="100" height="1" fill="#E5E7EB" />
+                              <Label text="Or continue with" style="-fx-text-fill: #6B7280; -fx-font-size: 12px;"/>
+                              <Rectangle width="100" height="1" fill="#E5E7EB" />
+                         </HBox>
+                         <HBox alignment="CENTER" spacing="15.0">
+                              <Button styleClass="btn-social" text="G" HBox.hgrow="ALWAYS" maxWidth="Infinity" style="-fx-font-weight: bold; -fx-text-fill: #DB4437;"/>
+                              <Button styleClass="btn-social" text="f" HBox.hgrow="ALWAYS" maxWidth="Infinity" style="-fx-font-weight: bold; -fx-text-fill: #4267B2;"/>
+                              <Button styleClass="btn-social" text="gh" HBox.hgrow="ALWAYS" maxWidth="Infinity" style="-fx-font-weight: bold; -fx-text-fill: #333333;"/>
+                         </HBox>
+                    </VBox>
+                </VBox>
+                
+                <HBox alignment="CENTER" spacing="5.0">
+                    <Label styleClass="text-p" text="Don't have an account?" style="-fx-text-fill: #6B7280;" />
+                    <Hyperlink onAction="#goToSignup" text="Create one now" styleClass="nav-link" style="-fx-font-weight: bold; -fx-text-fill: #3B82F6;"/>
+                </HBox>
+
+            </VBox>
+        </HBox>
+    </center>
+</BorderPane>

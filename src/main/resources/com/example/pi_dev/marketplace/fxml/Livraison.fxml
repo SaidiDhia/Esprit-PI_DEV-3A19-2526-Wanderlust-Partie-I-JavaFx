@@ -1,0 +1,174 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.text.Font?>
+
+<BorderPane xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1"
+            fx:controller="com.example.pi_dev.Controllers.Marketplace.LivraisonController"
+            stylesheets="@../css/style.css"
+            styleClass="root" minHeight="650">
+
+    <top>
+        <HBox spacing="15" alignment="CENTER_LEFT" styleClass="top-bar">
+            <padding><Insets top="15" right="15" bottom="15" left="15"/></padding>
+            <Button text="← Back to Cart" styleClass="btn-back" onAction="#goBack"/>
+            <Region HBox.hgrow="ALWAYS"/>
+            <Label text="🚚  Delivery &amp; Payment" styleClass="page-title">
+                <font><Font name="System Bold" size="20"/></font>
+            </Label>
+            <Region HBox.hgrow="ALWAYS"/>
+        </HBox>
+    </top>
+
+    <center>
+        <ScrollPane fitToWidth="true" styleClass="scroll-pane">
+            <VBox spacing="20">
+                <padding><Insets top="25" right="50" bottom="25" left="50"/></padding>
+
+                <!-- ORDER SUMMARY -->
+                <VBox style="-fx-background-color:white;-fx-background-radius:12;-fx-border-color:#E0E0E0;-fx-border-radius:12;-fx-padding:18;-fx-effect:dropshadow(gaussian,rgba(0,0,0,0.07),8,0,0,2);">
+                    <HBox alignment="CENTER_LEFT" spacing="10">
+                        <Label text="🛒" style="-fx-font-size:22px;"/>
+                        <Label text="Order Summary" style="-fx-font-size:16px;-fx-font-weight:bold;"/>
+                        <Region HBox.hgrow="ALWAYS"/>
+                        <Label fx:id="totalSummaryLabel" text="0.000 TND"
+                               style="-fx-font-size:22px;-fx-font-weight:bold;-fx-text-fill:#2E7D32;"/>
+                    </HBox>
+                </VBox>
+
+                <!-- DELIVERY ADDRESS -->
+                <VBox spacing="14"
+                      style="-fx-background-color:white;-fx-background-radius:12;-fx-border-color:#E0E0E0;-fx-border-radius:12;-fx-padding:22;-fx-effect:dropshadow(gaussian,rgba(0,0,0,0.07),8,0,0,2);">
+                    <HBox spacing="8" alignment="CENTER_LEFT">
+                        <Label text="🏠" style="-fx-font-size:18px;"/>
+                        <Label text="Delivery Address" style="-fx-font-size:15px;-fx-font-weight:bold;"/>
+                    </HBox>
+                    <Separator/>
+
+                    <GridPane hgap="15" vgap="5">
+                        <columnConstraints>
+                            <ColumnConstraints hgrow="ALWAYS" percentWidth="50"/>
+                            <ColumnConstraints hgrow="ALWAYS" percentWidth="50"/>
+                        </columnConstraints>
+
+                        <!-- Full Name -->
+                        <VBox spacing="4" GridPane.columnIndex="0" GridPane.rowIndex="0">
+                            <Label text="Full Name *" style="-fx-font-weight:bold;-fx-font-size:13px;"/>
+                            <TextField fx:id="fullNameField" promptText="e.g. Mohamed Ben Ali"
+                                       style="-fx-background-radius:8;-fx-border-color:#BDBDBD;-fx-border-radius:8;-fx-padding:10;-fx-font-size:13px;"/>
+                            <Label fx:id="fullNameError" text="⚠ Name must be at least 3 characters"
+                                   style="-fx-text-fill:#E53935;-fx-font-size:11px;" visible="false" managed="false"/>
+                        </VBox>
+
+                        <!-- Phone -->
+                        <VBox spacing="4" GridPane.columnIndex="1" GridPane.rowIndex="0">
+                            <Label text="Phone Number *" style="-fx-font-weight:bold;-fx-font-size:13px;"/>
+                            <TextField fx:id="phoneField" promptText="e.g. 22345678"
+                                       style="-fx-background-radius:8;-fx-border-color:#BDBDBD;-fx-border-radius:8;-fx-padding:10;-fx-font-size:13px;"/>
+                            <Label fx:id="phoneError" text="⚠ Enter a valid 8-digit phone number"
+                                   style="-fx-text-fill:#E53935;-fx-font-size:11px;" visible="false" managed="false"/>
+                        </VBox>
+
+                        <!-- Address -->
+                        <VBox spacing="4" GridPane.columnIndex="0" GridPane.rowIndex="1" GridPane.columnSpan="2">
+                            <padding><Insets top="8"/></padding>
+                            <Label text="Street Address *" style="-fx-font-weight:bold;-fx-font-size:13px;"/>
+                            <TextField fx:id="addressField" promptText="e.g. 12 Rue de la Liberté, Apt 3"
+                                       style="-fx-background-radius:8;-fx-border-color:#BDBDBD;-fx-border-radius:8;-fx-padding:10;-fx-font-size:13px;"/>
+                            <Label fx:id="addressError" text="⚠ Address must be at least 5 characters"
+                                   style="-fx-text-fill:#E53935;-fx-font-size:11px;" visible="false" managed="false"/>
+                        </VBox>
+
+                        <!-- City -->
+                        <VBox spacing="4" GridPane.columnIndex="0" GridPane.rowIndex="2">
+                            <padding><Insets top="8"/></padding>
+                            <Label text="City *" style="-fx-font-weight:bold;-fx-font-size:13px;"/>
+                            <TextField fx:id="cityField" promptText="e.g. Tunis"
+                                       style="-fx-background-radius:8;-fx-border-color:#BDBDBD;-fx-border-radius:8;-fx-padding:10;-fx-font-size:13px;"/>
+                            <Label fx:id="cityError" text="⚠ Please enter your city"
+                                   style="-fx-text-fill:#E53935;-fx-font-size:11px;" visible="false" managed="false"/>
+                        </VBox>
+
+                        <!-- Postal -->
+                        <VBox spacing="4" GridPane.columnIndex="1" GridPane.rowIndex="2">
+                            <padding><Insets top="8"/></padding>
+                            <Label text="Postal Code" style="-fx-font-weight:bold;-fx-font-size:13px;"/>
+                            <TextField fx:id="postalField" promptText="e.g. 1001"
+                                       style="-fx-background-radius:8;-fx-border-color:#BDBDBD;-fx-border-radius:8;-fx-padding:10;-fx-font-size:13px;"/>
+                        </VBox>
+
+                        <!-- Notes -->
+                        <VBox spacing="4" GridPane.columnIndex="0" GridPane.rowIndex="3" GridPane.columnSpan="2">
+                            <padding><Insets top="8"/></padding>
+                            <Label text="Delivery Notes (optional)" style="-fx-font-weight:bold;-fx-font-size:13px;"/>
+                            <TextArea fx:id="notesField" promptText="e.g. Ring the bell, leave at reception..."
+                                      prefRowCount="2"
+                                      style="-fx-background-radius:8;-fx-border-color:#BDBDBD;-fx-border-radius:8;-fx-padding:10;-fx-font-size:13px;"/>
+                        </VBox>
+
+                        <!-- ✉️ Email — NEW FIELD (optional) -->
+                        <VBox spacing="4" GridPane.columnIndex="0" GridPane.rowIndex="4" GridPane.columnSpan="2">
+                            <padding><Insets top="8"/></padding>
+                            <HBox spacing="6" alignment="CENTER_LEFT">
+                                <Label text="✉️  Email Address" style="-fx-font-weight:bold;-fx-font-size:13px;"/>
+                                <Label text="(optional — receive order confirmation)"
+                                       style="-fx-text-fill:#999;-fx-font-size:11px;"/>
+                            </HBox>
+                            <TextField fx:id="emailField" promptText="e.g. you@email.com"
+                                       style="-fx-background-radius:8;-fx-border-color:#BDBDBD;-fx-border-radius:8;-fx-padding:10;-fx-font-size:13px;"/>
+                        </VBox>
+
+                    </GridPane>
+                </VBox>
+
+                <!-- PAYMENT METHOD -->
+                <VBox spacing="12"
+                      style="-fx-background-color:white;-fx-background-radius:12;-fx-border-color:#E0E0E0;-fx-border-radius:12;-fx-padding:22;-fx-effect:dropshadow(gaussian,rgba(0,0,0,0.07),8,0,0,2);">
+                    <HBox spacing="8" alignment="CENTER_LEFT">
+                        <Label text="💳" style="-fx-font-size:18px;"/>
+                        <Label text="Payment Method" style="-fx-font-size:15px;-fx-font-weight:bold;"/>
+                    </HBox>
+                    <Separator/>
+
+                    <HBox fx:id="cashCard" spacing="15" alignment="CENTER_LEFT" onMouseClicked="#selectCash"
+                          style="-fx-background-color:#F9FBE7;-fx-background-radius:10;-fx-border-color:#CDDC39;-fx-border-radius:10;-fx-border-width:2;-fx-padding:15;-fx-cursor:hand;">
+                        <RadioButton fx:id="cashRadio" selected="true" mouseTransparent="true">
+                            <toggleGroup><ToggleGroup fx:id="payGroup"/></toggleGroup>
+                        </RadioButton>
+                        <VBox spacing="3">
+                            <Label text="💵  Cash on Delivery" style="-fx-font-size:14px;-fx-font-weight:bold;"/>
+                            <Label text="Pay when your order arrives. Stock reserved until delivery confirmed by seller."
+                                   wrapText="true" style="-fx-text-fill:#555;-fx-font-size:12px;"/>
+                        </VBox>
+                    </HBox>
+
+                    <HBox fx:id="onlineCard" spacing="15" alignment="CENTER_LEFT" onMouseClicked="#selectOnline"
+                          style="-fx-background-color:#F5F5F5;-fx-background-radius:10;-fx-border-color:#E0E0E0;-fx-border-radius:10;-fx-border-width:2;-fx-padding:15;-fx-cursor:hand;">
+                        <RadioButton fx:id="onlineRadio" toggleGroup="$payGroup" mouseTransparent="true"/>
+                        <VBox spacing="3">
+                            <Label text="💳  Online Payment (Stripe)" style="-fx-font-size:14px;-fx-font-weight:bold;"/>
+                            <Label text="Secure card payment. Order confirmed and stock updated immediately."
+                                   wrapText="true" style="-fx-text-fill:#555;-fx-font-size:12px;"/>
+                        </VBox>
+                    </HBox>
+                </VBox>
+
+            </VBox>
+        </ScrollPane>
+    </center>
+
+    <bottom>
+        <VBox style="-fx-background-color:white;-fx-border-color:#E0E0E0;-fx-border-width:1 0 0 0;-fx-padding:18;">
+            <HBox alignment="CENTER_RIGHT" spacing="20">
+                <Label text="Total:" style="-fx-font-size:15px;-fx-font-weight:bold;"/>
+                <Label fx:id="totalBottomLabel" text="0.000 TND"
+                       style="-fx-font-size:24px;-fx-font-weight:bold;-fx-text-fill:#2E7D32;"/>
+                <Region HBox.hgrow="ALWAYS"/>
+                <Button text="Continue  →" onAction="#confirmOrder" styleClass="button-confirm"
+                        style="-fx-background-color:linear-gradient(to right,#00796B,#43A047);-fx-text-fill:white;-fx-background-radius:25;-fx-padding:13 40;-fx-font-size:15px;-fx-font-weight:bold;-fx-cursor:hand;-fx-effect:dropshadow(gaussian,rgba(0,0,0,0.2),8,0,0,3);"/>
+            </HBox>
+        </VBox>
+    </bottom>
+
+</BorderPane>

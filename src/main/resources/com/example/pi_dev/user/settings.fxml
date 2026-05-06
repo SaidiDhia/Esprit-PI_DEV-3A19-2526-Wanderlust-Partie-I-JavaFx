@@ -1,0 +1,171 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.PasswordField?>
+<?import javafx.scene.control.ScrollPane?>
+<?import javafx.scene.control.Separator?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.image.ImageView?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.VBox?>
+<?import javafx.scene.shape.Circle?>
+
+<VBox prefHeight="700.0" prefWidth="800.0" stylesheets="@style.css" xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.example.pi_dev.Controllers.Users.SettingsController">
+    <children>
+        <ScrollPane fitToWidth="true" styleClass="scroll-pane" VBox.vgrow="ALWAYS">
+            <content>
+                <VBox alignment="TOP_CENTER" spacing="30.0" style="-fx-background-color: #F9FAFB;">
+                    <padding>
+                        <Insets bottom="50.0" left="50.0" right="50.0" top="50.0" />
+                    </padding>
+                    <children>
+                        <HBox alignment="CENTER_LEFT" maxWidth="800.0" spacing="20.0">
+                            <children>
+                                <Button fx:id="backButton" onAction="#handleBack" styleClass="btn, btn-secondary" text="← Back to Home" />
+                                <Label styleClass="text-h1" text="Account Settings" />
+                            </children>
+                        </HBox>
+
+                        <VBox maxWidth="800.0" spacing="30.0">
+                            <children>
+                                <VBox spacing="20.0" styleClass="card">
+                                    <padding>
+                                        <Insets bottom="30.0" left="30.0" right="30.0" top="30.0" />
+                                    </padding>
+                                    <children>
+                                        <HBox spacing="30.0" alignment="CENTER_LEFT">
+                                            <children>
+                                                <VBox spacing="10.0" alignment="CENTER">
+                                                    <children>
+                                                        <ImageView fx:id="profileImageView" fitHeight="120.0" fitWidth="120.0" pickOnBounds="true" preserveRatio="true">
+                                                            <clip>
+                                                                <Circle centerX="60" centerY="60" radius="60" />
+                                                            </clip>
+                                                        </ImageView>
+                                                        <Button onAction="#handleUploadProfilePic" styleClass="btn, btn-secondary" text="Change Picture" />
+                                                    </children>
+                                                </VBox>
+                                                
+                                                <VBox spacing="15.0" HBox.hgrow="ALWAYS">
+                                                    <children>
+                                                        <Label styleClass="text-h2" text="Profile Information" />
+                                                        <VBox spacing="8.0">
+                                                            <children>
+                                                                <Label styleClass="text-p" text="Full Name" style="-fx-font-weight: bold;" />
+                                                                <TextField fx:id="fullNameField" styleClass="text-input" />
+                                                            </children>
+                                                        </VBox>
+                                                        <VBox spacing="8.0">
+                                                            <children>
+                                                                <Label styleClass="text-p" text="Email Address" style="-fx-font-weight: bold;" />
+                                                                <TextField fx:id="emailField" editable="false" styleClass="text-input" style="-fx-opacity: 0.6;" />
+                                                            </children>
+                                                        </VBox>
+                                                        <VBox spacing="8.0">
+                                                            <children>
+                                                                <Label styleClass="text-p" text="Phone Number" style="-fx-font-weight: bold;" />
+                                                                <TextField fx:id="phoneField" styleClass="text-input" />
+                                                            </children>
+                                                        </VBox>
+                                                        <Button onAction="#handleUpdateProfile" styleClass="btn, btn-primary" text="Update Profile" />
+                                                    </children>
+                                                </VBox>
+                                            </children>
+                                        </HBox>
+                                    </children>
+                                </VBox>
+
+                                <VBox spacing="20.0" styleClass="card">
+                                    <padding>
+                                        <Insets bottom="30.0" left="30.0" right="30.0" top="30.0" />
+                                    </padding>
+                                    <children>
+                                        <HBox alignment="CENTER_LEFT" spacing="10.0">
+                                            <children>
+                                                <Label text="🛡" style="-fx-text-fill: #2563eb; -fx-font-size: 24px; -fx-background-color: #2563eb; -fx-background-radius: 8; -fx-padding: 5 10; -fx-text-fill: white;" />
+                                                <Label styleClass="text-h2" text="Security Settings" />
+                                            </children>
+                                        </HBox>
+                                        <VBox spacing="20.0">
+                                            <children>
+                                                <VBox spacing="15.0" styleClass="security-card-blue" style="-fx-padding: 30;">
+                                                    <children>
+                                                        <HBox alignment="CENTER_LEFT" spacing="10.0">
+                                                            <children>
+                                                                <Label styleClass="text-h2" text="Change Password" style="-fx-text-fill: #1d4ed8; -fx-font-size: 18px;" />
+                                                            </children>
+                                                        </HBox>
+                                                        
+                                                        <HBox alignment="CENTER_LEFT" spacing="10.0" styleClass="input-container-box">
+                                                            <children>
+                                                                <Label text="🔒" style="-fx-text-fill: #3b82f6; -fx-font-size: 16px;" />
+                                                                <PasswordField fx:id="currentPasswordField" promptText="Current Password" styleClass="input-container-field" HBox.hgrow="ALWAYS" />
+                                                            </children>
+                                                        </HBox>
+                                                        
+                                                        <HBox alignment="CENTER_LEFT" spacing="10.0" styleClass="input-container-box">
+                                                            <children>
+                                                                <Label text="🔒" style="-fx-text-fill: #3b82f6; -fx-font-size: 16px;" />
+                                                                <PasswordField fx:id="newPasswordField" promptText="New Password" styleClass="input-container-field" HBox.hgrow="ALWAYS" />
+                                                            </children>
+                                                        </HBox>
+                                                        
+                                                        <HBox alignment="CENTER_LEFT" spacing="10.0" styleClass="input-container-box">
+                                                            <children>
+                                                                <Label text="🔒" style="-fx-text-fill: #3b82f6; -fx-font-size: 16px;" />
+                                                                <PasswordField fx:id="confirmPasswordField" promptText="Confirm New Password" styleClass="input-container-field" HBox.hgrow="ALWAYS" />
+                                                            </children>
+                                                        </HBox>
+
+                                                        <Label fx:id="passwordErrorLabel" styleClass="text-p" style="-fx-text-fill: #EF4444;" />
+                                                        <Button onAction="#handleChangePassword" styleClass="btn-solid-blue" text="Update Password" />
+                                                    </children>
+                                                </VBox>
+
+                                                <VBox spacing="20.0" styleClass="security-card-green" style="-fx-padding: 30;">
+                                                    <children>
+                                                        <HBox alignment="CENTER_LEFT" spacing="15.0">
+                                                            <children>
+                                                                 <Label text="✅" style="-fx-text-fill: #10B981; -fx-font-size: 20px;" />
+                                                                 <Label styleClass="text-h2" text="Two-Factor Authentication" style="-fx-font-size: 18px;" HBox.hgrow="ALWAYS" />
+                                                                 <HBox alignment="CENTER_RIGHT" HBox.hgrow="ALWAYS">
+                                                                     <children>
+                                                                         <Label fx:id="tfaStatusLabel" styleClass="badge-tfa-on" text="ON (FACE)" />
+                                                                     </children>
+                                                                 </HBox>
+                                                            </children>
+                                                        </HBox>
+                                                        
+                                                        <Label styleClass="text-p" text="Add an extra layer of security to your account by enabling two-factor authentication" style="-fx-text-fill: #4B5563;" />
+                                                        
+                                                        <HBox spacing="15.0">
+                                                            <children>
+                                                                <Button onAction="#handleEnableApp2FA" styleClass="btn, btn-outline-gray" text="App (QR)" />
+                                                                <Button onAction="#handleEnableEmail2FA" styleClass="btn, btn-outline-gray" text="Email" />
+                                                                <Button onAction="#handleEnableFace2FA" styleClass="btn, btn-outline-blue" text="Face ID" />
+                                                            </children>
+                                                        </HBox>
+                                                        
+                                                        <Button onAction="#handleDisable2FA" styleClass="btn, btn-danger" text="Disable 2FA" />
+                                                    </children>
+                                                </VBox>
+                                            </children>
+                                        </VBox>
+                                    </children>
+                                </VBox>
+
+                                <HBox alignment="CENTER_RIGHT" maxWidth="800.0" spacing="15.0">
+                                    <children>
+                                        <Button onAction="#handleLogout" styleClass="btn, btn-danger" text="Logout" />
+                                    </children>
+                                </HBox>
+                            </children>
+                        </VBox>
+                    </children>
+                </VBox>
+            </content>
+        </ScrollPane>
+    </children>
+</VBox>

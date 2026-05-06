@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.ScrollPane?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.layout.AnchorPane?>
+<?import javafx.scene.layout.FlowPane?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.Region?>
+<?import javafx.scene.layout.VBox?>
+
+<AnchorPane xmlns="http://javafx.com/javafx/17"
+            xmlns:fx="http://javafx.com/fxml/1"
+            fx:controller="com.example.pi_dev.Controllers.Booking.Front.PlaceBrowseController"
+            stylesheets="@../../style.css">
+
+    <ScrollPane fitToWidth="true" styleClass="scroll-pane"
+                AnchorPane.topAnchor="0" AnchorPane.bottomAnchor="0"
+                AnchorPane.leftAnchor="0" AnchorPane.rightAnchor="0">
+        <content>
+            <VBox spacing="0">
+
+                <!-- Hero Section -->
+                <VBox styleClass="hero-section" alignment="CENTER" spacing="16">
+                    <padding><Insets top="60" right="40" bottom="60" left="40"/></padding>
+                    <Label styleClass="hero-title" text="Book Your Dream Stay"/>
+                    <Label styleClass="hero-subtitle" text="Discover unique places to stay around the world"/>
+
+                    <!-- Search Bar -->
+                    <HBox styleClass="search-bar" alignment="CENTER" spacing="8" maxWidth="600">
+                        <TextField fx:id="searchField" styleClass="search-field"
+                                   promptText="Search by city, category or title..."
+                                   onAction="#handleSearch" HBox.hgrow="ALWAYS"/>
+                        <Button styleClass="search-btn" text="Search" onAction="#handleSearch"/>
+                    </HBox>
+                </VBox>
+
+                <!-- Properties Section -->
+                <VBox spacing="20" style="-fx-background-color: #F9FAFB;">
+                    <padding><Insets top="32" right="40" bottom="40" left="40"/></padding>
+
+                    <HBox alignment="CENTER_LEFT" spacing="12">
+                        <Label styleClass="section-title" text="Available Properties"/>
+                        <Region HBox.hgrow="ALWAYS"/>
+                        <Label fx:id="resultCountLabel" styleClass="section-subtitle"/>
+                    </HBox>
+
+                    <!-- Cards Grid -->
+                    <FlowPane fx:id="cardsPane" hgap="20" vgap="20" prefWrapLength="1100"/>
+                </VBox>
+
+            </VBox>
+        </content>
+    </ScrollPane>
+
+</AnchorPane>

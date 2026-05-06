@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.Region?>
+<?import javafx.scene.layout.StackPane?>
+<?import javafx.scene.layout.VBox?>
+
+<VBox xmlns="http://javafx.com/javafx/17"
+      xmlns:fx="http://javafx.com/fxml/1"
+      fx:controller="com.example.pi_dev.Controllers.Booking.AppController"
+      stylesheets="@../style.css"
+      prefWidth="1200.0" prefHeight="750.0">
+
+    <!-- Navbar -->
+    <HBox styleClass="navbar" alignment="CENTER_LEFT" spacing="8">
+        <Label styleClass="navbar-brand" text="✈ Wanderlust"/>
+        <Region HBox.hgrow="ALWAYS"/>
+        <Button styleClass="nav-btn" text="Browse" onAction="#handleHome"/>
+        <Button fx:id="btnListYourPlace" styleClass="nav-btn" text="List Your Place" onAction="#handleListYourPlace"/>
+        <Button fx:id="btnMyBookings" styleClass="nav-btn" text="My Bookings" onAction="#handleMyBookings"/>
+        <Button fx:id="btnMyPlaces" styleClass="nav-btn" text="My Places" onAction="#handleMyPlaces"/>
+        <Button fx:id="btnReservations" styleClass="nav-btn" text="Reservations" onAction="#handleReservations"/>
+        <Button fx:id="btnAdmin" styleClass="nav-btn" text="Admin" onAction="#handleAdminDashboard"/>
+    </HBox>
+
+    <!-- Content Area -->
+    <StackPane fx:id="contentPane" VBox.vgrow="ALWAYS"/>
+
+</VBox>

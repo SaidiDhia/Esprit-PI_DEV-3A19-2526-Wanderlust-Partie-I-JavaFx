@@ -1,0 +1,107 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.DatePicker?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.Separator?>
+<?import javafx.scene.control.Spinner?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.VBox?>
+
+<VBox xmlns="http://javafx.com/javafx/25"
+      xmlns:fx="http://javafx.com/fxml/1"
+      fx:controller="com.example.pi_dev.Controllers.Booking.Front.BookingDialogController"
+      stylesheets="@../../style.css"
+      styleClass="dialog-card"
+      spacing="18"
+      prefWidth="480">
+
+    <padding><Insets top="32" right="32" bottom="32" left="32"/></padding>
+
+    <!-- Header -->
+    <VBox spacing="4">
+        <Label styleClass="dialog-title" text="Book Your Stay"/>
+        <Label fx:id="placeTitleLabel"
+               styleClass="text-h2"
+               style="-fx-text-fill: #2563EB;"
+               text=""/>
+    </VBox>
+
+    <Separator/>
+
+    <!-- Place Info -->
+    <VBox spacing="8" style="-fx-background-color: #F9FAFB; -fx-background-radius: 8; -fx-padding: 12;">
+        <HBox spacing="8">
+            <Label styleClass="text-p" style="-fx-font-weight: bold;" text="📍 Address:"/>
+            <Label fx:id="placeAddressLabel" styleClass="text-p" wrapText="true"/>
+        </HBox>
+
+        <HBox spacing="16">
+            <HBox spacing="6">
+                <Label styleClass="text-p" style="-fx-font-weight: bold;" text="🏠 Rooms:"/>
+                <Label fx:id="placeCapacityLabel" styleClass="text-p"/>
+            </HBox>
+
+            <HBox spacing="6">
+                <Label styleClass="text-p" style="-fx-font-weight: bold;" text="👥 Max Guests:"/>
+                <Label fx:id="placeMaxGuestsLabel" styleClass="text-p"/>
+            </HBox>
+        </HBox>
+
+        <HBox spacing="8">
+            <Label styleClass="text-p" style="-fx-font-weight: bold;" text="💰 Price:"/>
+            <Label fx:id="placePriceLabel"
+                   styleClass="text-p"
+                   style="-fx-text-fill: #16a34a; -fx-font-weight: bold;"/>
+        </HBox>
+    </VBox>
+
+    <Separator/>
+
+    <!-- Date Pickers -->
+    <HBox spacing="16">
+        <VBox spacing="6" HBox.hgrow="ALWAYS">
+            <Label styleClass="text-p" style="-fx-font-weight: bold;" text="Check-in Date"/>
+            <DatePicker fx:id="startDatePicker" maxWidth="Infinity"/>
+        </VBox>
+
+        <VBox spacing="6" HBox.hgrow="ALWAYS">
+            <Label styleClass="text-p" style="-fx-font-weight: bold;" text="Check-out Date"/>
+            <DatePicker fx:id="endDatePicker" maxWidth="Infinity"/>
+        </VBox>
+    </HBox>
+
+    <!-- Guests -->
+    <VBox spacing="6">
+        <Label styleClass="text-p" style="-fx-font-weight: bold;" text="Number of Guests"/>
+        <Spinner fx:id="guestsSpinner" editable="true" maxWidth="Infinity"/>
+    </VBox>
+
+    <!-- Total Price -->
+    <HBox spacing="12" alignment="CENTER_LEFT"
+          style="-fx-background-color: #EFF6FF; -fx-background-radius: 8; -fx-padding: 12;">
+        <Label styleClass="text-p" style="-fx-font-weight: bold;" text="Total Price:"/>
+        <Label fx:id="totalPriceLabel"
+               styleClass="text-h2"
+               style="-fx-text-fill: #2563EB;"
+               text="0.00"/>
+    </HBox>
+
+    <!-- Error Label -->
+    <Label fx:id="errorLabel" styleClass="error-label" text="" wrapText="true"/>
+
+    <Separator/>
+
+    <!-- Action Buttons -->
+    <HBox spacing="12" alignment="CENTER_RIGHT">
+        <Button text="Cancel" onAction="#handleCancel"
+                styleClass="btn"
+                style="-fx-background-color: transparent; -fx-border-color: #D1D5DB; -fx-border-width: 1; -fx-border-radius: 8; -fx-background-radius: 8; -fx-text-fill: #374151;"/>
+
+        <Button text="Confirm Booking" onAction="#handleConfirm" prefWidth="160"
+                styleClass="btn"
+                style="-fx-background-color: #2563EB; -fx-text-fill: white; -fx-background-radius: 8; -fx-border-radius: 8; -fx-padding: 8 16 8 16; -fx-font-weight: bold;"/>
+    </HBox>
+
+</VBox>

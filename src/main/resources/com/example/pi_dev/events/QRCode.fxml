@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.Separator?>
+<?import javafx.scene.image.ImageView?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.Region?>
+<?import javafx.scene.layout.VBox?>
+
+<VBox prefHeight="600.0" prefWidth="500.0" style="-fx-background-color: linear-gradient(to bottom, #CAD4DC, #ffffff); -fx-padding: 0;" xmlns="http://javafx.com/javafx/25" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.example.pi_dev.Controllers.Events.QRCodeController">
+   <children>
+      <HBox alignment="CENTER_LEFT" prefHeight="0.0" prefWidth="930.0" style="-fx-background-color: linear-gradient(to bottom right, #86A7BF, #2D70B3); -fx-padding: 20; -fx-spacing: 20;">
+         <children>
+            <VBox spacing="5">
+               <children>
+                  <Label style="-fx-font-size: 24px; -fx-font-weight: bold; -fx-text-fill: white;" text="Wanderlust" />
+                  <Label style="-fx-font-size: 14px; -fx-text-fill: #86A7BF;" text="QR Code de Réservation" />
+               </children>
+            </VBox>
+            <Region HBox.hgrow="ALWAYS" />
+            <Button fx:id="fermerButton" onAction="#fermer" style="-fx-background-color: transparent; -fx-text-fill: white; -fx-border-color: transparent; -fx-border-width: 0 0 2 0; -fx-font-size: 14px; -fx-cursor: hand;" text="❌ Fermer" />
+         </children>
+      </HBox>
+      
+      <VBox alignment="CENTER" spacing="30" style="-fx-padding: 40;">
+         <children>
+            <Label style="-fx-font-size: 20px; -fx-font-weight: bold; -fx-text-fill: #0F2C4F;" text="🎫 Réservation Confirmée" />
+            
+            <VBox alignment="CENTER" spacing="15" style="-fx-background-color: white; -fx-background-radius: 15; -fx-border-color: #e0e0e0; -fx-border-width: 1; -fx-padding: 30;">
+               <children>
+                  <Label fx:id="reservationInfoLabel" style="-fx-font-size: 14px; -fx-text-fill: #333; -fx-wrap-text: true;" text="Informations de la réservation" />
+                  <Separator style="-fx-background-color: #e0e0e0;" />
+                  <ImageView fx:id="qrCodeImageView" fitHeight="200" fitWidth="200" style="-fx-background-radius: 10; -fx-border-color: #ddd; -fx-border-width: 1;" />
+                  <Label style="-fx-font-size: 12px; -fx-text-fill: #666; -fx-wrap-text: true;" text="Scannez ce QR code pour vérifier votre réservation" />
+               </children>
+            </VBox>
+            
+            <VBox spacing="15">
+               <children>
+                  <Button fx:id="imprimerButton" onAction="#imprimerQRCode" style="-fx-background-color: linear-gradient(to bottom right, #1A4E85, #0F2C4F); -fx-text-fill: white; -fx-background-radius: 25; -fx-border-radius: 25; -fx-padding: 15 30; -fx-font-size: 16px; -fx-font-weight: bold; -fx-cursor: hand;" text="🖨️ Imprimer le QR Code" />
+                  <Button fx:id="sauvegarderButton" onAction="#sauvegarderQRCode" style="-fx-background-color: #e3f2fd; -fx-text-fill: #1a73e8; -fx-background-radius: 25; -fx-border-radius: 25; -fx-padding: 12 25; -fx-font-size: 14px; -fx-cursor: hand;" text="💾 Sauvegarder" />
+               </children>
+            </VBox>
+         </children>
+      </VBox>
+   </children>
+</VBox>

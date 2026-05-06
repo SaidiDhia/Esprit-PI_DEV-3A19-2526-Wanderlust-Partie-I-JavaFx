@@ -1,0 +1,302 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.geometry.Insets?>
+
+<BorderPane xmlns="http://javafx.com/javafx"
+            xmlns:fx="http://javafx.com/fxml"
+            fx:controller="com.example.pi_dev.Controllers.Blog.BlogController"
+            style="-fx-background-color: #EFF6FF;">
+
+    <top>
+        <HBox style="-fx-background-color:#1E40AF;
+                     -fx-padding:0 32 0 32;
+                     -fx-alignment:CENTER_LEFT;
+                     -fx-spacing:0;
+                     -fx-min-height:58;
+                     -fx-effect:dropshadow(gaussian,rgba(30,64,175,0.25),10,0,0,3);">
+
+            <Label text="✦ Wanderlust"
+                   style="-fx-font-size:19px; -fx-font-weight:bold;
+                          -fx-text-fill:#FFFFFF; -fx-font-family:'Segoe UI',Arial;"/>
+            <Label text="  Blog"
+                   style="-fx-font-size:19px; -fx-font-weight:300;
+                          -fx-text-fill:#BFDBFE; -fx-font-family:'Segoe UI',Arial;"/>
+
+            <Region HBox.hgrow="ALWAYS"/>
+
+            <!-- NOTIFICATION BELL -->
+            <StackPane fx:id="notifBellPane" style="-fx-cursor:HAND; -fx-padding:0 12 0 0;">
+                <Button fx:id="notifBellBtn"
+                        text="🔔"
+                        onAction="#handleToggleNotifications"
+                        style="-fx-background-color:rgba(255,255,255,0.12);
+                               -fx-background-radius:50;
+                               -fx-text-fill:#FFFFFF;
+                               -fx-font-size:16px;
+                               -fx-min-width:40; -fx-min-height:40;
+                               -fx-cursor:HAND;
+                               -fx-border-color:transparent;"/>
+                <Label fx:id="notifBadge"
+                       text="0"
+                       visible="false" managed="false"
+                       style="-fx-background-color:#EF4444;
+                              -fx-background-radius:10;
+                              -fx-text-fill:white;
+                              -fx-font-size:9px;
+                              -fx-font-weight:bold;
+                              -fx-padding:1 5 1 5;
+                              -fx-min-width:16;
+                              -fx-alignment:CENTER;"
+                       StackPane.alignment="TOP_RIGHT"/>
+            </StackPane>
+
+            <Button fx:id="navArchiveBtn"
+                    text="🗂  Sauvegardés"
+                    onAction="#handleShowArchive"
+                    style="-fx-background-color:rgba(255,255,255,0.12);
+                           -fx-background-radius:8;
+                           -fx-text-fill:#FFFFFF;
+                           -fx-font-size:13px;
+                           -fx-font-family:'Segoe UI',Arial;
+                           -fx-padding:8 16 8 16;
+                           -fx-cursor:HAND;
+                           -fx-border-color:rgba(255,255,255,0.2);
+                           -fx-border-radius:8;"/>
+
+            <Separator orientation="VERTICAL"
+                       style="-fx-padding:12 16 12 16;"/>
+
+            <HBox spacing="8" style="-fx-alignment:CENTER_LEFT; -fx-padding:0 0 0 8;">
+                <Label text="●" style="-fx-text-fill:#86EFAC; -fx-font-size:9px;"/>
+                <Label fx:id="currentUsernameLabel"
+                       text="Utilisateur"
+                       style="-fx-font-size:13px; -fx-font-weight:bold;
+                              -fx-text-fill:#FFFFFF; -fx-font-family:'Segoe UI',Arial;"/>
+            </HBox>
+        </HBox>
+    </top>
+
+    <center>
+        <StackPane>
+
+            <!-- MAIN FEED -->
+            <ScrollPane fx:id="mainScrollPane"
+                        fitToWidth="true"
+                        hbarPolicy="NEVER"
+                        vbarPolicy="AS_NEEDED"
+                        style="-fx-background:transparent;
+                               -fx-background-color:transparent;
+                               -fx-border-color:transparent;">
+                <content>
+                    <VBox alignment="TOP_CENTER" style="-fx-background-color:#EFF6FF;">
+                        <padding><Insets top="28" bottom="48" left="20" right="20"/></padding>
+
+                        <VBox fx:id="feedColumn" maxWidth="700" minWidth="340" spacing="0"
+                              style="-fx-alignment:TOP_CENTER;">
+
+                            <!-- CREATE POST CARD -->
+                            <VBox style="-fx-background-color:#FFFFFF;
+                                         -fx-background-radius:14;
+                                         -fx-effect:dropshadow(gaussian,rgba(30,64,175,0.08),16,0,0,2);
+                                         -fx-padding:20 22 20 22;
+                                         -fx-spacing:14;">
+                                <VBox.margin><Insets bottom="20"/></VBox.margin>
+
+                                <HBox spacing="12" style="-fx-alignment:CENTER_LEFT;">
+                                    <Label text="✎"
+                                           style="-fx-background-color:linear-gradient(135deg,#1E40AF,#3B82F6);
+                                                  -fx-background-radius:22;
+                                                  -fx-min-width:42; -fx-min-height:42;
+                                                  -fx-max-width:42; -fx-max-height:42;
+                                                  -fx-alignment:CENTER;
+                                                  -fx-text-fill:white; -fx-font-size:17px;"/>
+                                    <VBox spacing="1">
+                                        <Label text="Créer une publication"
+                                               style="-fx-font-size:14px; -fx-font-weight:bold;
+                                                      -fx-text-fill:#111827; -fx-font-family:'Segoe UI',Arial;"/>
+                                        <Label text="Partagez vos pensées avec la communauté"
+                                               style="-fx-font-size:11px; -fx-text-fill:#9CA3AF;
+                                                      -fx-font-family:'Segoe UI',Arial;"/>
+                                    </VBox>
+                                </HBox>
+
+                                <TextArea fx:id="newPostContent"
+                                          promptText="Quoi de neuf ?"
+                                          wrapText="true" prefRowCount="4"
+                                          style="-fx-font-size:13px; -fx-font-family:'Segoe UI',Arial;
+                                                 -fx-text-fill:#374151; -fx-background-color:#F8FAFF;
+                                                 -fx-background-radius:10; -fx-border-color:#BFDBFE;
+                                                 -fx-border-radius:10; -fx-border-width:1.5; -fx-padding:11;"/>
+
+                                <Label fx:id="postErrorLabel" visible="false" managed="false"
+                                       style="-fx-text-fill:#EF4444; -fx-font-size:11px;
+                                              -fx-font-family:'Segoe UI',Arial;"/>
+
+                                <HBox spacing="8" style="-fx-alignment:CENTER_LEFT;">
+                                    <TextField fx:id="newPostMediaPath"
+                                               promptText="Photo ou vidéo (optionnel)"
+                                               HBox.hgrow="ALWAYS"
+                                               style="-fx-font-size:12px; -fx-font-family:'Segoe UI',Arial;
+                                                      -fx-background-color:#F8FAFF; -fx-background-radius:8;
+                                                      -fx-border-color:#BFDBFE; -fx-border-radius:8;
+                                                      -fx-border-width:1.5; -fx-padding:8 12 8 12;"/>
+                                    <Button text="📎" onAction="#handleBrowseMedia"
+                                            style="-fx-background-color:#EFF6FF; -fx-background-radius:8;
+                                                   -fx-text-fill:#1E40AF; -fx-font-size:14px;
+                                                   -fx-min-width:36; -fx-min-height:36; -fx-cursor:HAND;
+                                                   -fx-border-color:#BFDBFE; -fx-border-radius:8;"/>
+                                </HBox>
+
+                                <HBox spacing="10" style="-fx-alignment:CENTER_LEFT;">
+                                    <Label text="Visibilité :"
+                                           style="-fx-font-size:12px; -fx-text-fill:#6B7280;
+                                                  -fx-font-family:'Segoe UI',Arial;"/>
+                                    <ComboBox fx:id="visibilityCombo"
+                                              style="-fx-font-size:12px; -fx-background-color:#EFF6FF;
+                                                     -fx-background-radius:8; -fx-border-color:#BFDBFE;
+                                                     -fx-border-radius:8;"/>
+                                    <Region HBox.hgrow="ALWAYS"/>
+                                    <Button text="Effacer" onAction="#handleClearPost"
+                                            style="-fx-background-color:transparent; -fx-text-fill:#9CA3AF;
+                                                   -fx-font-size:12px; -fx-padding:8 14 8 14; -fx-cursor:HAND;"/>
+                                    <Button fx:id="publishBtn" text="Publier" onAction="#handlePublishPost"
+                                            style="-fx-background-color:#1E40AF; -fx-background-radius:9;
+                                                   -fx-text-fill:white; -fx-font-size:12px; -fx-font-weight:bold;
+                                                   -fx-padding:8 20 8 20; -fx-cursor:HAND;"/>
+                                </HBox>
+                            </VBox>
+
+                            <!-- FEED HEADER -->
+                            <HBox spacing="8" style="-fx-alignment:CENTER_LEFT; -fx-padding:0 0 10 2;">
+                                <Label text="Publications"
+                                       style="-fx-font-size:15px; -fx-font-weight:bold;
+                                              -fx-text-fill:#1E40AF; -fx-font-family:'Segoe UI',Arial;"/>
+                                <Label fx:id="postCountLabel" text="· 0 publications"
+                                       style="-fx-font-size:13px; -fx-text-fill:#9CA3AF;
+                                              -fx-font-family:'Segoe UI',Arial;"/>
+                                <Region HBox.hgrow="ALWAYS"/>
+                                <Button text="↻" onAction="#handleRefresh"
+                                        style="-fx-background-color:transparent; -fx-text-fill:#1E40AF;
+                                               -fx-font-size:16px; -fx-cursor:HAND; -fx-border-color:transparent;"/>
+                            </HBox>
+
+                            <VBox fx:id="postsFeedContainer" spacing="14"/>
+
+                            <VBox fx:id="emptyStateBox" alignment="CENTER" spacing="10"
+                                  visible="false" managed="false" style="-fx-padding:60 0 60 0;">
+                                <Label text="✦" style="-fx-font-size:44px; -fx-text-fill:#BFDBFE;"/>
+                                <Label text="Aucune publication"
+                                       style="-fx-font-size:17px; -fx-font-weight:bold;
+                                              -fx-text-fill:#9CA3AF; -fx-font-family:'Segoe UI',Arial;"/>
+                                <Label text="Soyez le premier à partager quelque chose !"
+                                       style="-fx-font-size:12px; -fx-text-fill:#D1D5DB;
+                                              -fx-font-family:'Segoe UI',Arial;"/>
+                            </VBox>
+
+                        </VBox>
+                    </VBox>
+                </content>
+            </ScrollPane>
+
+            <!-- ARCHIVE VIEW -->
+            <VBox fx:id="archiveView" visible="false" managed="false"
+                  style="-fx-background-color:#EFF6FF;">
+
+                <HBox style="-fx-background-color:#1E40AF; -fx-padding:14 28 14 28;
+                             -fx-alignment:CENTER_LEFT; -fx-spacing:14;
+                             -fx-effect:dropshadow(gaussian,rgba(30,64,175,0.2),8,0,0,2);">
+                    <Button text="← Retour au fil" onAction="#handleShowFeed"
+                            style="-fx-background-color:rgba(255,255,255,0.15); -fx-background-radius:8;
+                                   -fx-text-fill:#FFFFFF; -fx-font-size:13px; -fx-cursor:HAND;
+                                   -fx-border-color:rgba(255,255,255,0.25); -fx-border-radius:8;
+                                   -fx-padding:6 14 6 14;"/>
+                    <Label text="Publications sauvegardées"
+                           style="-fx-font-size:16px; -fx-font-weight:bold;
+                                  -fx-text-fill:#FFFFFF; -fx-font-family:'Segoe UI',Arial;"/>
+                    <Label fx:id="archiveCountLabel" text="· 0 sauvegardé(s)"
+                           style="-fx-font-size:13px; -fx-text-fill:#BFDBFE;
+                                  -fx-font-family:'Segoe UI',Arial;"/>
+                </HBox>
+
+                <ScrollPane fitToWidth="true" hbarPolicy="NEVER" VBox.vgrow="ALWAYS"
+                            style="-fx-background:transparent; -fx-background-color:transparent;
+                                   -fx-border-color:transparent;">
+                    <content>
+                        <VBox alignment="TOP_CENTER" style="-fx-background-color:#EFF6FF;">
+                            <padding><Insets top="24" bottom="48" left="20" right="20"/></padding>
+                            <VBox fx:id="archiveFeedContainer" maxWidth="700" minWidth="340" spacing="14"
+                                  style="-fx-alignment:TOP_CENTER;"/>
+                            <VBox fx:id="archiveEmptyBox" alignment="CENTER" spacing="10"
+                                  visible="false" managed="false" style="-fx-padding:60 0 0 0;">
+                                <Label text="🗂" style="-fx-font-size:44px;"/>
+                                <Label text="Aucune publication sauvegardée"
+                                       style="-fx-font-size:17px; -fx-font-weight:bold; -fx-text-fill:#9CA3AF;"/>
+                                <Label text="Sauvegardez des publications depuis le fil pour les retrouver ici."
+                                       style="-fx-font-size:12px; -fx-text-fill:#D1D5DB;"/>
+                            </VBox>
+                        </VBox>
+                    </content>
+                </ScrollPane>
+            </VBox>
+
+            <!-- NOTIFICATION PANEL OVERLAY -->
+            <VBox fx:id="notifPanel" visible="false" managed="false"
+                  StackPane.alignment="TOP_RIGHT"
+                  style="-fx-background-color:#FFFFFF;
+                         -fx-background-radius:14;
+                         -fx-effect:dropshadow(gaussian,rgba(0,0,0,0.18),24,0,0,6);
+                         -fx-pref-width:360; -fx-max-width:360; -fx-max-height:520;
+                         -fx-border-color:#E5E7EB; -fx-border-radius:14; -fx-border-width:1;">
+                <VBox.margin><Insets top="62" right="16"/></VBox.margin>
+
+                <!-- Header -->
+                <HBox style="-fx-padding:16 18 12 18; -fx-alignment:CENTER_LEFT; -fx-spacing:8;
+                             -fx-border-color:#F3F4F6; -fx-border-width:0 0 1 0;">
+                    <Label text="🔔  Notifications"
+                           style="-fx-font-size:15px; -fx-font-weight:bold;
+                                  -fx-text-fill:#111827; -fx-font-family:'Segoe UI',Arial;"/>
+                    <Region HBox.hgrow="ALWAYS"/>
+                    <Button fx:id="notifMarkAllBtn" text="Tout lire" onAction="#handleMarkAllRead"
+                            style="-fx-background-color:transparent; -fx-text-fill:#1E40AF;
+                                   -fx-font-size:11px; -fx-cursor:HAND; -fx-border-color:transparent;"/>
+                    <Button text="✕" onAction="#handleToggleNotifications"
+                            style="-fx-background-color:transparent; -fx-text-fill:#9CA3AF;
+                                   -fx-font-size:13px; -fx-cursor:HAND; -fx-border-color:transparent;
+                                   -fx-padding:2 6 2 6;"/>
+                </HBox>
+
+                <!-- Tab bar -->
+                <HBox fx:id="notifTabBar"
+                      style="-fx-padding:0 18 0 18; -fx-spacing:4; -fx-alignment:CENTER_LEFT;
+                             -fx-border-color:#F3F4F6; -fx-border-width:0 0 1 0;">
+                    <Button fx:id="notifTabAll" text="Tout" onAction="#handleNotifTabAll"
+                            style="-fx-background-color:transparent; -fx-text-fill:#1E40AF;
+                                   -fx-font-size:12px; -fx-font-weight:bold; -fx-cursor:HAND;
+                                   -fx-border-color:#1E40AF; -fx-border-width:0 0 2 0;
+                                   -fx-border-radius:0; -fx-background-radius:0;
+                                   -fx-padding:10 12 8 12;"/>
+                    <Button fx:id="notifTabUnread" text="Non lu" onAction="#handleNotifTabUnread"
+                            style="-fx-background-color:transparent; -fx-text-fill:#6B7280;
+                                   -fx-font-size:12px; -fx-cursor:HAND;
+                                   -fx-border-color:transparent; -fx-border-width:0 0 2 0;
+                                   -fx-border-radius:0; -fx-background-radius:0;
+                                   -fx-padding:10 12 8 12;"/>
+                </HBox>
+
+                <!-- Notification list -->
+                <ScrollPane fitToWidth="true" hbarPolicy="NEVER" VBox.vgrow="ALWAYS"
+                            style="-fx-background:transparent; -fx-background-color:transparent;
+                                   -fx-border-color:transparent;">
+                    <content>
+                        <VBox fx:id="notifListContainer"
+                              style="-fx-background-color:#FFFFFF; -fx-padding:4 0 4 0; -fx-spacing:0;"/>
+                    </content>
+                </ScrollPane>
+            </VBox>
+
+        </StackPane>
+    </center>
+
+</BorderPane>

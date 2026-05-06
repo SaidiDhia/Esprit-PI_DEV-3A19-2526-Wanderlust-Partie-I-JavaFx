@@ -1,0 +1,180 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.ComboBox?>
+<?import javafx.scene.control.Hyperlink?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.PasswordField?>
+<?import javafx.scene.control.ProgressBar?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.control.ScrollPane?>
+<?import javafx.scene.layout.BorderPane?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.VBox?>
+<?import javafx.scene.layout.StackPane?>
+<?import javafx.scene.layout.Region?>
+<?import javafx.scene.image.ImageView?>
+<?import javafx.scene.image.Image?>
+<?import javafx.scene.shape.Rectangle?>
+
+<BorderPane prefHeight="800.0" prefWidth="1200.0" stylesheets="@style.css" xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.example.pi_dev.Controllers.Users.SignupController" style="-fx-background-color: #F8FAFC;">
+    <top>
+        <!-- Top Navbar -->
+        <VBox styleClass="auth-top-navbar">
+            <children>
+                <HBox alignment="CENTER_LEFT" spacing="30.0">
+                    <children>
+                        <!-- Logo Placeholder -->
+                        <HBox alignment="CENTER" spacing="10.0">
+                            <StackPane style="-fx-background-color: white; -fx-background-radius: 8; -fx-padding: 5;">
+                                <Label text="🏕️" style="-fx-font-size: 24px;" />
+                            </StackPane>
+                            <VBox>
+                                <Label text="WonderLust" styleClass="text-h2" style="-fx-text-fill: white;" />
+                                <Label text="Travel &amp; Camping" style="-fx-text-fill: white; -fx-font-size: 10px; -fx-opacity: 0.8;" />
+                            </VBox>
+                        </HBox>
+                        
+                        <Region HBox.hgrow="ALWAYS" />
+                        
+                        <!-- Nav Links -->
+                        <HBox alignment="CENTER" spacing="25.0">
+                            <Label text="🏠 Home" styleClass="auth-top-navbar-link" />
+                            <Label text="🧭 Explore" styleClass="auth-top-navbar-link" />
+                            <Label text="⚙️ Settings" styleClass="auth-top-navbar-link" />
+                        </HBox>
+                        
+                        <Region HBox.hgrow="ALWAYS" />
+                        
+                        <!-- Auth Action -->
+                        <Button text="Sign In" onAction="#goToLogin" style="-fx-background-color: white; -fx-text-fill: #2563eb; -fx-font-weight: bold; -fx-background-radius: 20; -fx-padding: 8 20;" />
+                    </children>
+                </HBox>
+            </children>
+        </VBox>
+    </top>
+
+    <center>
+        <ScrollPane fitToWidth="true" style="-fx-background: transparent; -fx-background-color: transparent;">
+            <content>
+                <HBox alignment="CENTER" spacing="40.0" style="-fx-padding: 40;">
+                    <!-- Left Side: Form Card -->
+            <VBox alignment="CENTER" HBox.hgrow="ALWAYS" maxWidth="450.0" spacing="20.0">
+                
+                <VBox alignment="CENTER" spacing="8.0" style="-fx-padding: 0 0 10 0;">
+                    <Label styleClass="auth-badge" text="✨ Join WonderLust Today" />
+                    <Label styleClass="text-h1" text="Create Account" style="-fx-font-size: 32px; -fx-padding: 10 0 0 0;" />
+                    <Label styleClass="text-p" text="Start your adventure journey" style="-fx-text-fill: #6B7280;" />
+                </VBox>
+            
+                <!-- Main Form Card -->
+                <VBox styleClass="auth-form-card" spacing="20.0" alignment="CENTER">
+                    <children>
+                        <!-- Profile Upload -->
+                        <VBox alignment="CENTER" spacing="10.0">
+                            <children>
+                                <StackPane>
+                                     <javafx.scene.shape.Circle fx:id="profileCircle" radius="45.0" fill="#3B82F6" />
+                                     <Label text="📷" style="-fx-font-size: 24px; -fx-text-fill: white;" />
+                                </StackPane>
+                                <Button onAction="#handleUploadPhoto" styleClass="btn-outline-blue" text="Upload Photo" style="-fx-font-size: 12px; -fx-padding: 5 15;" />
+                            </children>
+                        </VBox>
+                        
+                        <VBox spacing="15.0">
+                             <!-- Full Name -->
+                             <VBox spacing="8.0">
+                                 <Label styleClass="text-p" text="Full Name" style="-fx-font-weight: bold; -fx-text-fill: #374151;" />
+                                 <HBox alignment="CENTER_LEFT" spacing="10.0" styleClass="input-container-box">
+                                     <Label text="👤" style="-fx-text-fill: #6B7280;" />
+                                     <TextField fx:id="fullNameField" promptText="John Doe" styleClass="input-container-field" HBox.hgrow="ALWAYS" />
+                                 </HBox>
+                                 <Label fx:id="fullNameError" textFill="RED" style="-fx-font-size: 11px;" visible="false" managed="false" />
+                             </VBox>
+                             
+                             <!-- Email -->
+                             <VBox spacing="8.0">
+                                 <Label styleClass="text-p" text="Email" style="-fx-font-weight: bold; -fx-text-fill: #374151;" />
+                                 <HBox alignment="CENTER_LEFT" spacing="10.0" styleClass="input-container-box">
+                                     <Label text="✉️" style="-fx-text-fill: #6B7280;" />
+                                     <TextField fx:id="emailField" promptText="john@example.com" styleClass="input-container-field" HBox.hgrow="ALWAYS" />
+                                 </HBox>
+                                 <Label fx:id="emailError" textFill="RED" style="-fx-font-size: 11px;" visible="false" managed="false" />
+                             </VBox>
+                             
+                             <!-- Phone -->
+                             <VBox spacing="8.0">
+                                 <Label styleClass="text-p" text="Phone Number" style="-fx-font-weight: bold; -fx-text-fill: #374151;" />
+                                 <HBox alignment="CENTER_LEFT" spacing="10.0" styleClass="input-container-box">
+                                     <Label text="📞" style="-fx-text-fill: #6B7280;" />
+                                     <TextField fx:id="phoneField" promptText="+1234567890" styleClass="input-container-field" HBox.hgrow="ALWAYS" />
+                                 </HBox>
+                                 <Label fx:id="phoneError" textFill="RED" style="-fx-font-size: 11px;" visible="false" managed="false" />
+                             </VBox>
+
+                             <!-- Role -->
+                             <VBox spacing="8.0">
+                                 <Label styleClass="text-p" text="I want to" style="-fx-font-weight: bold; -fx-text-fill: #374151;" />
+                                 <HBox alignment="CENTER_LEFT" spacing="10.0" styleClass="input-container-box">
+                                     <ComboBox fx:id="roleComboBox" maxWidth="Infinity" style="-fx-background-color: transparent;" HBox.hgrow="ALWAYS" />
+                                 </HBox>
+                             </VBox>
+                             
+                             <!-- Password -->
+                             <VBox spacing="8.0">
+                                 <Label styleClass="text-p" text="Password" style="-fx-font-weight: bold; -fx-text-fill: #374151;" />
+                                 <HBox alignment="CENTER_LEFT" spacing="10.0" styleClass="input-container-box">
+                                     <Label text="🔒" style="-fx-text-fill: #6B7280;" />
+                                     <PasswordField fx:id="passwordField" promptText="••••••••" styleClass="input-container-field" HBox.hgrow="ALWAYS" />
+                                 </HBox>
+                                 <HBox alignment="CENTER_LEFT" spacing="10.0">
+                                      <ProgressBar fx:id="strengthBar" HBox.hgrow="ALWAYS" maxWidth="Infinity" progress="0.0" prefHeight="4.0" styleClass="strength-bar" />
+                                      <Label fx:id="strengthLabel" style="-fx-font-size: 11px;" text="None" />
+                                 </HBox>
+                                 <Label fx:id="passwordError" textFill="RED" style="-fx-font-size: 11px;" visible="false" managed="false" />
+                             </VBox>
+                             
+                             <!-- Confirm Password -->
+                             <VBox spacing="8.0">
+                                 <Label styleClass="text-p" text="Confirm Password" style="-fx-font-weight: bold; -fx-text-fill: #374151;" />
+                                 <HBox alignment="CENTER_LEFT" spacing="10.0" styleClass="input-container-box">
+                                     <Label text="🔒" style="-fx-text-fill: #6B7280;" />
+                                     <PasswordField fx:id="confirmPasswordField" promptText="••••••••" styleClass="input-container-field" HBox.hgrow="ALWAYS" />
+                                 </HBox>
+                                 <Label fx:id="confirmPasswordError" textFill="RED" style="-fx-font-size: 11px;" visible="false" managed="false" />
+                             </VBox>
+                        </VBox>
+                        
+                        <Label fx:id="errorLabel" styleClass="error-label" wrapText="true" />
+                        
+                        <Button onAction="#handleSignup" styleClass="btn-solid-blue" text="Create Account" maxWidth="1.7976931348623157E308" style="-fx-font-size: 15px; -fx-padding: 12;" />
+                    </children>
+                </VBox>
+                
+                <HBox alignment="CENTER" spacing="5.0">
+                    <Label styleClass="text-p" text="Already have an account?" style="-fx-text-fill: #6B7280;" />
+                    <Hyperlink onAction="#goToLogin" text="Sign in" styleClass="nav-link" style="-fx-font-weight: bold; -fx-text-fill: #3B82F6;"/>
+                </HBox>
+            </VBox>
+            
+            <!-- Right Side: Image Card -->
+            <StackPane HBox.hgrow="ALWAYS" maxWidth="500.0" style="-fx-background-radius: 24; -fx-border-radius: 24; overflow: hidden; -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.1), 20, 0, 0, 10);">
+                <!-- Replace with actual Image implementation -->
+                <ImageView fitHeight="800.0" fitWidth="500.0" preserveRatio="false">
+                    <image>
+                        <Image url="@auth_signup_bg.png" />
+                    </image>
+                </ImageView>
+                <!-- Gradient Overlay -->
+                <Rectangle width="500" height="800" style="-fx-fill: linear-gradient(to bottom, transparent 50%, #111827 100%); -fx-opacity: 0.8;" />
+                <VBox alignment="BOTTOM_LEFT" style="-fx-padding: 40;">
+                    <Label text="Your Journey Begins Here" style="-fx-text-fill: white; -fx-font-size: 28px; -fx-font-weight: bold;" wrapText="true" />
+                    <Label text="Explore, camp, and create unforgettable memories" style="-fx-text-fill: white; -fx-font-size: 14px; -fx-opacity: 0.9; -fx-padding: 10 0 0 0;" wrapText="true" />
+                </VBox>
+                </StackPane>
+            </HBox>
+            </content>
+        </ScrollPane>
+    </center>
+</BorderPane>

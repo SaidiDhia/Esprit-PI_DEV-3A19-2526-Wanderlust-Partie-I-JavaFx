@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.text.Font?>
+
+<BorderPane xmlns="http://javafx.com/javafx/18" 
+            xmlns:fx="http://javafx.com/fxml/1" 
+            fx:controller="com.example.pi_dev.Controllers.Marketplace.FactureListController"
+            stylesheets="@../css/style.css"
+
+            styleClass="root">
+
+    <!-- Top Bar -->
+    <top>
+        <HBox spacing="15" alignment="CENTER" styleClass="top-bar">
+            <padding>
+                <Insets top="15" right="15" bottom="15" left="15"/>
+            </padding>
+            <Button text="← Back" styleClass="btn-back" onAction="#goBack"/>
+            <Region HBox.hgrow="ALWAYS"/>
+            <Label text="My Invoices" styleClass="page-title">
+                <font>
+                    <Font name="System Bold" size="20"/>
+                </font>
+            </Label>
+            <Region HBox.hgrow="ALWAYS"/>
+            <Button text="Refresh" styleClass="btn-secondary" onAction="#refresh"/>
+        </HBox>
+    </top>
+
+    <!-- Main Content -->
+    <center>
+        <VBox spacing="20">
+            <padding>
+                <Insets top="30" right="30" bottom="30" left="30"/>
+            </padding>
+            
+            <!-- Factures List Container -->
+            <ScrollPane fitToWidth="true" VBox.vgrow="ALWAYS" styleClass="scroll-pane">
+                <VBox fx:id="facturesContainer" spacing="15">
+                    <padding>
+                        <Insets top="10" right="10" bottom="10" left="10"/>
+                    </padding>
+                </VBox>
+            </ScrollPane>
+
+            <!-- Empty State -->
+            <VBox fx:id="emptyState" alignment="CENTER" spacing="15" visible="false" managed="false">
+                <Label text="🧾" style="-fx-font-size: 64px;"/>
+                <Label text="No invoices yet" styleClass="empty-message">
+                    <font>
+                        <Font size="20"/>
+                    </font>
+                </Label>
+                <Label text="Your purchase history will appear here" style="-fx-text-fill: #999; -fx-font-size: 14px;"/>
+                <Button text="Start Shopping" styleClass="btn-add-cart" onAction="#goToProducts"/>
+            </VBox>
+
+        </VBox>
+    </center>
+
+</BorderPane>

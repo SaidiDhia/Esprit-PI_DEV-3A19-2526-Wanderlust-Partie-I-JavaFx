@@ -1,0 +1,79 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.control.*?>
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.text.Font?>
+
+<BorderPane xmlns="http://javafx.com/javafx"
+            xmlns:fx="http://javafx.com/fxml"
+            fx:controller="com.example.pi_dev.Controllers.Marketplace.RoleSelectionController"
+            style="-fx-background-color: #F0F4F8;">
+
+    <center>
+        <VBox alignment="CENTER" spacing="40">
+
+            <!-- Logo / Title -->
+            <VBox alignment="CENTER" spacing="8">
+                <Label text="🌿 WonderLust"
+                       style="-fx-font-size: 42px; -fx-font-weight: bold; -fx-text-fill: #0D47A1;"/>
+                <Label text="Outdoor Marketplace"
+                       style="-fx-font-size: 16px; -fx-text-fill: #888;"/>
+            </VBox>
+
+            <Label text="Who are you today?"
+                   style="-fx-font-size: 20px; -fx-font-weight: bold; -fx-text-fill: #444;"/>
+
+            <!-- Cards Row -->
+            <HBox spacing="40" alignment="CENTER">
+
+                <!-- BUYER Card -->
+                <VBox alignment="CENTER" spacing="15" prefWidth="240" prefHeight="220"
+                      onMouseClicked="#enterAsBuyer"
+                      style="-fx-background-color: white;
+                             -fx-background-radius: 20;
+                             -fx-border-color: #1565C0;
+                             -fx-border-radius: 20;
+                             -fx-border-width: 2;
+                             -fx-cursor: hand;
+                             -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.12), 15, 0, 0, 5);">
+                    <Label text="🛍️" style="-fx-font-size: 52px;"/>
+                    <Label text="I want to BUY"
+                           style="-fx-font-size: 18px; -fx-font-weight: bold; -fx-text-fill: #1565C0;"/>
+                    <Label text="Browse products, add to cart,&#10;track your orders"
+                           style="-fx-font-size: 12px; -fx-text-fill: #888; -fx-text-alignment: center;"
+                           wrapText="true"/>
+                    <Button text="Enter as Buyer →" onAction="#enterAsBuyer"
+                            style="-fx-background-color: #1565C0; -fx-text-fill: white;
+                                   -fx-background-radius: 20; -fx-padding: 8 20;
+                                   -fx-font-weight: bold; -fx-cursor: hand;"/>
+                </VBox>
+
+                <!-- SELLER Card -->
+                <VBox alignment="CENTER" spacing="15" prefWidth="240" prefHeight="220"
+                      onMouseClicked="#enterAsSeller"
+                      style="-fx-background-color: white;
+                             -fx-background-radius: 20;
+                             -fx-border-color: #1565C0;
+                             -fx-border-radius: 20;
+                             -fx-border-width: 2;
+                             -fx-cursor: hand;
+                             -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.12), 15, 0, 0, 5);">
+                    <Label text="🏪" style="-fx-font-size: 52px;"/>
+                    <Label text="I want to SELL"
+                           style="-fx-font-size: 18px; -fx-font-weight: bold; -fx-text-fill: #1565C0;"/>
+                    <Label text="Manage products, process orders,&#10;view your dashboard"
+                           style="-fx-font-size: 12px; -fx-text-fill: #888; -fx-text-alignment: center;"
+                           wrapText="true"/>
+                    <Button text="Enter as Seller →" onAction="#enterAsSeller"
+                            style="-fx-background-color: #1565C0; -fx-text-fill: white;
+                                   -fx-background-radius: 20; -fx-padding: 8 20;
+                                   -fx-font-weight: bold; -fx-cursor: hand;"/>
+                </VBox>
+
+            </HBox>
+
+        </VBox>
+    </center>
+
+</BorderPane>

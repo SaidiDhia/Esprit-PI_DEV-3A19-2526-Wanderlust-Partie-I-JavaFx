@@ -1,0 +1,217 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.Hyperlink?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.ScrollPane?>
+<?import javafx.scene.control.Separator?>
+<?import javafx.scene.control.TextArea?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.image.Image?>
+<?import javafx.scene.image.ImageView?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.Region?>
+<?import javafx.scene.layout.VBox?>
+<?import javafx.scene.web.WebView?>
+
+<VBox prefHeight="708.0" prefWidth="980.0" style="-fx-background-color: linear-gradient(to bottom, #CAD4DC, #ffffff); -fx-padding: 0;" xmlns="http://javafx.com/javafx/25" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.example.pi_dev.Controllers.Events.ReservationController">
+   <children>
+      <HBox alignment="CENTER_LEFT" prefHeight="0.0" prefWidth="930.0" style="-fx-background-color: linear-gradient(to bottom right, #86A7BF, #2D70B3); -fx-padding: 20; -fx-spacing: 20;">
+         <children>
+            <ImageView fitHeight="72.0" fitWidth="69.0">
+               <image>
+                  <Image url="@../images/wanderlust-logo.png" />
+               </image>
+            </ImageView>
+            <VBox spacing="5">
+               <children>
+                  <Label style="-fx-font-size: 24px; -fx-font-weight: bold; -fx-text-fill: white;" text="Wanderlust" />
+                  <Label style="-fx-font-size: 14px; -fx-text-fill: #86A7BF;" text="Réservation d'activité" textFill="#130202" />
+               </children>
+            </VBox>
+            <Region HBox.hgrow="ALWAYS" />
+            <HBox alignment="CENTER" spacing="15">
+               <children>
+                  <Button fx:id="cataloguebtn" onAction="#goToCatalogue" style="-fx-background-color: transparent; -fx-text-fill: white; -fx-border-color: transparent; -fx-border-width: 0 0 2 0; -fx-font-size: 14px; -fx-cursor: hand;" text="🌿 Catalogue" />
+                  <Button style="-fx-background-color: transparent; -fx-text-fill: white; -fx-border-color: transparent; -fx-border-width: 0 0 2 0; -fx-font-size: 14px; -fx-cursor: hand;" text="📋 Détails" />
+                  <Button fx:id="panier" onAction="#goToPanier" style="-fx-background-color: transparent; -fx-text-fill: white; -fx-border-color: transparent; -fx-border-width: 0 0 2 0; -fx-font-size: 14px; -fx-cursor: hand;" text="🛒" />
+               </children>
+            </HBox>
+         </children>
+      </HBox>
+      <ScrollPane fitToWidth="true" hbarPolicy="NEVER" style="-fx-background-color: transparent; -fx-border-color: transparent;" VBox.vgrow="ALWAYS">
+         <content>
+            <HBox maxWidth="1200.0" prefHeight="1057.0" prefWidth="1316.0" spacing="40" style="-fx-padding: 40;">
+               <children>
+                  <VBox prefWidth="400" spacing="25" style="-fx-background-color: white; -fx-background-radius: 15; -fx-border-color: #e0e0e0; -fx-border-width: 1; -fx-padding: 30;">
+                     <children>
+                        <Label style="-fx-font-size: 20px; -fx-font-weight: bold; -fx-text-fill: #0F2C4F;" text="📋 Récapitulatif de la réservation" />
+                        <Separator style="-fx-background-color: #e0e0e0;" />
+                        <VBox spacing="15">
+                           <children>
+                              <VBox spacing="8">
+                                 <children>
+                                    <Label style="-fx-font-size: 14px; -fx-text-fill: #666666;" text="Description de l'événement" />
+                                    <Label fx:id="EventDescription" style="-fx-font-size: 14px; -fx-text-fill: #0F2C4F; -fx-wrap-text: true;" text="Chargement..." />
+                                 </children>
+                              </VBox>
+                              <VBox spacing="8">
+                                 <children>
+                                    <Label style="-fx-font-size: 14px; -fx-text-fill: #666666;" text="Lieu" />
+                                    <Label fx:id="Eventlieu" style="-fx-font-size: 16px; -fx-font-weight: bold; -fx-text-fill: #0F2C4F;" text="Chargement..." />
+                                 </children>
+                              </VBox>
+                              <VBox spacing="8">
+                                 <children>
+                                    <Label style="-fx-font-size: 14px; -fx-text-fill: #666666;" text="Date" />
+                                    <Label fx:id="datedebut" style="-fx-font-size: 16px; -fx-font-weight: bold; -fx-text-fill: #0F2C4F;" text="Chargement..." />
+                                 </children>
+                              </VBox>
+                              <!-- Conteneur pour la vidéo YouTube -->
+                              <VBox fx:id="videoContainer" spacing="15" style="-fx-background-color: white; -fx-background-radius: 15; -fx-border-color: #2D70B3; -fx-padding: 20; -fx-border-width: 2; -fx-min-height: 300; -fx-pref-height: 320;" visible="false">
+                                 <children>
+                                    <Label style="-fx-font-size: 18px; -fx-font-weight: bold; -fx-text-fill: #1A4E85;" text="🎥 Vidéo de présentation" />
+                                    <WebView fx:id="videoWebView" prefWidth="400" prefHeight="280" style="-fx-background-color: black; -fx-border-radius: 10;" />
+                                 </children>
+                              </VBox>
+                              <HBox fx:id="EventImagesContainer" spacing="15" alignment="CENTER_LEFT" style="-fx-padding: 10; -fx-background-color: #f5f5f5; -fx-background-radius: 10; -fx-border-color: #e0e0e0; -fx-border-radius: 10;">
+                                 <!-- Les images seront ajoutées dynamiquement ici -->
+                              </HBox>
+                              <HBox spacing="10" alignment="CENTER">
+                                 <children>
+                                    <Button fx:id="prevImageButton" onAction="#previousImage" style="-fx-background-color: #2D70B3; -fx-text-fill: white; -fx-background-radius: 50; -fx-border-radius: 50; -fx-min-width: 40; -fx-min-height: 40; -fx-cursor: hand;" text="◀" />
+                                    <Label fx:id="imageCounterLabel" style="-fx-font-size: 14px; -fx-text-fill: #666;" text="1 / 1" />
+                                    <Button fx:id="nextImageButton" onAction="#nextImage" style="-fx-background-color: #2D70B3; -fx-text-fill: white; -fx-background-radius: 50; -fx-border-radius: 50; -fx-min-width: 40; -fx-min-height: 40; -fx-cursor: hand;" text="▶" />
+                                 </children>
+                              </HBox>
+                           </children>
+                        </VBox>
+                        <VBox spacing="15" style="-fx-background-color: #f8faf8; -fx-background-radius: 10; -fx-padding: 20;">
+                           <children>
+                              <Label style="-fx-font-size: 16px; -fx-font-weight: bold; -fx-text-fill: #0F2C4F;" text=" Détails du prix" />
+                              <HBox alignment="CENTER_LEFT" spacing="10">
+                                 <children>
+                                    <Label style="-fx-font-size: 14px; -fx-text-fill: #666666;" text="Prix :" />
+                                    <Label fx:id="prixlabel" style="-fx-font-size: 14px; -fx-font-weight: bold; -fx-text-fill: #0F2C4F;" />
+                                 </children>
+                              </HBox>
+                              <HBox alignment="CENTER_LEFT" spacing="10">
+                                 <children>
+                                    <Label style="-fx-font-size: 14px; -fx-text-fill: #666666;" text="Places restantes:" />
+                                    <Label fx:id="personCountLabel" style="-fx-font-size: 14px; -fx-text-fill: #0F2C4F;" />
+                                 </children>
+                              </HBox>
+                              <Separator style="-fx-background-color: #e0e0e0;" />
+                              <HBox alignment="CENTER_LEFT" spacing="10" />
+                           </children>
+                        </VBox>
+                        <VBox spacing="12" style="-fx-background-color: #e8f5e8; -fx-background-radius: 10; -fx-padding: 20;">
+                           <children>
+                              <Label style="-fx-font-size: 16px; -fx-font-weight: bold; -fx-text-fill: #1A4E85;" text="ℹ️ Informations importantes" />
+                              <VBox spacing="8">
+                                 <children>
+                                    <HBox alignment="TOP_LEFT" spacing="8">
+                                       <children>
+                                          <Label style="-fx-font-size: 12px; -fx-text-fill: #2D70B3;" text="✅" />
+                                          <Label style="-fx-font-size: 12px; -fx-text-fill: #333333; -fx-wrap-text: true;" text="Confirmation immédiate par email" />
+                                       </children>
+                                    </HBox>
+                                    <HBox alignment="TOP_LEFT" spacing="8">
+                                       <children>
+                                          <Label style="-fx-font-size: 12px; -fx-text-fill: #2D70B3;" text="💳" />
+                                          <Label style="-fx-font-size: 12px; -fx-text-fill: #333333; -fx-wrap-text: true;" text="Paiement sécurisé sur place" />
+                                       </children>
+                                    </HBox>
+                                    <HBox alignment="TOP_LEFT" spacing="8">
+                                       <children>
+                                          <Label style="-fx-font-size: 12px; -fx-text-fill: #2D70B3;" text="🔄" />
+                                          <Label style="-fx-font-size: 12px; -fx-text-fill: #333333; -fx-wrap-text: true;" text="Annulation gratuite jusqu'à 48h avant" />
+                                       </children>
+                                    </HBox>
+                                    <HBox alignment="TOP_LEFT" spacing="8">
+                                       <children>
+                                          <Label style="-fx-font-size: 12px; -fx-text-fill: #2D70B3;" text="📧" />
+                                          <Label style="-fx-font-size: 12px; -fx-text-fill: #333333; -fx-wrap-text: true;" text="Tous les détails envoyés par email" />
+                                       </children>
+                                    </HBox>
+                                 </children>
+                              </VBox>
+                           </children>
+                        </VBox>
+                     </children>
+                  </VBox>
+                  <VBox spacing="25" style="-fx-background-color: white; -fx-background-radius: 15; -fx-border-color: #e0e0e0; -fx-border-width: 1; -fx-padding: 30;" HBox.hgrow="ALWAYS">
+                     <children>
+                        <Label style="-fx-font-size: 20px; -fx-font-weight: bold; -fx-text-fill: #0F2C4F;" text="🎯 Vos informations" />
+                        <Separator style="-fx-background-color: #e0e0e0;" />
+                        <TextField fx:id="idEventField" visible="false" />
+                        <VBox spacing="20">
+                           <children>
+                              <Label style="-fx-font-size: 16px; -fx-font-weight: bold; -fx-text-fill: #1A4E85;" text="👤 Coordonnées principales" />
+                              <VBox spacing="8">
+                                 <children>
+                                    <Label style="-fx-font-size: 14px; -fx-font-weight: bold; -fx-text-fill: #0F2C4F;" text="Nom complet *" />
+                                    <TextField fx:id="nomField" promptText="Entrez votre nom complet" style="-fx-border-color: #2D70B3; -fx-border-radius: 8; -fx-background-radius: 8; -fx-padding: 12 16; -fx-font-size: 14px;" />
+                                 </children>
+                              </VBox>
+                              <VBox spacing="8">
+                                 <children>
+                                    <Label style="-fx-font-size: 14px; -fx-font-weight: bold; -fx-text-fill: #0F2C4F;" text="Adresse email *" />
+                                    <TextField fx:id="emailField" promptText="exemple@email.com" style="-fx-border-color: #2D70B3; -fx-border-radius: 8; -fx-background-radius: 8; -fx-padding: 12 16; -fx-font-size: 14px;" />
+                                 </children>
+                              </VBox>
+                              <VBox spacing="8">
+                                 <children>
+                                    <Label style="-fx-font-size: 14px; -fx-font-weight: bold; -fx-text-fill: #0F2C4F;" text="Numéro de téléphone *" />
+                                    <TextField fx:id="telephoneField" promptText="+216 XX XXX XXX" style="-fx-border-color: #2D70B3; -fx-border-radius: 8; -fx-background-radius: 8; -fx-padding: 12 16; -fx-font-size: 14px;" />
+                                 </children>
+                              </VBox>
+                           </children>
+                        </VBox>
+                        <VBox spacing="20">
+                           <children>
+                              <Label style="-fx-font-size: 16px; -fx-font-weight: bold; -fx-text-fill: #1A4E85;" text="👥 Participants" />
+                              <VBox spacing="8">
+                                 <children>
+                                    <Label style="-fx-font-size: 14px; -fx-font-weight: bold; -fx-text-fill: #0F2C4F;" text="Nombre de personnes *" />
+                                    <HBox alignment="CENTER" spacing="15">
+                                       <children>
+                                          <TextField fx:id="nombrePersonnesField" promptText="6" style="-fx-border-color: #2D70B3; -fx-border-radius: 8; -fx-background-radius: 8; -fx-padding: 12 16; -fx-font-size: 14px; -fx-pref-width: 100;" />
+                                          <Label style="-fx-font-size: 14px; -fx-text-fill: #666666;" text="personnes" />
+                                          <Label style="-fx-font-size: 12px; -fx-text-fill: #999999; -fx-font-style: italic;" text="" />
+                                       </children>
+                                    </HBox>
+                                 </children>
+                              </VBox>
+                           </children>
+                        </VBox>
+                        <VBox spacing="15">
+                           <children>
+                              <Label style="-fx-font-size: 16px; -fx-font-weight: bold; -fx-text-fill: #1A4E85;" text="📝 Demandes spéciales (optionnel)" />
+                              <TextArea fx:id="demandesp" prefHeight="100" promptText="Allergies alimentaires, besoins spéciaux, questions..." style="-fx-border-color: #2D70B3; -fx-border-radius: 8; -fx-background-radius: 8; -fx-padding: 12 16; -fx-font-size: 14px; -fx-wrap-text: true;" />
+                           </children>
+                        </VBox>
+                        <VBox spacing="15">
+                           <children>
+                              <Button fx:id="reserverButton" maxWidth="Infinity" onAction="#reserver" style="-fx-background-color: linear-gradient(to bottom right, #1A4E85, #0F2C4F); -fx-text-fill: white; -fx-background-radius: 25; -fx-border-radius: 25; -fx-padding: 15 30; -fx-font-size: 16px; -fx-font-weight: bold; -fx-cursor: hand;" text="✅ Confirmer la réservation" />
+                              <HBox spacing="15">
+                                 <children>
+                                    <Button fx:id="annulerRES" onAction="#annulerRES" prefHeight="42.0" prefWidth="554.0" style="-fx-background-color: #ffebee; -fx-text-fill: #cc6666; -fx-background-radius: 20; -fx-border-radius: 20; -fx-padding: 12 20; -fx-font-size: 14px; -fx-cursor: hand;" text="❌ Annuler" HBox.hgrow="ALWAYS" />
+                                 </children>
+                              </HBox>
+                           </children>
+                        </VBox>
+                        <HBox alignment="CENTER_LEFT" spacing="10" style="-fx-background-color: #f0f8f0; -fx-background-radius: 8; -fx-padding: 15;">
+                           <children>
+                              <Label style="-fx-font-size: 16px; -fx-text-fill: #1A4E85;" text="🔒" />
+                              <Label style="-fx-font-size: 12px; -fx-text-fill: #2D70B3; -fx-wrap-text: true;" text="Vos données sont sécurisées et protégées conformément à notre politique de confidentialité." />
+                           </children>
+                        </HBox>
+                     </children>
+                  </VBox>
+               </children>
+            </HBox>
+         </content>
+      </ScrollPane>
+   </children>
+</VBox>

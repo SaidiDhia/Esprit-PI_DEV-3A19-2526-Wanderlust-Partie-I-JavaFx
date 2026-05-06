@@ -1,0 +1,440 @@
+/* ==================== ROOT STYLES ==================== */
+.root {
+    -fx-font-family: "Segoe UI", Arial, sans-serif;
+    -fx-background-color: linear-gradient(to bottom, #CAD4DC, #ffffff);
+}
+
+/* ==================== HEADER STYLES ==================== */
+.header-blue {
+    -fx-background-color: linear-gradient(to bottom right, #86A7BF, #2D70B3);
+}
+
+.header-title {
+    -fx-font-size: 24px;
+    -fx-font-weight: bold;
+    -fx-text-fill: white;
+}
+
+.header-subtitle {
+    -fx-font-size: 14px;
+    -fx-text-fill: #0F2C4F;
+}
+
+/* ==================== TAB PANE STYLES ==================== */
+.tab-pane {
+    -fx-background-color: transparent;
+    -fx-tab-min-width: 120;
+}
+
+.tab-pane .tab-header-area {
+    -fx-background-color: transparent;
+}
+
+.tab {
+    -fx-background-color: transparent;
+    -fx-background-radius: 20 20 0 0;
+    -fx-padding: 8 20;
+}
+
+.tab:selected {
+    -fx-background-color: #1A4E85;
+}
+
+.tab .tab-label {
+    -fx-font-size: 14px;
+    -fx-font-weight: bold;
+    -fx-text-fill: #1A4E85;
+}
+
+.tab:selected .tab-label {
+    -fx-text-fill: white;
+}
+
+/* ==================== LIST VIEW STYLES ==================== */
+.list-view {
+    -fx-background-color: #F8F9FA;
+    -fx-background-radius: 12;
+    -fx-border-color: #e0e0e0;
+    -fx-border-radius: 12;
+}
+
+.list-view .list-cell {
+    -fx-background-color: transparent;
+    -fx-padding: 8 12;
+    -fx-border-color: transparent;
+}
+
+.list-view .list-cell:hover {
+    -fx-background-color: #CAD4DC;
+}
+
+.list-view .list-cell:selected {
+    -fx-background-color: #86A7BF;
+}
+
+/* Conversation title */
+.conv-title {
+    -fx-font-size: 14px;
+    -fx-font-weight: bold;
+    -fx-text-fill: #1A4E85;
+}
+
+/* Conversation subtitle */
+.conv-subtitle {
+    -fx-font-size: 11px;
+    -fx-text-fill: #666666;
+}
+
+/* ==================== MESSAGE STYLES ==================== */
+
+/* Message header (username + time) */
+.message-header {
+    -fx-font-size: 10px;
+    -fx-text-fill: #666666;
+}
+
+/* Message bubble base style */
+.message-bubble {
+    -fx-padding: 8 12;
+    -fx-background-radius: 15;
+    -fx-font-size: 13px;
+    -fx-wrap-text: true;
+    -fx-max-width: 300;
+}
+
+/* Drop shadow for all message bubbles */
+.mine .message-bubble,
+.theirs .message-bubble {
+    -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.1), 4, 0, 0, 1);
+}
+
+/* My messages (sent) - Blue theme */
+.mine .message-bubble {
+    -fx-background-color: #86A7BF;
+    -fx-background-radius: 15 15 2 15;
+    -fx-text-fill: white;
+}
+
+/* Other messages (received) */
+.theirs .message-bubble {
+    -fx-background-color: #EEEEEE;
+    -fx-background-radius: 15 15 15 2;
+}
+
+/* ==================== INPUT FIELD STYLES ==================== */
+.text-field {
+    -fx-background-radius: 25;
+    -fx-border-radius: 25;
+    -fx-border-color: #2D70B3;
+    -fx-padding: 12 20;
+    -fx-font-size: 14px;
+    -fx-background-color: white;
+}
+
+.text-field:focused {
+    -fx-border-color: #1A4E85;
+    -fx-border-width: 2;
+}
+
+/* ==================== BUTTON STYLES ==================== */
+.button {
+    -fx-background-radius: 25;
+    -fx-background-color: #1A4E85;
+    -fx-text-fill: white;
+    -fx-font-weight: bold;
+    -fx-font-size: 14px;
+    -fx-padding: 12 24;
+    -fx-cursor: hand;
+}
+
+.button:hover {
+    -fx-background-color: #0F2C4F;
+    -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.2), 5, 0, 0, 2);
+}
+
+.button:pressed {
+    -fx-background-color: #0a1f36;
+}
+
+/* Secondary button style (like Add Participant) */
+.button-secondary {
+    -fx-background-color: #2D70B3;
+    -fx-padding: 8 20;
+    -fx-font-size: 13px;
+}
+
+/* Danger button (Delete) */
+.button-danger {
+    -fx-background-color: #ff6b6b;
+}
+
+.button-danger:hover {
+    -fx-background-color: #ff5252;
+}
+
+/* ==================== MENU BUTTON STYLES ==================== */
+.menu-button {
+    -fx-font-size: 18px;
+    -fx-font-weight: bold;
+    -fx-background-color: transparent;
+    -fx-cursor: hand;
+    -fx-text-fill: #555;
+    -fx-padding: 0 6 0 6;
+}
+
+.menu-button:hover {
+    -fx-text-fill: #1A4E85;
+    -fx-scale-x: 1.2;
+    -fx-scale-y: 1.2;
+}
+
+/* Context menu styling */
+.context-menu {
+    -fx-background-color: white;
+    -fx-background-radius: 8;
+    -fx-border-radius: 8;
+    -fx-border-color: #e0e0e0;
+    -fx-padding: 5;
+}
+
+.menu-item {
+    -fx-padding: 8 20;
+}
+
+.menu-item .label {
+    -fx-text-fill: #333;
+}
+
+.menu-item:hover {
+    -fx-background-color: #CAD4DC;
+    -fx-background-radius: 5;
+}
+
+/* ==================== SCROLL BAR STYLES ==================== */
+.scroll-bar:vertical {
+    -fx-pref-width: 8;
+}
+
+.scroll-bar .thumb {
+    -fx-background-color: #2D70B3;
+    -fx-background-radius: 10;
+}
+
+.scroll-bar .thumb:hover {
+    -fx-background-color: #1A4E85;
+}
+
+.scroll-bar .track {
+    -fx-background-color: #f0f0f0;
+}
+
+/* ==================== CONTACT CARD STYLES ==================== */
+.contact-card {
+    -fx-background-color: white;
+    -fx-background-radius: 12;
+    -fx-border-radius: 12;
+    -fx-border-color: #e0e0e0;
+    -fx-padding: 15;
+    -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.1), 5, 0, 0, 2);
+    -fx-alignment: center;
+    -fx-pref-width: 200;
+}
+
+.contact-card:hover {
+    -fx-effect: dropshadow(three-pass-box, rgba(45,74,144,0.3), 8, 0, 0, 3);
+    -fx-border-color: #2D70B3;
+}
+
+.contact-name {
+    -fx-font-size: 16px;
+    -fx-font-weight: bold;
+    -fx-text-fill: #1A4E85;
+}
+
+.contact-status {
+    -fx-font-size: 12px;
+    -fx-text-fill: #2D70B3;
+}
+
+.contact-avatar {
+    -fx-font-size: 36px;
+}
+
+/* ==================== FOOTER STYLES ==================== */
+.footer {
+    -fx-background-color: linear-gradient(to bottom right, #86A7BF, #2D70B3);
+    -fx-padding: 20;
+    -fx-border-color: #1A4E85;
+    -fx-border-width: 2 0 0 0;
+}
+
+.footer-text {
+    -fx-font-size: 12px;
+    -fx-text-fill: #CAD4DC;
+}
+
+.footer-title {
+    -fx-font-size: 16px;
+    -fx-font-weight: bold;
+    -fx-text-fill: white;
+}
+
+/* ==================== PLACEHOLDER STYLES ==================== */
+.placeholder-text {
+    -fx-text-fill: #999;
+    -fx-font-size: 14px;
+}
+
+.placeholder-icon {
+    -fx-font-size: 24px;
+}
+
+/* ==================== DIALOG STYLES ==================== */
+.dialog-pane {
+    -fx-background-color: white;
+    -fx-background-radius: 15;
+    -fx-border-radius: 15;
+    -fx-border-color: #2D70B3;
+    -fx-border-width: 2;
+    -fx-padding: 10;
+}
+
+.dialog-pane .header-panel {
+    -fx-background-color: linear-gradient(to bottom right, #86A7BF, #2D70B3);
+    -fx-background-radius: 12 12 0 0;
+    -fx-padding: 15;
+}
+
+.dialog-pane .header-panel .label {
+    -fx-font-size: 18px;
+    -fx-font-weight: bold;
+    -fx-text-fill: white;
+}
+
+.dialog-pane .content {
+    -fx-padding: 20;
+    -fx-background-color: #f8faf8;
+}
+
+.dialog-pane .content.label {
+    -fx-font-size: 14px;
+    -fx-text-fill: #1A4E85;
+}
+
+/* Dialog field styling */
+.dialog-field {
+    -fx-background-color: white;
+    -fx-border-color: #2D70B3;
+    -fx-border-radius: 8;
+    -fx-background-radius: 8;
+    -fx-padding: 10;
+    -fx-font-size: 13px;
+}
+
+.dialog-field:focused {
+    -fx-border-color: #1A4E85;
+    -fx-border-width: 2;
+}
+
+/* Dialog labels */
+.dialog-label {
+    -fx-font-size: 13px;
+    -fx-font-weight: bold;
+    -fx-text-fill: #1A4E85;
+    -fx-padding: 10 0 5 0;
+}
+
+/* Participants list in dialog */
+.participants-list {
+    -fx-background-color: white;
+    -fx-border-color: #e0e0e0;
+    -fx-border-radius: 8;
+    -fx-background-radius: 8;
+}
+
+.participants-list .list-cell {
+    -fx-background-color: transparent;
+    -fx-padding: 8;
+    -fx-border-color: transparent;
+    -fx-text-fill: #1A4E85;
+}
+
+.participants-list .list-cell:hover {
+    -fx-background-color: #CAD4DC;
+}
+
+/* Dialog buttons */
+.dialog-pane .button {
+    -fx-background-radius: 20;
+    -fx-padding: 8 25;
+    -fx-font-size: 13px;
+    -fx-font-weight: bold;
+    -fx-cursor: hand;
+    -fx-min-width: 100;
+}
+
+.dialog-pane .button:default {
+    -fx-background-color: #1A4E85;
+    -fx-text-fill: white;
+}
+
+.dialog-pane .button:default:hover {
+    -fx-background-color: #0F2C4F;
+}
+
+.dialog-pane .button:cancel {
+    -fx-background-color: #f0f0f0;
+    -fx-text-fill: #666;
+}
+
+.dialog-pane .button:cancel:hover {
+    -fx-background-color: #e0e0e0;
+}
+
+/* Choice box in dialog */
+.dialog-pane .choice-box {
+    -fx-background-color: white;
+    -fx-border-color: #2D70B3;
+    -fx-border-radius: 8;
+    -fx-background-radius: 8;
+}
+
+.dialog-pane .choice-box .label {
+    -fx-text-fill: #1A4E85;
+}
+
+/* Alert dialog styles */
+.alert.confirmation.dialog-pane {
+    -fx-background-color: white;
+}
+
+.alert.confirmation.dialog-pane .header-panel {
+    -fx-background-color: linear-gradient(to bottom right, #ff9800, #f57c00);
+}
+
+.alert.error.dialog-pane .header-panel {
+    -fx-background-color: linear-gradient(to bottom right, #ff4444, #cc0000);
+}
+
+.alert.information.dialog-pane .header-panel {
+    -fx-background-color: linear-gradient(to bottom right, #86A7BF, #2D70B3);
+}
+
+/* Text input dialog */
+.text-input-dialog {
+    -fx-background-color: white;
+}
+
+.text-input-dialog .text-field {
+    -fx-background-color: white;
+    -fx-border-color: #2D70B3;
+    -fx-border-radius: 8;
+    -fx-background-radius: 8;
+    -fx-padding: 10;
+    -fx-font-size: 13px;
+}
+
+.text-input-dialog .text-field:focused {
+    -fx-border-color: #1A4E85;
+    -fx-border-width: 2;
+}

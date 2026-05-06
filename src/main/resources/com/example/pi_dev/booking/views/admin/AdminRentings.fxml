@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.ScrollPane?>
+<?import javafx.scene.layout.FlowPane?>
+<?import javafx.scene.layout.VBox?>
+
+<VBox spacing="24" style="-fx-background-color: #F9FAFB; -fx-padding: 32 40 40 40;"
+      xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1"
+      fx:controller="com.example.pi_dev.Controllers.Booking.Admin.AdminRentingsController"
+      stylesheets="@../../style.css">
+
+    <VBox spacing="4">
+        <Label styleClass="text-h2" text="Place Approvals"/>
+        <Label styleClass="section-subtitle" text="Review new place listings submitted by hosts"/>
+    </VBox>
+
+    <ScrollPane fitToWidth="true" hbarPolicy="NEVER" VBox.vgrow="ALWAYS" style="-fx-background-color: transparent; -fx-background: white;">
+        <FlowPane fx:id="placesFlowPane" hgap="20" vgap="20" style="-fx-padding: 10;">
+            <!-- Cards will be injected here -->
+        </FlowPane>
+    </ScrollPane>
+
+</VBox>
