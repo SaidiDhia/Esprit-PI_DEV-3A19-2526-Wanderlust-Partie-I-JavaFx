@@ -7,6 +7,7 @@ import com.example.pi_dev.Services.Events.ReservationService;
 import com.example.pi_dev.Services.Events.GoogleCalendarService;
 import com.example.pi_dev.Services.Events.EmailService;
 import com.example.pi_dev.Utils.Events.Mydatabase;
+import com.example.pi_dev.Session.Session;
 
 import java.util.regex.Pattern;
 import javafx.collections.FXCollections;
@@ -32,29 +33,50 @@ import javafx.scene.web.WebEngine;
 
 public class ReservationController {
 
-    @FXML private Label EventDescription;
-    @FXML private Label Eventlieu;
-    @FXML private Label datedebut;
-    @FXML private Label personCountLabel;
-    @FXML private Label prixlabel;
-    @FXML private HBox EventImagesContainer;
-    @FXML private Button prevImageButton;
-    @FXML private Button nextImageButton;
-    @FXML private Label imageCounterLabel;
-    @FXML private VBox videoContainer;
-    @FXML private WebView videoWebView;
+    @FXML
+    private Label EventDescription;
+    @FXML
+    private Label Eventlieu;
+    @FXML
+    private Label datedebut;
+    @FXML
+    private Label personCountLabel;
+    @FXML
+    private Label prixlabel;
+    @FXML
+    private HBox EventImagesContainer;
+    @FXML
+    private Button prevImageButton;
+    @FXML
+    private Button nextImageButton;
+    @FXML
+    private Label imageCounterLabel;
+    @FXML
+    private VBox videoContainer;
+    @FXML
+    private WebView videoWebView;
 
-    @FXML private TextField idEventField;
-    @FXML private TextField nomField;
-    @FXML private TextField emailField;
-    @FXML private TextField telephoneField;
-    @FXML private TextField nombrePersonnesField;
-    @FXML private TextArea demandesp;
+    @FXML
+    private TextField idEventField;
+    @FXML
+    private TextField nomField;
+    @FXML
+    private TextField emailField;
+    @FXML
+    private TextField telephoneField;
+    @FXML
+    private TextField nombrePersonnesField;
+    @FXML
+    private TextArea demandesp;
 
-    @FXML private Button reserverButton;
-    @FXML private Button annulerRES;
-    @FXML private Button cataloguebtn;
-    @FXML private Button panierButton;
+    @FXML
+    private Button reserverButton;
+    @FXML
+    private Button annulerRES;
+    @FXML
+    private Button cataloguebtn;
+    @FXML
+    private Button panierButton;
 
     private EventService eventService = new EventService();
     private ReservationService reservationService = new ReservationService();
@@ -107,7 +129,9 @@ public class ReservationController {
 
                 if (EventDescription != null) {
                     String eventDescription = currentEvent.getDescription();
-                    String activiteDescription = (currentEvent.getActivite() != null) ? currentEvent.getActivite().getDescription() : null;
+                    String activiteDescription = (currentEvent.getActivite() != null)
+                            ? currentEvent.getActivite().getDescription()
+                            : null;
 
                     String descriptionToShow = eventDescription;
                     if (descriptionToShow == null || descriptionToShow.trim().isEmpty()) {
@@ -127,7 +151,8 @@ public class ReservationController {
 
                 if (datedebut != null) {
                     if (currentEvent.getDateDebut() != null) {
-                        datedebut.setText(currentEvent.getDateDebut().format(java.time.format.DateTimeFormatter.ofPattern("dd/MM/yyyy")));
+                        datedebut.setText(currentEvent.getDateDebut()
+                                .format(java.time.format.DateTimeFormatter.ofPattern("dd/MM/yyyy")));
                     } else {
                         datedebut.setText("Date non définie");
                     }
@@ -141,8 +166,11 @@ public class ReservationController {
                 }
 
                 if (demandesp != null) {
-                    if (currentEvent.getMaterielsNecessaires() != null && !currentEvent.getMaterielsNecessaires().trim().isEmpty()) {
-                        demandesp.setPromptText("Allergies alimentaires, besoins spéciaux, questions...\n\n📋 Matériels requis pour cet événement :\n" + currentEvent.getMaterielsNecessaires());
+                    if (currentEvent.getMaterielsNecessaires() != null
+                            && !currentEvent.getMaterielsNecessaires().trim().isEmpty()) {
+                        demandesp.setPromptText(
+                                "Allergies alimentaires, besoins spéciaux, questions...\n\n📋 Matériels requis pour cet événement :\n"
+                                        + currentEvent.getMaterielsNecessaires());
                         demandesp.setEditable(true);
                         demandesp.setStyle("-fx-border-color: #2D70B3; -fx-background-color: white;");
                     } else {
@@ -154,7 +182,8 @@ public class ReservationController {
 
                 if (prixlabel != null) {
                     try {
-                        int nbPersonnes = Integer.parseInt(nombrePersonnesField.getText().isEmpty() ? "1" : nombrePersonnesField.getText());
+                        int nbPersonnes = Integer.parseInt(
+                                nombrePersonnesField.getText().isEmpty() ? "1" : nombrePersonnesField.getText());
                         double prixUnitaire = currentEvent.getPrix().doubleValue();
                         double total = prixUnitaire * nbPersonnes;
                         prixlabel.setText(" " + total + " TND");
@@ -185,7 +214,8 @@ public class ReservationController {
                         imageView.setFitHeight(180);
                         imageView.setFitWidth(180);
                         imageView.setPreserveRatio(true);
-                        imageView.setStyle("-fx-border-radius: 10; -fx-background-radius: 10; -fx-border-color: #2D70B3; -fx-background-color: white; -fx-padding: 5;");
+                        imageView.setStyle(
+                                "-fx-border-radius: 10; -fx-background-radius: 10; -fx-border-color: #2D70B3; -fx-background-color: white; -fx-padding: 5;");
                         allMediaNodes.add(imageView);
                         System.out.println("DEBUG: Image principale chargée: " + currentEvent.getImage());
                     }
@@ -205,7 +235,8 @@ public class ReservationController {
                             imageView.setFitHeight(180);
                             imageView.setFitWidth(180);
                             imageView.setPreserveRatio(true);
-                            imageView.setStyle("-fx-border-radius: 10; -fx-background-radius: 10; -fx-border-color: #2D70B3; -fx-background-color: white; -fx-padding: 5;");
+                            imageView.setStyle(
+                                    "-fx-border-radius: 10; -fx-background-radius: 10; -fx-border-color: #2D70B3; -fx-background-color: white; -fx-padding: 5;");
                             allMediaNodes.add(imageView);
                             System.out.println("DEBUG: Image activité chargée: " + activityImagePath);
                         }
@@ -253,7 +284,8 @@ public class ReservationController {
                         imageView.setFitHeight(180);
                         imageView.setFitWidth(180);
                         imageView.setPreserveRatio(true);
-                        imageView.setStyle("-fx-border-radius: 10; -fx-background-radius: 10; -fx-border-color: #2D70B3; -fx-background-color: white; -fx-padding: 5;");
+                        imageView.setStyle(
+                                "-fx-border-radius: 10; -fx-background-radius: 10; -fx-border-color: #2D70B3; -fx-background-color: white; -fx-padding: 5;");
                         allMediaNodes.add(imageView);
 
                         System.out.println("DEBUG: Photo supplémentaire chargée: " + photoPath);
@@ -310,7 +342,8 @@ public class ReservationController {
     private void loadYouTubeVideo() {
         System.out.println("DEBUG: Début loadYouTubeVideo()");
 
-        if (currentEvent != null && currentEvent.getVideoYoutube() != null && !currentEvent.getVideoYoutube().trim().isEmpty() && videoWebView != null && videoContainer != null) {
+        if (currentEvent != null && currentEvent.getVideoYoutube() != null
+                && !currentEvent.getVideoYoutube().trim().isEmpty() && videoWebView != null && videoContainer != null) {
             try {
                 String videoUrl = currentEvent.getVideoYoutube().trim();
                 System.out.println("DEBUG: Chargement de la vidéo YouTube dans WebView: " + videoUrl);
@@ -328,12 +361,15 @@ public class ReservationController {
                         "<head>\n" +
                         "    <meta charset=\"UTF-8\">\n" +
                         "    <style>\n" +
-                        "        body { margin: 0; padding: 0; background-color: #000; font-family: Arial; width: 400px; height: 280px; display: flex; justify-content: center; align-items: center; }\n" +
-                        "        .video-box { width: 380px; height: 260px; background-color: #1a1a1a; border: 2px solid #333; border-radius: 10px; display: flex; flex-direction: column; justify-content: center; align-items: center; text-align: center; color: white; }\n" +
+                        "        body { margin: 0; padding: 0; background-color: #000; font-family: Arial; width: 400px; height: 280px; display: flex; justify-content: center; align-items: center; }\n"
+                        +
+                        "        .video-box { width: 380px; height: 260px; background-color: #1a1a1a; border: 2px solid #333; border-radius: 10px; display: flex; flex-direction: column; justify-content: center; align-items: center; text-align: center; color: white; }\n"
+                        +
                         "        .icon { font-size: 48px; color: #ff0000; margin-bottom: 15px; }\n" +
                         "        .title { font-size: 18px; font-weight: bold; margin-bottom: 10px; }\n" +
                         "        .desc { font-size: 14px; color: #ccc; margin-bottom: 20px; }\n" +
-                        "        .btn { background-color: #ff0000; color: white; padding: 12px 24px; border: none; border-radius: 20px; font-size: 14px; font-weight: bold; cursor: pointer; text-decoration: none; }\n" +
+                        "        .btn { background-color: #ff0000; color: white; padding: 12px 24px; border: none; border-radius: 20px; font-size: 14px; font-weight: bold; cursor: pointer; text-decoration: none; }\n"
+                        +
                         "        .btn:hover { background-color: #cc0000; }\n" +
                         "    </style>\n" +
                         "</head>\n" +
@@ -480,21 +516,33 @@ public class ReservationController {
             }
 
             if (!eventExists(currentEvent.getId())) {
-                showAlert("L'événement sélectionné n'est plus disponible. Veuillez rafraîchir la liste des événements et réessayer.");
+                showAlert(
+                        "L'événement sélectionné n'est plus disponible. Veuillez rafraîchir la liste des événements et réessayer.");
                 return;
             }
 
             Reservation reservation = new Reservation();
             reservation.setIdEvent(currentEvent.getId());
+            reservation.setUserId(Session.getCurrentUserId());
 
             reservation.setNom(nomField.getText());
             reservation.setEmail(emailField.getText());
             reservation.setTelephone(telephoneField.getText());
 
             reservation.setNombrePersonnes(Integer.parseInt(nombrePersonnesField.getText()));
-            reservation.setDemandesSpeciales(demandesp.getText() != null && !demandesp.getText().trim().isEmpty() ? demandesp.getText().trim() : "");
+            reservation.setDemandesSpeciales(
+                    demandesp.getText() != null && !demandesp.getText().trim().isEmpty() ? demandesp.getText().trim()
+                            : "");
             reservation.setEvent(currentEvent);
-            reservation.setStatut(Reservation.StatutReservation.CONFIRMEE);
+
+            // Check if event date has passed
+            if (currentEvent.getDateDebut() != null
+                    && currentEvent.getDateDebut().isBefore(java.time.LocalDateTime.now())) {
+                showAlert("La date de cet événement est déjà passée. Vous ne pouvez pas réserver.");
+                return;
+            }
+
+            reservation.setStatut(Reservation.StatutReservation.EN_ATTENTE);
 
             double prixUnitaire = currentEvent.getPrix().doubleValue();
             int nbPersonnes = Integer.parseInt(nombrePersonnesField.getText());
@@ -513,7 +561,8 @@ public class ReservationController {
                 boolean addedToCalendar = googleCalendarService.addReservationToCalendar(reservation);
                 if (addedToCalendar) {
                     System.out.println("📅 Réservation ajoutée automatiquement à Google Calendar");
-                    showAlert("Réservation effectuée avec succès !\n📅 L'événement a été ajouté à votre Google Calendar.");
+                    showAlert(
+                            "Réservation effectuée avec succès !\n📅 L'événement a été ajouté à votre Google Calendar.");
                 } else {
                     System.out.println("⚠️ Erreur lors de l'ajout à Google Calendar");
                     showAlert("Réservation effectuée avec succès !\n⚠️ Impossible d'ajouter à Google Calendar.");
@@ -544,7 +593,8 @@ public class ReservationController {
             System.err.println("Erreur lors de la réservation: " + e.getMessage());
 
             if (e.getMessage().contains("foreign key constraint fails")) {
-                showAlert("Erreur : L'événement sélectionné n'est plus disponible. Veuillez rafraîchir la liste des événements et réessayer.");
+                showAlert(
+                        "Erreur : L'événement sélectionné n'est plus disponible. Veuillez rafraîchir la liste des événements et réessayer.");
                 fermerFenetre();
             } else {
                 showAlert("Erreur lors de la réservation: " + e.getMessage());
@@ -620,7 +670,8 @@ public class ReservationController {
             try {
                 int nbPersonnes = Integer.parseInt(nombrePersonnesField.getText());
 
-                System.out.println("currentEvent.getPrix(): " + (currentEvent.getPrix() != null ? currentEvent.getPrix() : "NULL"));
+                System.out.println("currentEvent.getPrix(): "
+                        + (currentEvent.getPrix() != null ? currentEvent.getPrix() : "NULL"));
 
                 double prixUnitaire = currentEvent.getPrix().doubleValue();
                 double total = prixUnitaire * nbPersonnes;

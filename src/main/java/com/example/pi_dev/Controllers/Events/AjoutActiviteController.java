@@ -161,7 +161,7 @@ public class AjoutActiviteController {
             pstmt.setString(3, type.getNom());
             pstmt.setString(4, categorie.toDbValue());
             pstmt.setString(5, imagePath);
-            pstmt.setString(6, "accepte");
+            pstmt.setString(6, "en_attente");
 
             if (ageMin == null) {
                 pstmt.setNull(7, Types.INTEGER);

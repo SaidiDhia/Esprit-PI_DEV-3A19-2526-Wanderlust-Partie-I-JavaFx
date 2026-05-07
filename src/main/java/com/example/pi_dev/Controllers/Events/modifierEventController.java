@@ -330,7 +330,7 @@ public class modifierEventController implements Initializable {
 
             int activiteId = getSelectedActiviteId();
 
-            String sql = "UPDATE events SET id_activite = ?, lieu = ?, organisateur = ?, email = ?, telephone = ?, description = ?, materiels_necessaires = ?, date_debut = ?, date_fin = ?, prix = ?, capacite_max = ?, places_disponibles = ?, statut = ?, date_modification = CURRENT_TIMESTAMP, video_youtube = ?, image = ? WHERE id = ? AND created_by_id = ?";
+            String sql = "UPDATE events SET id_activite = ?, lieu = ?, organisateur = ?, email = ?, telephone = ?, description = ?, materiels_necessaires = ?, date_debut = ?, date_fin = ?, prix = ?, capacite_max = ?, places_disponibles = ?, status = ?, statut = ?, date_modification = CURRENT_TIMESTAMP, video_youtube = ?, image = ? WHERE id = ? AND created_by_id = ?";
 
             PreparedStatement pstmt = connection.prepareStatement(sql);
             pstmt.setInt(1, activiteId);
@@ -351,12 +351,13 @@ public class modifierEventController implements Initializable {
             pstmt.setDouble(10, prixValue);
             pstmt.setInt(11, capaciteValue);
             pstmt.setInt(12, capaciteValue);
-            pstmt.setString(13, "A_VENIR");
-            pstmt.setString(14, videoYoutube);
-            pstmt.setString(15, imagePrincipalePath != null ? imagePrincipalePath
+            pstmt.setString(13, "en_attente");
+            pstmt.setString(14, "en_attente");
+            pstmt.setString(15, videoYoutube);
+            pstmt.setString(16, imagePrincipalePath != null ? imagePrincipalePath
                     : (currentEvent != null ? currentEvent.getImage() : ""));
-            pstmt.setInt(16, currentEvent != null ? currentEvent.getId() : 0);
-            pstmt.setString(17, Session.getCurrentUserId());
+            pstmt.setInt(17, currentEvent != null ? currentEvent.getId() : 0);
+            pstmt.setString(18, Session.getCurrentUserId());
 
             int rowsAffected = pstmt.executeUpdate();
 

@@ -4,6 +4,10 @@ import com.example.pi_dev.Services.Events.WeatherService;
 import com.example.pi_dev.Utils.Events.Mydatabase;
 import com.example.pi_dev.Entities.Events.Activite;
 import com.example.pi_dev.Session.Session;
+import com.example.pi_dev.Utils.Users.UserSession;
+import com.example.pi_dev.enums.RoleEnum;
+import com.example.pi_dev.Utils.Users.UserSession;
+import com.example.pi_dev.enums.RoleEnum;
 
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
@@ -27,6 +31,9 @@ import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.ResourceBundle;
+import javafx.fxml.FXMLLoader;
+import javafx.scene.Parent;
+import javafx.scene.Scene;
 
 public class EventController implements Initializable {
 
@@ -74,6 +81,8 @@ public class EventController implements Initializable {
     private CheckBox check3;
     @FXML
     private CheckBox check4;
+    @FXML
+    private Button adminDashboardButton;
 
     private Connection connection;
     private WeatherService weatherService;
@@ -93,6 +102,7 @@ public class EventController implements Initializable {
         loadWeatherData();
         loadActivites();
         createUploadsDirectory();
+        updateAdminButtonVisibility();
     }
 
     private void createUploadsDirectory() {
@@ -109,7 +119,7 @@ public class EventController implements Initializable {
 
     private void loadActivites() {
         try {
-            String sql = "SELECT id, titre, type_activite, description, image FROM activites";
+            String sql = "SELECT id, titre, type_activite, description, image, status FROM activites";
             Statement st = connection.createStatement();
             ResultSet rs = st.executeQuery(sql);
 
@@ -119,6 +129,12 @@ public class EventController implements Initializable {
                 String type = rs.getString("type_activite");
                 String description = rs.getString("description");
                 String imagePath = rs.getString("image");
+                String status = rs.getString("status");
+
+                // Only include activities that are approved for selection
+                if (!isPublishedStatus(status)) {
+                    continue;
+                }
 
                 Object activite = createActiviteObject(id, titre, type, description, imagePath);
                 if (activite != null) {
@@ -232,7 +248,7 @@ public class EventController implements Initializable {
                 Activite activiteEntity = (Activite) activite;
                 int activiteId = activiteEntity.getId();
 
-                String sql = "INSERT INTO events (id_activite, lieu, organisateur, email, telephone, description, materiels_necessaires, prix, capacite_max, places_disponibles, date_debut, date_fin, image, video_youtube, statut, date_limite_inscription, date_creation, date_modification, created_by_id) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+                String sql = "INSERT INTO events (id_activite, lieu, organisateur, email, telephone, description, materiels_necessaires, prix, capacite_max, places_disponibles, date_debut, date_fin, image, video_youtube, status, statut, date_limite_inscription, date_creation, date_modification, created_by_id) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
                 PreparedStatement pstmt = connection.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS);
 
                 pstmt.setInt(1, activiteId);
@@ -253,7 +269,8 @@ public class EventController implements Initializable {
                 String primaryImagePath = savePrimaryImageToUploads();
                 pstmt.setString(13, primaryImagePath != null ? primaryImagePath : "");
                 pstmt.setString(14, videoYoutubeField != null ? videoYoutubeField.getText().trim() : "");
-                pstmt.setString(15, "A_VENIR");
+                pstmt.setString(15, "en_attente");
+                pstmt.setString(16, "en_attente");
                 java.sql.Timestamp dateLimiteInscription = null;
                 if (dateDebutPicker.getValue() != null) {
                     java.time.LocalDate limite = dateDebutPicker.getValue().minusDays(1);
@@ -266,10 +283,10 @@ public class EventController implements Initializable {
                 } else {
                     dateLimiteInscription = new Timestamp(System.currentTimeMillis());
                 }
-                pstmt.setTimestamp(16, dateLimiteInscription);
-                pstmt.setTimestamp(17, new Timestamp(System.currentTimeMillis()));
+                pstmt.setTimestamp(17, dateLimiteInscription);
                 pstmt.setTimestamp(18, new Timestamp(System.currentTimeMillis()));
-                pstmt.setString(19, Session.getCurrentUserId());
+                pstmt.setTimestamp(19, new Timestamp(System.currentTimeMillis()));
+                pstmt.setString(20, Session.getCurrentUserId());
 
                 int rowsAffected = pstmt.executeUpdate();
 
@@ -359,6 +376,50 @@ public class EventController implements Initializable {
         Alert alert = new Alert(Alert.AlertType.INFORMATION);
         alert.setContentText(message);
         alert.showAndWait();
+    }
+
+    private boolean isAdminUser() {
+        return UserSession.getInstance().getCurrentUser() != null
+                && UserSession.getInstance().getCurrentUser().getRole() == RoleEnum.ADMIN;
+    }
+
+    private void updateAdminButtonVisibility() {
+        if (adminDashboardButton != null) {
+            boolean isAdmin = isAdminUser();
+            adminDashboardButton.setVisible(isAdmin);
+            adminDashboardButton.setManaged(isAdmin);
+        }
+    }
+
+    private boolean isPublishedStatus(String status) {
+        if (status == null || status.trim().isEmpty()) {
+            return false;
+        }
+        String normalized = status.trim().toLowerCase();
+        return normalized.equals("accepte");
+    }
+
+    @FXML
+    void ouvrirAdminApprovalDashboard(ActionEvent event) {
+        if (!isAdminUser()) {
+            showAlert("Accès réservé aux administrateurs.");
+            return;
+        }
+        try {
+            FXMLLoader loader = new FXMLLoader(
+                    getClass().getResource("/com/example/pi_dev/events/ApprovalDashboard.fxml"));
+            Parent root = loader.load();
+            Stage stage = new Stage();
+            stage.setTitle("Validation des activités et événements");
+            stage.setScene(new Scene(root));
+            stage.setWidth(1200);
+            stage.setHeight(800);
+            stage.centerOnScreen();
+            stage.show();
+        } catch (Exception e) {
+            e.printStackTrace();
+            showAlert("Impossible d'ouvrir le tableau de validation.");
+        }
     }
 
     private void fermerFenetre() {

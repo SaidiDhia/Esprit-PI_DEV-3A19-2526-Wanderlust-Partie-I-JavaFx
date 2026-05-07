@@ -201,7 +201,7 @@ public class modifierActiviteController {
                 }
             }
 
-            String sql = "UPDATE activites SET titre = ?, description = ?, type_activite = ?, categorie = ?, image = ?, age_minimum = ?, date_modification = NOW() WHERE id = ? AND created_by_id = ?";
+            String sql = "UPDATE activites SET titre = ?, description = ?, type_activite = ?, categorie = ?, image = ?, age_minimum = ?, status = ?, date_modification = NOW() WHERE id = ? AND created_by_id = ?";
             PreparedStatement pstmt = connection.prepareStatement(sql);
             pstmt.setString(1, titre);
             pstmt.setString(2, description);
@@ -213,8 +213,9 @@ public class modifierActiviteController {
             } else {
                 pstmt.setInt(6, ageMin);
             }
-            pstmt.setInt(7, currentActivite.getId());
-            pstmt.setString(8, Session.getCurrentUserId());
+            pstmt.setString(7, "en_attente");
+            pstmt.setInt(8, currentActivite.getId());
+            pstmt.setString(9, Session.getCurrentUserId());
 
             int rowsAffected = pstmt.executeUpdate();
 

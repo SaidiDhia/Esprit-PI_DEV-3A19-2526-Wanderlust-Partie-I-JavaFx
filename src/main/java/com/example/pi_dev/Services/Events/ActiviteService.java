@@ -18,7 +18,7 @@ public class ActiviteService {
     // ================= ADD =================
     public void ajouter(Activite a) throws SQLException {
 
-        String sql = "INSERT INTO activites (titre, description, type_activite, image, age_minimum, date_creation, date_modification) VALUES (?, ?, ?, ?, ?, NOW(), NOW())";
+        String sql = "INSERT INTO activites (titre, description, type_activite, image, age_minimum, status, date_creation, date_modification) VALUES (?, ?, ?, ?, ?, ?, NOW(), NOW())";
 
         PreparedStatement ps = cnx.prepareStatement(sql);
 
@@ -31,11 +31,12 @@ public class ActiviteService {
         } else {
             ps.setInt(5, a.getAgeMinimum());
         }
+        ps.setString(6, "en_attente");
 
         ps.executeUpdate();
     }
 
-    //  READ
+    // READ
     public List<Activite> afficher() throws SQLException {
 
         List<Activite> list = new ArrayList<>();
@@ -53,6 +54,7 @@ public class ActiviteService {
             a.setDescription(rs.getString("description"));
             a.setTypeActivite(rs.getString("type_activite"));
             a.setImage(rs.getString("image"));
+            a.setStatus(rs.getString("status"));
             int age = rs.getInt("age_minimum");
             if (rs.wasNull()) {
                 a.setAgeMinimum(null);
@@ -68,10 +70,10 @@ public class ActiviteService {
         return list;
     }
 
-    //  UPDATE
+    // UPDATE
     public void modifier(Activite a) throws SQLException {
 
-        String sql = "UPDATE activites SET titre=?, description=?, type_activite=?, image=?, age_minimum=?, date_modification=NOW() WHERE id=?";
+        String sql = "UPDATE activites SET titre=?, description=?, type_activite=?, image=?, age_minimum=?, status=?, date_modification=NOW() WHERE id=?";
 
         PreparedStatement ps = cnx.prepareStatement(sql);
 
@@ -84,12 +86,13 @@ public class ActiviteService {
         } else {
             ps.setInt(5, a.getAgeMinimum());
         }
-        ps.setInt(6, a.getId());
+        ps.setString(6, a.getStatus() != null ? a.getStatus() : "en_attente");
+        ps.setInt(7, a.getId());
 
         ps.executeUpdate();
     }
 
-    //  DELETE
+    // DELETE
     public void supprimer(int id) throws SQLException {
 
         String sql = "DELETE FROM activites WHERE id=?";

@@ -34,6 +34,7 @@
             <HBox alignment="CENTER" spacing="15">
                <children>
                   <Button style="-fx-background-color: #1A4E85; -fx-text-fill: white; -fx-background-radius: 6; -fx-padding: 8 16; -fx-font-size: 14px; -fx-cursor: hand;" text="🎯 Organisation" />
+                  <Button fx:id="adminDashboardButton" onAction="#ouvrirAdminApprovalDashboard" style="-fx-background-color: #111827; -fx-text-fill: white; -fx-background-radius: 6; -fx-padding: 8 16; -fx-font-size: 14px; -fx-cursor: hand;" text="🛡️ Validation admin" />
                </children>
             </HBox>
          </children>

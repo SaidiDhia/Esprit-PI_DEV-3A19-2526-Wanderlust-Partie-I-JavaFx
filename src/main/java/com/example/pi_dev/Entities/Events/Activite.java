@@ -11,6 +11,7 @@ public class Activite {
     private CategorieActivite categorie;
     private String image;
     private Integer ageMinimum;
+    private String status;
     private Timestamp dateCreation;
     private Timestamp dateModification;
     private String createdById;
@@ -69,6 +70,14 @@ public class Activite {
 
     public void setAgeMinimum(Integer ageMinimum) {
         this.ageMinimum = ageMinimum;
+    }
+
+    public String getStatus() {
+        return status;
+    }
+
+    public void setStatus(String status) {
+        this.status = status;
     }
 
     public Timestamp getDateCreation() {

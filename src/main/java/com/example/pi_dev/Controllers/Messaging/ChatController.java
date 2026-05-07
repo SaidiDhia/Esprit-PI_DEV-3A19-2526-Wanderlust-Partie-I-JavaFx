@@ -40,49 +40,75 @@ import javax.sound.sampled.LineUnavailableException;
 
 /**
  * Controller class for the chat interface.
- * Manages conversations, messages, and user interactions in the messaging system.
+ * Manages conversations, messages, and user interactions in the messaging
+ * system.
  */
 public class ChatController {
 
     // ==================== FXML UI Components ====================
 
     // Header Components
-    @FXML private Button themeBtn;
+    @FXML
+    private Button themeBtn;
 
     // Chat Tab Components
-    @FXML private ListView<Conversation> conversationList;
-    @FXML private ListView<Message> messageList;
-    @FXML private TextField messageInput;
-    @FXML private Label conversationTitleLabel;
-    @FXML private Button updateConversationBtn;
-    @FXML private Button deleteConversationBtn;
-    @FXML private TextField conversationSearchField;
+    @FXML
+    private ListView<Conversation> conversationList;
+    @FXML
+    private ListView<Message> messageList;
+    @FXML
+    private TextField messageInput;
+    @FXML
+    private Label conversationTitleLabel;
+    @FXML
+    private Button updateConversationBtn;
+    @FXML
+    private Button deleteConversationBtn;
+    @FXML
+    private TextField conversationSearchField;
 
     // Contacts Tab Components
-    @FXML private Tab contactsTab;
-    @FXML private ScrollPane contactsScrollPane;
-    @FXML private FlowPane contactsFlow;
-    @FXML private Tab archivedTab;
-    @FXML private ListView<Conversation> archivedConversationList;
-    @FXML private Button unarchiveAllBtn;
+    @FXML
+    private Tab contactsTab;
+    @FXML
+    private ScrollPane contactsScrollPane;
+    @FXML
+    private FlowPane contactsFlow;
+    @FXML
+    private Tab archivedTab;
+    @FXML
+    private ListView<Conversation> archivedConversationList;
+    @FXML
+    private Button unarchiveAllBtn;
 
-    @FXML private Button attachImageBtn;
-    @FXML private MenuButton attachMenuBtn;
+    @FXML
+    private Button attachImageBtn;
+    @FXML
+    private MenuButton attachMenuBtn;
 
     // Voice recording fields
-    @FXML private Button voiceRecordBtn;
-    @FXML private HBox recordingIndicator;
-    @FXML private Label recordingTimeLabel;
-    @FXML private Button stopRecordingBtn;
-    @FXML private Button cancelRecordingBtn;
+    @FXML
+    private Button voiceRecordBtn;
+    @FXML
+    private HBox recordingIndicator;
+    @FXML
+    private Label recordingTimeLabel;
+    @FXML
+    private Button stopRecordingBtn;
+    @FXML
+    private Button cancelRecordingBtn;
 
     // Smart Reply button
-    @FXML private Button smartReplyBtn;
+    @FXML
+    private Button smartReplyBtn;
 
-    @FXML private Button stopSpeechBtn;
+    @FXML
+    private Button stopSpeechBtn;
 
-    @FXML private HBox emojiSuggestionBox;
-    @FXML private Button emoji1Btn, emoji2Btn, emoji3Btn;
+    @FXML
+    private HBox emojiSuggestionBox;
+    @FXML
+    private Button emoji1Btn, emoji2Btn, emoji3Btn;
     // Services
     private final FileUploadService uploadService = new FileUploadService();
     private final GeminiService geminiService = new GeminiService();
@@ -103,12 +129,10 @@ public class ChatController {
     private ObservableList<Conversation> archivedConversations = FXCollections.observableArrayList();
     private final ReactionRepository reactionRepo = new ReactionRepository();
 
-    //bad words
+    // bad words
     private MessageFilterService filterService;
 
-
     private SimpleTTSService ttsService;
-
 
     private void setupImageHandling() {
         if (attachImageBtn != null) {
@@ -145,9 +169,8 @@ public class ChatController {
         recordingIndicator.setVisible(false);
         recordingIndicator.setManaged(false);
 
-        //initialize suggestion
+        // initialize suggestion
         setupEmojiSuggestions();
-
 
         ttsService = new SimpleTTSService();
         ttsService.listWindowsVoices(); // Optional: see available voices (Windows only)
@@ -164,8 +187,8 @@ public class ChatController {
                     selectedConversation = newVal;
                     if (newVal != null) {
                         if (conversationTitleLabel != null) {
-                            conversationTitleLabel.setText(newVal.getName() != null ?
-                                    newVal.getName() : "Conversation " + newVal.getId());
+                            conversationTitleLabel.setText(
+                                    newVal.getName() != null ? newVal.getName() : "Conversation " + newVal.getId());
                             conversationTitleLabel.getStyleClass().add("conversation-title");
                         }
                         if (updateConversationBtn != null) {
@@ -175,8 +198,10 @@ public class ChatController {
                             deleteConversationBtn.setVisible(true);
                         }
                     } else {
-                        if (updateConversationBtn != null) updateConversationBtn.setVisible(false);
-                        if (deleteConversationBtn != null) deleteConversationBtn.setVisible(false);
+                        if (updateConversationBtn != null)
+                            updateConversationBtn.setVisible(false);
+                        if (deleteConversationBtn != null)
+                            deleteConversationBtn.setVisible(false);
                         if (conversationTitleLabel != null) {
                             conversationTitleLabel.setText("Select a conversation");
                         }
@@ -332,7 +357,7 @@ public class ChatController {
                 MenuItem listen = new MenuItem("🔊 Listen");
                 MenuItem summarize = new MenuItem("📋 Summarize");
 
-// Set actions FIRST
+                // Set actions FIRST
                 summarize.setOnAction(e -> summarizeMessage(msg));
                 listen.setOnAction(e -> {
                     if (msg.isText()) {
@@ -340,7 +365,10 @@ public class ChatController {
                         showInfo("🔊 Speaking message...");
                         listen.setDisable(true);
                         new Thread(() -> {
-                            try { Thread.sleep(2000); } catch (InterruptedException ex) {}
+                            try {
+                                Thread.sleep(2000);
+                            } catch (InterruptedException ex) {
+                            }
                             Platform.runLater(() -> listen.setDisable(false));
                         }).start();
                     } else {
@@ -349,18 +377,18 @@ public class ChatController {
                 });
                 translate.setOnAction(e -> translateMessage(msg));
 
-// Clear and rebuild menu properly
+                // Clear and rebuild menu properly
                 menu.getItems().clear();
 
-// Always add common items
+                // Always add common items
                 menu.getItems().addAll(listen, translate);
 
-// Add summarize ONLY for long text messages
+                // Add summarize ONLY for long text messages
                 if (msg.isText() && msg.getContent().length() > 200) {
                     menu.getItems().add(summarize);
                 }
 
-// Add edit/delete based on ownership
+                // Add edit/delete based on ownership
                 if (msg.isText() && isMine) {
                     menu.getItems().addAll(edit, delete);
                 } else if (!msg.isText() && isMine) {
@@ -372,7 +400,8 @@ public class ChatController {
                 menuBtn.setVisible(true);
 
                 edit.setOnAction(e -> {
-                    if (!msg.isText()) return;
+                    if (!msg.isText())
+                        return;
 
                     TextInputDialog dialog = new TextInputDialog(msg.getContent());
                     dialog.setTitle("Edit Message");
@@ -441,10 +470,12 @@ public class ChatController {
 
                 if (isMine) {
                     bubble.getStyleClass().add("mine");
-                    bubble.setStyle("-fx-background-color: #86A7BF; -fx-background-radius: 15 15 2 15; -fx-padding: 8;");
+                    bubble.setStyle(
+                            "-fx-background-color: #86A7BF; -fx-background-radius: 15 15 2 15; -fx-padding: 8;");
                 } else {
                     bubble.getStyleClass().add("theirs");
-                    bubble.setStyle("-fx-background-color: white; -fx-background-radius: 15 15 15 2; -fx-padding: 8; -fx-border-color: #e0e0e0; -fx-border-radius: 15 15 15 2;");
+                    bubble.setStyle(
+                            "-fx-background-color: white; -fx-background-radius: 15 15 15 2; -fx-padding: 8; -fx-border-color: #e0e0e0; -fx-border-radius: 15 15 15 2;");
                 }
 
                 HBox messageRow = isMine ? new HBox(menuBtn, bubble) : new HBox(bubble, menuBtn);
@@ -482,8 +513,10 @@ public class ChatController {
                             if (msg.getFileName() != null || msg.getFileSize() > 0) {
                                 Label info = new Label();
                                 String infoText = "📷 ";
-                                if (msg.getFileName() != null) infoText += msg.getFileName();
-                                if (msg.getFileSize() > 0) infoText += " • " + formatFileSize(msg.getFileSize());
+                                if (msg.getFileName() != null)
+                                    infoText += msg.getFileName();
+                                if (msg.getFileSize() > 0)
+                                    infoText += " • " + formatFileSize(msg.getFileSize());
                                 info.setText(infoText);
                                 info.setStyle("-fx-font-size: 10px; -fx-text-fill: #999;");
                                 bubble.getChildren().add(info);
@@ -496,13 +529,14 @@ public class ChatController {
                     showErrorPlaceholder(bubble, "Failed to load image");
                 }
             }
+
             // Add these methods inside your cell factory
             private void showReactionPicker(Message msg, VBox bubble) {
                 // Create reaction popup
                 ContextMenu reactionMenu = new ContextMenu();
 
-                String[] emojis = {"👍", "❤️", "😂", "😮", "😢", "😡"};
-                String[] names = {"Like", "Love", "Haha", "Wow", "Sad", "Angry"};
+                String[] emojis = { "👍", "❤️", "😂", "😮", "😢", "😡" };
+                String[] names = { "Like", "Love", "Haha", "Wow", "Sad", "Angry" };
 
                 for (int i = 0; i < emojis.length; i++) {
                     MenuItem item = new MenuItem(emojis[i] + " " + names[i]);
@@ -552,8 +586,8 @@ public class ChatController {
                     List<Reaction> reactions = reactionRepo.getReactionsForMessage(msg.getId());
 
                     // Remove old reaction bar if exists
-                    bubble.getChildren().removeIf(node ->
-                            node instanceof HBox && "reaction-bar".equals(node.getStyleClass().stream().findFirst().orElse("")));
+                    bubble.getChildren().removeIf(node -> node instanceof HBox
+                            && "reaction-bar".equals(node.getStyleClass().stream().findFirst().orElse("")));
 
                     if (!reactions.isEmpty()) {
                         // Group reactions by type
@@ -569,7 +603,8 @@ public class ChatController {
 
                         counts.forEach((emoji, count) -> {
                             Label reactionLabel = new Label(emoji + " " + count);
-                            reactionLabel.setStyle("-fx-background-color: #f0f0f0; -fx-background-radius: 12; -fx-padding: 2 8; -fx-font-size: 12px; -fx-text-fill: #333333;");
+                            reactionLabel.setStyle(
+                                    "-fx-background-color: #f0f0f0; -fx-background-radius: 12; -fx-padding: 2 8; -fx-font-size: 12px; -fx-text-fill: #333333;");
                             reactionLabel.setTooltip(new Tooltip(getReactionUsers(reactions, emoji)));
                             reactionBar.getChildren().add(reactionLabel);
                         });
@@ -587,13 +622,15 @@ public class ChatController {
                         .map(r -> r.getUserFullName() != null ? r.getUserFullName() : r.getUserId())
                         .collect(java.util.stream.Collectors.joining("\n"));
             }
+
             private void displayVideoMessage(Message msg, VBox bubble) {
                 try {
                     String fileUrl = msg.getFileUrl();
                     File videoFile = resolveMessageFile(fileUrl);
                     if (fileUrl != null && videoFile.exists()) {
                         Label videoThumbnail = new Label("🎥");
-                        videoThumbnail.setStyle("-fx-font-size: 48px; -fx-text-fill: #2d7a2d; -fx-background-color: #f0f0f0; -fx-background-radius: 8; -fx-padding: 20;");
+                        videoThumbnail.setStyle(
+                                "-fx-font-size: 48px; -fx-text-fill: #2d7a2d; -fx-background-color: #f0f0f0; -fx-background-radius: 8; -fx-padding: 20;");
                         videoThumbnail.setPrefSize(200, 120);
                         videoThumbnail.setAlignment(Pos.CENTER);
                         videoThumbnail.setStyle(videoThumbnail.getStyle() + "-fx-cursor: hand;");
@@ -604,9 +641,11 @@ public class ChatController {
                         Label fileName = new Label(msg.getFileName() != null ? msg.getFileName() : "Video");
                         fileName.setStyle("-fx-font-size: 12px; -fx-font-weight: bold;");
                         String infoText = "";
-                        if (msg.getDuration() != null && msg.getDuration() > 0) infoText += formatDuration(msg.getDuration());
+                        if (msg.getDuration() != null && msg.getDuration() > 0)
+                            infoText += formatDuration(msg.getDuration());
                         if (msg.getFileSize() > 0) {
-                            if (!infoText.isEmpty()) infoText += " • ";
+                            if (!infoText.isEmpty())
+                                infoText += " • ";
                             infoText += formatFileSize(msg.getFileSize());
                         }
                         Label fileInfo = new Label(infoText);
@@ -628,7 +667,8 @@ public class ChatController {
                     if (fileUrl != null && audioFile.exists()) {
                         HBox audioBox = new HBox(10);
                         audioBox.setAlignment(Pos.CENTER_LEFT);
-                        audioBox.setStyle("-fx-background-color: #f5f5f5; -fx-background-radius: 20; -fx-padding: 8; -fx-cursor: hand;");
+                        audioBox.setStyle(
+                                "-fx-background-color: #f5f5f5; -fx-background-radius: 20; -fx-padding: 8; -fx-cursor: hand;");
                         audioBox.setOnMouseClicked(e -> openFile(audioFile.getPath()));
 
                         Label playIcon = new Label("▶");
@@ -662,7 +702,8 @@ public class ChatController {
             private void displayFileMessage(Message msg, VBox bubble) {
                 HBox fileBox = new HBox(8);
                 fileBox.setAlignment(Pos.CENTER_LEFT);
-                fileBox.setStyle("-fx-cursor: hand; -fx-background-color: #f5f5f5; -fx-background-radius: 8; -fx-padding: 8;");
+                fileBox.setStyle(
+                        "-fx-cursor: hand; -fx-background-color: #f5f5f5; -fx-background-radius: 8; -fx-padding: 8;");
                 fileBox.setOnMouseClicked(e -> {
                     File resolved = resolveMessageFile(msg.getFileUrl());
                     openFile(resolved.getPath());
@@ -709,8 +750,9 @@ public class ChatController {
             }
 
             private String formatFileSize(long bytes) {
-                if (bytes <= 0) return "0 B";
-                String[] units = {"B", "KB", "MB", "GB", "TB"};
+                if (bytes <= 0)
+                    return "0 B";
+                String[] units = { "B", "KB", "MB", "GB", "TB" };
                 int digitGroups = (int) (Math.log10(bytes) / Math.log10(1024));
                 return String.format("%.1f %s", bytes / Math.pow(1024, digitGroups), units[digitGroups]);
             }
@@ -739,11 +781,13 @@ public class ChatController {
                     scrollPane.setStyle("-fx-background-color: #2d2d2d;");
 
                     Button downloadBtn = new Button("⬇ Download");
-                    downloadBtn.setStyle("-fx-background-color: #2d7a2d; -fx-text-fill: white; -fx-background-radius: 5; -fx-padding: 8 15;");
+                    downloadBtn.setStyle(
+                            "-fx-background-color: #2d7a2d; -fx-text-fill: white; -fx-background-radius: 5; -fx-padding: 8 15;");
                     downloadBtn.setOnAction(e -> downloadFile(imageFile));
 
                     Button closeBtn = new Button("✖ Close");
-                    closeBtn.setStyle("-fx-background-color: #ff6b6b; -fx-text-fill: white; -fx-background-radius: 5; -fx-padding: 8 15;");
+                    closeBtn.setStyle(
+                            "-fx-background-color: #ff6b6b; -fx-text-fill: white; -fx-background-radius: 5; -fx-padding: 8 15;");
                     closeBtn.setOnAction(e -> imageStage.close());
 
                     HBox buttonBar = new HBox(10, downloadBtn, closeBtn);
@@ -801,12 +845,15 @@ public class ChatController {
             deleteConversationBtn.setVisible(false);
         }
 
-        if (themeBtn != null) themeBtn.getStyleClass().add("theme-button");
+        if (themeBtn != null)
+            themeBtn.getStyleClass().add("theme-button");
 
-        if (contactsTab != null) loadContacts();
+        if (contactsTab != null)
+            loadContacts();
         if (archivedTab != null) {
             loadArchivedConversations();
-            if (unarchiveAllBtn != null) unarchiveAllBtn.setOnAction(e -> handleUnarchiveAll());
+            if (unarchiveAllBtn != null)
+                unarchiveAllBtn.setOnAction(e -> handleUnarchiveAll());
         }
 
         setupImageHandling();
@@ -826,7 +873,8 @@ public class ChatController {
             HBox container = new HBox(10);
             container.setAlignment(Pos.CENTER_LEFT);
             container.setPadding(new Insets(10));
-            container.setStyle("-fx-background-color: transparent; -fx-border-color: transparent transparent #e0e0e0 transparent;");
+            container.setStyle(
+                    "-fx-background-color: transparent; -fx-border-color: transparent transparent #e0e0e0 transparent;");
 
             Label archiveIcon = new Label("📦");
             archiveIcon.setStyle("-fx-font-size: 20px; -fx-text-fill: #6c757d;");
@@ -840,7 +888,8 @@ public class ChatController {
             HBox.setHgrow(infoBox, Priority.ALWAYS);
 
             Button unarchiveBtn = new Button("Unarchive");
-            unarchiveBtn.setStyle("-fx-background-color: #6c757d; -fx-text-fill: white; -fx-background-radius: 15; -fx-padding: 5 15;");
+            unarchiveBtn.setStyle(
+                    "-fx-background-color: #6c757d; -fx-text-fill: white; -fx-background-radius: 15; -fx-padding: 5 15;");
             unarchiveBtn.setOnAction(e -> {
                 try {
                     conversationRepo.updateArchiveStatus(c.getId(), Session.getCurrentUserId(), false);
@@ -957,11 +1006,11 @@ public class ChatController {
     }
 
     private void loadMessages() {
-        if (selectedConversation == null) return;
+        if (selectedConversation == null)
+            return;
         try {
             messageList.getItems().setAll(
-                    messageRepo.findByConversation(selectedConversation.getId(), Session.getCurrentUserId())
-            );
+                    messageRepo.findByConversation(selectedConversation.getId(), Session.getCurrentUserId()));
             if (!messageList.getItems().isEmpty()) {
                 messageList.scrollTo(messageList.getItems().size() - 1);
             }
@@ -982,7 +1031,7 @@ public class ChatController {
 
     // ==================== Message Actions ====================
 
-    //baddaltha bch twalli bel filter
+    // baddaltha bch twalli bel filter
     @FXML
     private void sendMessage() {
         if (selectedConversation == null || messageInput.getText().isBlank())
@@ -1034,11 +1083,11 @@ public class ChatController {
         FileChooser fileChooser = new FileChooser();
         fileChooser.setTitle("Select Image");
         fileChooser.getExtensionFilters().addAll(
-                new FileChooser.ExtensionFilter("Image Files", "*.png", "*.jpg", "*.jpeg", "*.gif", "*.bmp")
-        );
+                new FileChooser.ExtensionFilter("Image Files", "*.png", "*.jpg", "*.jpeg", "*.gif", "*.bmp"));
 
         File selectedFile = fileChooser.showOpenDialog(themeBtn.getScene().getWindow());
-        if (selectedFile != null) sendImageMessage(selectedFile);
+        if (selectedFile != null)
+            sendImageMessage(selectedFile);
     }
 
     @FXML
@@ -1051,11 +1100,11 @@ public class ChatController {
         FileChooser fileChooser = new FileChooser();
         fileChooser.setTitle("Select Video");
         fileChooser.getExtensionFilters().addAll(
-                new FileChooser.ExtensionFilter("Video Files", "*.mp4", "*.avi", "*.mov", "*.mkv", "*.wmv")
-        );
+                new FileChooser.ExtensionFilter("Video Files", "*.mp4", "*.avi", "*.mov", "*.mkv", "*.wmv"));
 
         File selectedFile = fileChooser.showOpenDialog(themeBtn.getScene().getWindow());
-        if (selectedFile != null) sendVideoMessage(selectedFile);
+        if (selectedFile != null)
+            sendVideoMessage(selectedFile);
     }
 
     @FXML
@@ -1068,11 +1117,11 @@ public class ChatController {
         FileChooser fileChooser = new FileChooser();
         fileChooser.setTitle("Select Audio");
         fileChooser.getExtensionFilters().addAll(
-                new FileChooser.ExtensionFilter("Audio Files", "*.mp3", "*.wav", "*.aac", "*.ogg", "*.m4a")
-        );
+                new FileChooser.ExtensionFilter("Audio Files", "*.mp3", "*.wav", "*.aac", "*.ogg", "*.m4a"));
 
         File selectedFile = fileChooser.showOpenDialog(themeBtn.getScene().getWindow());
-        if (selectedFile != null) sendAudioMessage(selectedFile);
+        if (selectedFile != null)
+            sendAudioMessage(selectedFile);
     }
 
     @FXML
@@ -1085,7 +1134,8 @@ public class ChatController {
         FileChooser fileChooser = new FileChooser();
         fileChooser.setTitle("Select File");
         File selectedFile = fileChooser.showOpenDialog(themeBtn.getScene().getWindow());
-        if (selectedFile != null) sendFileMessage(selectedFile);
+        if (selectedFile != null)
+            sendFileMessage(selectedFile);
     }
 
     private void sendImageMessage(File imageFile) {
@@ -1097,8 +1147,7 @@ public class ChatController {
             Message msg = new Message(
                     selectedConversation.getId(),
                     Session.getCurrentUserId(),
-                    "📷 Image", "IMAGE", filePath
-            );
+                    "📷 Image", "IMAGE", filePath);
             msg.setThumbnailUrl(thumbnailPath);
             msg.setFileSize(imageFile.length());
             msg.setFileName(imageFile.getName());
@@ -1120,8 +1169,7 @@ public class ChatController {
             Message msg = new Message(
                     selectedConversation.getId(),
                     Session.getCurrentUserId(),
-                    "🎥 Video", "VIDEO", filePath
-            );
+                    "🎥 Video", "VIDEO", filePath);
             msg.setFileSize(videoFile.length());
             msg.setFileName(videoFile.getName());
             msg.setMimeType(Files.probeContentType(videoFile.toPath()));
@@ -1143,8 +1191,7 @@ public class ChatController {
             Message msg = new Message(
                     selectedConversation.getId(),
                     Session.getCurrentUserId(),
-                    "🎵 Audio", "AUDIO", filePath
-            );
+                    "🎵 Audio", "AUDIO", filePath);
             msg.setFileSize(audioFile.length());
             msg.setFileName(audioFile.getName());
             msg.setMimeType(Files.probeContentType(audioFile.toPath()));
@@ -1165,8 +1212,7 @@ public class ChatController {
             Message msg = new Message(
                     selectedConversation.getId(),
                     Session.getCurrentUserId(),
-                    "📎 File", "FILE", filePath
-            );
+                    "📎 File", "FILE", filePath);
             msg.setFileSize(file.length());
             msg.setFileName(file.getName());
             msg.setMimeType(Files.probeContentType(file.toPath()));
@@ -1215,9 +1261,11 @@ public class ChatController {
     @FXML
     private void stopVoiceRecording() {
         try {
-            if (recordingTimer != null) recordingTimer.stop();
+            if (recordingTimer != null)
+                recordingTimer.stop();
             File audioFile = audioRecorderService.stopRecording();
-            if (audioFile != null && audioFile.exists()) sendVoiceMessage(audioFile);
+            if (audioFile != null && audioFile.exists())
+                sendVoiceMessage(audioFile);
         } catch (IOException e) {
             showError("Failed to save recording: " + e.getMessage());
         } finally {
@@ -1227,7 +1275,8 @@ public class ChatController {
 
     @FXML
     private void cancelVoiceRecording() {
-        if (recordingTimer != null) recordingTimer.stop();
+        if (recordingTimer != null)
+            recordingTimer.stop();
         audioRecorderService.cancelRecording();
         resetRecordingUI();
         showInfo("Recording cancelled");
@@ -1249,8 +1298,7 @@ public class ChatController {
             Message msg = new Message(
                     selectedConversation.getId(),
                     Session.getCurrentUserId(),
-                    "🎤 Voice message", "AUDIO", filePath
-            );
+                    "🎤 Voice message", "AUDIO", filePath);
             msg.setFileSize(audioFile.length());
             msg.setFileName(audioFile.getName());
             msg.setMimeType("audio/wav");
@@ -1271,7 +1319,8 @@ public class ChatController {
      */
     private void translateMessage(Message msg) {
         // Language choices
-        List<String> languages = List.of("English", "French", "Spanish", "German", "Italian", "Arabic", "Chinese", "Japanese");
+        List<String> languages = List.of("English", "French", "Spanish", "German", "Italian", "Arabic", "Chinese",
+                "Japanese");
         ChoiceDialog<String> dialog = new ChoiceDialog<>("English", languages);
         dialog.setTitle("🌐 Translate Message");
         dialog.setHeaderText("Choose target language");
@@ -1289,8 +1338,7 @@ public class ChatController {
 
             String prompt = String.format(
                     "Translate this message to %s. Only return the translation, nothing else:\n\n%s",
-                    language, msg.getContent()
-            );
+                    language, msg.getContent());
 
             new Thread(() -> {
                 try {
@@ -1407,8 +1455,7 @@ public class ChatController {
         content.setPadding(new Insets(20));
         content.getChildren().addAll(
                 new Label("You can edit this before using:"),
-                suggestionArea
-        );
+                suggestionArea);
 
         dialogPane.setContent(content);
         dialogPane.getButtonTypes().addAll(ButtonType.OK, ButtonType.CANCEL);
@@ -1486,8 +1533,7 @@ public class ChatController {
                 createStyledLabel("Conversation Name:"), nameField,
                 createStyledLabel("Conversation Type:"), typeChoice,
                 createStyledLabel("Add Participants by Email:"), emailField, addBtn,
-                createStyledLabel("Participants:"), participantsList
-        );
+                createStyledLabel("Participants:"), participantsList);
 
         dialog.getDialogPane().setContent(content);
         dialog.getDialogPane().getButtonTypes().addAll(ButtonType.OK, ButtonType.CANCEL);
@@ -1510,7 +1556,8 @@ public class ChatController {
         });
 
         dialog.showAndWait().ifPresent(result -> {
-            if (result != ButtonType.OK) return;
+            if (result != ButtonType.OK)
+                return;
 
             String name = nameField.getText().trim();
             String type = typeChoice.getValue();
@@ -1561,12 +1608,12 @@ public class ChatController {
             }
         });
     }
-    //method summirize
+
+    // method summirize
     private void summarizeMessage(Message msg) {
         String prompt = String.format(
                 "Summarize this message in 1-2 sentences:\n\n%s",
-                msg.getContent()
-        );
+                msg.getContent());
 
         Alert loading = new Alert(Alert.AlertType.INFORMATION);
         loading.setTitle("Summarizing");
@@ -1603,6 +1650,7 @@ public class ChatController {
             }
         }).start();
     }
+
     @FXML
     private void summarizeConversation() {
         if (selectedConversation == null) {
@@ -1650,10 +1698,14 @@ public class ChatController {
 
             // Show message type
             String content = msg.getContent();
-            if (msg.isImage()) content = "[Image]";
-            else if (msg.isVideo()) content = "[Video]";
-            else if (msg.isAudio()) content = "[Audio]";
-            else if (msg.isFile()) content = "[File]";
+            if (msg.isImage())
+                content = "[Image]";
+            else if (msg.isVideo())
+                content = "[Video]";
+            else if (msg.isAudio())
+                content = "[Audio]";
+            else if (msg.isFile())
+                content = "[File]";
 
             context.append(prefix).append(": ").append(content).append("\n");
         }
@@ -1726,7 +1778,8 @@ public class ChatController {
         dialogPane.getStyleClass().add("dialog-pane");
 
         var result = dialog.showAndWait();
-        if (result.isEmpty()) return;
+        if (result.isEmpty())
+            return;
 
         String newName = result.get().trim();
         if (newName.isEmpty()) {
@@ -1737,12 +1790,14 @@ public class ChatController {
         try {
             conversationRepo.updateName(selectedConversation.getId(), newName);
             loadConversations();
-            if (conversationTitleLabel != null) conversationTitleLabel.setText(newName);
+            if (conversationTitleLabel != null)
+                conversationTitleLabel.setText(newName);
             showInfo("Conversation updated successfully!");
         } catch (SQLException e) {
             showError("Failed to update conversation: " + e.getMessage());
         }
     }
+
     // EMOGIES
     private void setupEmojiSuggestions() {
         messageInput.textProperty().addListener((obs, oldVal, newVal) -> {
@@ -1756,8 +1811,7 @@ public class ChatController {
         String prompt = String.format(
                 "Based on this message: '%s', suggest 3 relevant emojis. " +
                         "Return ONLY the emojis separated by spaces, nothing else.",
-                text
-        );
+                text);
 
         new Thread(() -> {
             try {
@@ -1784,8 +1838,6 @@ public class ChatController {
         }).start();
     }
 
-
-
     private void insertEmoji(String emoji) {
         messageInput.setText(messageInput.getText() + " " + emoji);
         messageInput.positionCaret(messageInput.getText().length());
@@ -1801,7 +1853,8 @@ public class ChatController {
         }
 
         try {
-            boolean isCreator = conversationRepo.isUserCreator(selectedConversation.getId(), Session.getCurrentUserId());
+            boolean isCreator = conversationRepo.isUserCreator(selectedConversation.getId(),
+                    Session.getCurrentUserId());
             if (!isCreator) {
                 showError("Only the conversation creator can delete it.");
                 return;
@@ -1823,9 +1876,12 @@ public class ChatController {
                         messageList.getItems().clear();
 
                         selectedConversation = null;
-                        if (conversationTitleLabel != null) conversationTitleLabel.setText("Select a conversation");
-                        if (deleteConversationBtn != null) deleteConversationBtn.setVisible(false);
-                        if (updateConversationBtn != null) updateConversationBtn.setVisible(false);
+                        if (conversationTitleLabel != null)
+                            conversationTitleLabel.setText("Select a conversation");
+                        if (deleteConversationBtn != null)
+                            deleteConversationBtn.setVisible(false);
+                        if (updateConversationBtn != null)
+                            updateConversationBtn.setVisible(false);
 
                         showInfo("Conversation deleted successfully!");
                     } catch (SQLException e) {
@@ -1854,6 +1910,7 @@ public class ChatController {
             e.printStackTrace();
         }
     }
+
     @FXML
     private void stopSpeaking() {
         if (ttsService != null) {
@@ -1868,10 +1925,12 @@ public class ChatController {
         scene.getStylesheets().clear();
 
         if (darkMode) {
-            scene.getStylesheets().add(getClass().getResource("/com/example/pi_dev/messagingchat.css").toExternalForm());
+            scene.getStylesheets()
+                    .add(getClass().getResource("/com/example/pi_dev/messagingchat.css").toExternalForm());
             themeBtn.setText("🌙");
         } else {
-            scene.getStylesheets().add(getClass().getResource("/com/example/pi_dev/messagingchat-dark.css").toExternalForm());
+            scene.getStylesheets()
+                    .add(getClass().getResource("/com/example/pi_dev/messagingchat-dark.css").toExternalForm());
             themeBtn.setText("☀️");
         }
 

@@ -22,7 +22,7 @@ public class EventService {
 
     // CREATE
     public void ajouter(Event e) throws SQLException {
-        String sql = "INSERT INTO events (id_activite, lieu, date_debut, date_fin, prix, capacite_max, places_disponibles, organisateur, materiels_necessaires, image, telephone, email, statut, date_limite_inscription, date_creation, date_modification, video_youtube, created_by_id) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+        String sql = "INSERT INTO events (id_activite, lieu, date_debut, date_fin, prix, capacite_max, places_disponibles, organisateur, materiels_necessaires, image, telephone, email, status, statut, date_limite_inscription, date_creation, date_modification, video_youtube, created_by_id) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
 
         PreparedStatement ps = cnx.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS);
 
@@ -38,7 +38,9 @@ public class EventService {
         ps.setString(10, e.getImage());
         ps.setString(11, e.getTelephone() != null ? String.valueOf(e.getTelephone()) : "");
         ps.setString(12, e.getEmail());
-        ps.setString(13, e.getStatut() != null ? e.getStatut().name() : "A_VENIR");
+        String statusValue = e.getStatut() != null ? e.getStatut().name().toLowerCase() : "en_attente";
+        ps.setString(13, statusValue);
+        ps.setString(14, statusValue);
 
         Timestamp dateLimiteInscription;
         if (e.getDateDebut() != null) {
@@ -53,12 +55,12 @@ public class EventService {
             dateLimiteInscription = new Timestamp(System.currentTimeMillis());
         }
 
-        ps.setTimestamp(14, dateLimiteInscription);
-        ps.setTimestamp(15,
+        ps.setTimestamp(15, dateLimiteInscription);
+        ps.setTimestamp(16,
                 e.getDateCreation() != null ? e.getDateCreation() : new Timestamp(System.currentTimeMillis()));
-        ps.setTimestamp(16, new Timestamp(System.currentTimeMillis()));
-        ps.setString(17, e.getVideoYoutube());
-        ps.setString(18, com.example.pi_dev.Session.Session.getCurrentUserId());
+        ps.setTimestamp(17, new Timestamp(System.currentTimeMillis()));
+        ps.setString(18, e.getVideoYoutube());
+        ps.setString(19, com.example.pi_dev.Session.Session.getCurrentUserId());
 
         ps.executeUpdate();
 
@@ -75,7 +77,7 @@ public class EventService {
     // READ
     public List<Event> afficher() throws SQLException {
         List<Event> list = new ArrayList<>();
-        String sql = "SELECT * FROM events ORDER BY date_creation DESC";
+        String sql = "SELECT *, COALESCE(status, statut) AS effective_status FROM events ORDER BY date_creation DESC";
 
         Statement st = cnx.createStatement();
         ResultSet rs = st.executeQuery(sql);
@@ -172,7 +174,7 @@ public class EventService {
     }
 
     public Event getEventById(int idEvent) throws SQLException {
-        String sql = "SELECT * FROM events WHERE id = ?";
+        String sql = "SELECT *, COALESCE(status, statut) AS effective_status FROM events WHERE id = ?";
 
         PreparedStatement ps = cnx.prepareStatement(sql);
         ps.setInt(1, idEvent);
@@ -207,7 +209,7 @@ public class EventService {
 
     public Event findById(int id) throws SQLException {
 
-        String sql = "SELECT e.*, a.titre, a.description as activite_description, a.type_activite, a.categorie, a.date_creation as activite_date_creation "
+        String sql = "SELECT e.*, COALESCE(e.status, e.statut) AS effective_status, a.titre, a.description as activite_description, a.type_activite, a.categorie, a.date_creation as activite_date_creation "
                 +
                 "FROM events e " +
                 "LEFT JOIN activites a ON e.id_activite = a.id " +
@@ -237,12 +239,12 @@ public class EventService {
             e.setDateCreation(rs.getTimestamp("date_creation"));
             e.setDateModification(rs.getTimestamp("date_modification"));
 
-            String statutStr = rs.getString("statut");
+            String statutStr = rs.getString("effective_status");
             if (statutStr != null) {
                 try {
-                    e.setStatut(Event.StatutEvent.valueOf(statutStr));
+                    e.setStatut(Event.StatutEvent.valueOf(statutStr.toUpperCase()));
                 } catch (IllegalArgumentException ex) {
-                    e.setStatut(Event.StatutEvent.A_VENIR);
+                    e.setStatut(Event.StatutEvent.EN_ATTENTE);
                 }
             }
 

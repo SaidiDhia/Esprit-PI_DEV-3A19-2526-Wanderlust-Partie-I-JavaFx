@@ -161,7 +161,21 @@ public class UserRepository {
         }
 
         String roleStr = rs.getString("role");
-        RoleEnum role = roleStr != null ? RoleEnum.valueOf(roleStr) : RoleEnum.PARTICIPANT;
+        RoleEnum role = RoleEnum.PARTICIPANT; // Default fallback
+        if (roleStr != null) {
+            try {
+                // Try direct match first
+                role = RoleEnum.valueOf(roleStr);
+            } catch (IllegalArgumentException e) {
+                // Try case-insensitive match
+                String upperRole = roleStr.trim().toUpperCase();
+                try {
+                    role = RoleEnum.valueOf(upperRole);
+                } catch (IllegalArgumentException ex) {
+                    // Unknown role; keep default PARTICIPANT
+                }
+            }
+        }
 
         String tfaStr = rs.getString("tfa_method");
         TFAMethod tfa = null;

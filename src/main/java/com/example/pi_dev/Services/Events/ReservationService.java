@@ -1,5 +1,6 @@
 package com.example.pi_dev.Services.Events;
 
+import com.example.pi_dev.Entities.Events.Event;
 import com.example.pi_dev.Entities.Events.Reservation;
 import com.example.pi_dev.Utils.Events.Mydatabase;
 
@@ -13,22 +14,32 @@ public class ReservationService {
 
     public ReservationService() {
         cnx = Mydatabase.getInstance().getConnextion();
+        ensureUserColumnExists();
+    }
+
+    private void ensureUserColumnExists() {
+        try (Statement st = cnx.createStatement()) {
+            st.executeUpdate("ALTER TABLE reservations ADD COLUMN IF NOT EXISTS user_id VARCHAR(36) NULL AFTER id_event");
+        } catch (SQLException e) {
+            System.err.println("Impossible de vérifier la colonne user_id des réservations: " + e.getMessage());
+        }
     }
 
     // CREATE
     public void ajouter(Reservation r) throws SQLException {
 
-        String sql = "INSERT INTO reservations (id_event, nom_complet, email, telephone, nombre_personnes, demandes_speciales, statut, prix_total, date_creation) VALUES (?, ?, ?, ?, ?, ?, ?, ?, NOW())";
+        String sql = "INSERT INTO reservations (id_event, user_id, nom_complet, email, telephone, nombre_personnes, demandes_speciales, statut, prix_total, date_creation) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, NOW())";
 
         PreparedStatement ps = cnx.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS);
 
         ps.setInt(1, r.getIdEvent());
-        ps.setString(2, r.getNomComplet());
-        ps.setString(3, r.getEmail());
-        ps.setString(4, r.getTelephone());
-        ps.setInt(5, r.getNombrePersonnes());
-        ps.setString(6, r.getDemandesSpeciales());
-        ps.setString(7, r.getStatut().toString());
+        ps.setString(2, r.getUserId());
+        ps.setString(3, r.getNomComplet());
+        ps.setString(4, r.getEmail());
+        ps.setString(5, r.getTelephone());
+        ps.setInt(6, r.getNombrePersonnes());
+        ps.setString(7, r.getDemandesSpeciales());
+        ps.setString(8, r.getStatut() != null ? r.getStatut().name().toLowerCase() : "en_attente");
 
         // Compute prix_total: prefer the value in Reservation, otherwise compute from
         // Event price
@@ -48,7 +59,7 @@ public class ReservationService {
             }
         }
 
-        ps.setDouble(8, prixTotal);
+        ps.setDouble(9, prixTotal);
 
         ps.executeUpdate();
 
@@ -73,6 +84,7 @@ public class ReservationService {
             Reservation r = new Reservation();
             r.setId(rs.getInt("id"));
             r.setIdEvent(rs.getInt("id_event"));
+            r.setUserId(rs.getString("user_id"));
             r.setNomComplet(rs.getString("nom_complet"));
             r.setEmail(rs.getString("email"));
             r.setTelephone(rs.getString("telephone"));
@@ -82,7 +94,7 @@ public class ReservationService {
             String statutStr = rs.getString("statut");
             if (statutStr != null) {
                 try {
-                    r.setStatut(Reservation.StatutReservation.valueOf(statutStr));
+                    r.setStatut(Reservation.StatutReservation.valueOf(statutStr.toUpperCase()));
                 } catch (IllegalArgumentException e) {
                     r.setStatut(Reservation.StatutReservation.EN_ATTENTE);
                 }
@@ -109,17 +121,18 @@ public class ReservationService {
             ancienEvent = rs.getInt("id_event");
         }
 
-        String updateSql = "UPDATE reservations SET id_event=?, nom_complet=?, email=?, telephone=?, nombre_personnes=?, demandes_speciales=?, statut=?, prix_total=? WHERE id=?";
+        String updateSql = "UPDATE reservations SET id_event=?, user_id=?, nom_complet=?, email=?, telephone=?, nombre_personnes=?, demandes_speciales=?, statut=?, prix_total=? WHERE id=?";
 
         PreparedStatement ps = cnx.prepareStatement(updateSql);
 
         ps.setInt(1, r.getIdEvent());
-        ps.setString(2, r.getNomComplet());
-        ps.setString(3, r.getEmail());
-        ps.setString(4, r.getTelephone());
-        ps.setInt(5, r.getNombrePersonnes());
-        ps.setString(6, r.getDemandesSpeciales());
-        ps.setString(7, r.getStatut().toString());
+        ps.setString(2, r.getUserId());
+        ps.setString(3, r.getNomComplet());
+        ps.setString(4, r.getEmail());
+        ps.setString(5, r.getTelephone());
+        ps.setInt(6, r.getNombrePersonnes());
+        ps.setString(7, r.getDemandesSpeciales());
+        ps.setString(8, r.getStatut() != null ? r.getStatut().name().toLowerCase() : "en_attente");
 
         Double prixTotalUpdate = r.getPrixTotal();
         if (prixTotalUpdate == null) {
@@ -137,8 +150,8 @@ public class ReservationService {
             }
         }
 
-        ps.setDouble(8, prixTotalUpdate);
-        ps.setInt(9, r.getId());
+        ps.setDouble(9, prixTotalUpdate);
+        ps.setInt(10, r.getId());
 
         ps.executeUpdate();
 
@@ -151,6 +164,39 @@ public class ReservationService {
     // Méthode add pour compatibilité avec le controller
     public void add(Reservation r) throws SQLException {
         ajouter(r);
+    }
+
+    public List<Reservation> getReservationsByUser(String userId) throws SQLException {
+        List<Reservation> list = new ArrayList<>();
+        if (userId == null || userId.trim().isEmpty()) {
+            return list;
+        }
+
+        String sql = "SELECT r.*, e.organisateur, e.lieu, e.date_debut, e.date_fin, e.prix AS event_prix " +
+                "FROM reservations r LEFT JOIN events e ON e.id = r.id_event " +
+                "WHERE r.user_id = ? ORDER BY r.id DESC";
+
+        try (PreparedStatement ps = cnx.prepareStatement(sql)) {
+            ps.setString(1, userId);
+            try (ResultSet rs = ps.executeQuery()) {
+                while (rs.next()) {
+                    Reservation r = mapReservation(rs);
+                    Event event = new Event();
+                    event.setId(rs.getInt("id_event"));
+                    event.setOrganisateur(rs.getString("organisateur"));
+                    event.setLieu(rs.getString("lieu"));
+                    event.setDateDebut(rs.getTimestamp("date_debut") != null ? rs.getTimestamp("date_debut").toLocalDateTime() : null);
+                    event.setDateFin(rs.getTimestamp("date_fin") != null ? rs.getTimestamp("date_fin").toLocalDateTime() : null);
+                    if (rs.getBigDecimal("event_prix") != null) {
+                        event.setPrix(rs.getBigDecimal("event_prix"));
+                    }
+                    r.setEvent(event);
+                    list.add(r);
+                }
+            }
+        }
+
+        return list;
     }
 
     // DELETE
@@ -176,5 +222,31 @@ public class ReservationService {
 
         EventService es = new EventService();
         es.diminuerPlaces(idEvent, -nombre);
+    }
+
+    private Reservation mapReservation(ResultSet rs) throws SQLException {
+        Reservation r = new Reservation();
+        r.setId(rs.getInt("id"));
+        r.setIdEvent(rs.getInt("id_event"));
+        r.setUserId(rs.getString("user_id"));
+        r.setNomComplet(rs.getString("nom_complet"));
+        r.setEmail(rs.getString("email"));
+        r.setTelephone(rs.getString("telephone"));
+        r.setNombrePersonnes(rs.getInt("nombre_personnes"));
+        r.setDemandesSpeciales(rs.getString("demandes_speciales"));
+        r.setPrixTotal(rs.getDouble("prix_total"));
+
+        String statutStr = rs.getString("statut");
+        if (statutStr != null) {
+            try {
+                r.setStatut(Reservation.StatutReservation.valueOf(statutStr.toUpperCase()));
+            } catch (IllegalArgumentException e) {
+                r.setStatut(Reservation.StatutReservation.EN_ATTENTE);
+            }
+        }
+
+        r.setDateCreation(rs.getTimestamp("date_creation"));
+        r.setDateModification(rs.getTimestamp("date_modification"));
+        return r;
     }
 }

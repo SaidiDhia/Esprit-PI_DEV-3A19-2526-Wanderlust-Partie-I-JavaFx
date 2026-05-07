@@ -4,6 +4,7 @@ public class Reservation {
 
     private int id;
     private int idEvent; // FK vers Event
+    private String userId;
     private String nomComplet;
     private String email;
     private String telephone;
@@ -19,10 +20,9 @@ public class Reservation {
     private Event event;
 
     public enum StatutReservation {
-        EN_ATTENTE,
-        CONFIRMEE,
-        ANNULEE,
-        TERMINEE
+        EN_ATTENTE, // Waiting for admin approval
+        ACCEPTE, // Admin approved
+        REFUSE // Admin rejected
     }
 
     public Reservation() {
@@ -31,7 +31,7 @@ public class Reservation {
     }
 
     public Reservation(int idEvent, String nomComplet, String email,
-                       String telephone, Integer nombrePersonnes) {
+            String telephone, Integer nombrePersonnes) {
         this();
         this.idEvent = idEvent;
         this.nomComplet = nomComplet;
@@ -42,48 +42,126 @@ public class Reservation {
 
     // Getters & Setters
 
-    public int getId() { return id; }
-    public void setId(int id) { this.id = id; }
+    public int getId() {
+        return id;
+    }
 
-    public int getIdEvent() { return idEvent; }
-    public void setIdEvent(int idEvent) { this.idEvent = idEvent; }
+    public void setId(int id) {
+        this.id = id;
+    }
 
-    public String getNomComplet() { return nomComplet; }
-    public void setNomComplet(String nomComplet) { this.nomComplet = nomComplet; }
+    public int getIdEvent() {
+        return idEvent;
+    }
 
-    public String getEmail() { return email; }
-    public void setEmail(String email) { this.email = email; }
+    public void setIdEvent(int idEvent) {
+        this.idEvent = idEvent;
+    }
 
-    public String getTelephone() { return telephone; }
-    public void setTelephone(String telephone) { this.telephone = telephone; }
+    public String getUserId() {
+        return userId;
+    }
 
-    public Integer getNombrePersonnes() { return nombrePersonnes; }
-    public void setNombrePersonnes(Integer nombrePersonnes) { this.nombrePersonnes = nombrePersonnes; }
+    public void setUserId(String userId) {
+        this.userId = userId;
+    }
 
-    public Double getPrixTotal() { return prixTotal; }
-    public void setPrixTotal(Double prixTotal) { this.prixTotal = prixTotal; }
+    public String getNomComplet() {
+        return nomComplet;
+    }
 
-    public java.time.LocalDateTime getDateReservation() { return dateReservation; }
-    public void setDateReservation(java.time.LocalDateTime dateReservation) { this.dateReservation = dateReservation; }
+    public void setNomComplet(String nomComplet) {
+        this.nomComplet = nomComplet;
+    }
 
-    public String getDemandesSpeciales() { return demandesSpeciales; }
-    public void setDemandesSpeciales(String demandesSpeciales) { this.demandesSpeciales = demandesSpeciales; }
+    public String getEmail() {
+        return email;
+    }
 
-    public StatutReservation getStatut() { return statut; }
-    public void setStatut(StatutReservation statut) { this.statut = statut; }
+    public void setEmail(String email) {
+        this.email = email;
+    }
 
-    public java.sql.Timestamp getDateCreation() { return dateCreation; }
-    public void setDateCreation(java.sql.Timestamp dateCreation) { this.dateCreation = dateCreation; }
+    public String getTelephone() {
+        return telephone;
+    }
 
-    public java.sql.Timestamp getDateModification() { return dateModification; }
-    public void setDateModification(java.sql.Timestamp dateModification) { this.dateModification = dateModification; }
+    public void setTelephone(String telephone) {
+        this.telephone = telephone;
+    }
 
-    public Event getEvent() { return event; }
-    public void setEvent(Event event) { this.event = event; }
+    public Integer getNombrePersonnes() {
+        return nombrePersonnes;
+    }
+
+    public void setNombrePersonnes(Integer nombrePersonnes) {
+        this.nombrePersonnes = nombrePersonnes;
+    }
+
+    public Double getPrixTotal() {
+        return prixTotal;
+    }
+
+    public void setPrixTotal(Double prixTotal) {
+        this.prixTotal = prixTotal;
+    }
+
+    public java.time.LocalDateTime getDateReservation() {
+        return dateReservation;
+    }
+
+    public void setDateReservation(java.time.LocalDateTime dateReservation) {
+        this.dateReservation = dateReservation;
+    }
+
+    public String getDemandesSpeciales() {
+        return demandesSpeciales;
+    }
+
+    public void setDemandesSpeciales(String demandesSpeciales) {
+        this.demandesSpeciales = demandesSpeciales;
+    }
+
+    public StatutReservation getStatut() {
+        return statut;
+    }
+
+    public void setStatut(StatutReservation statut) {
+        this.statut = statut;
+    }
+
+    public java.sql.Timestamp getDateCreation() {
+        return dateCreation;
+    }
+
+    public void setDateCreation(java.sql.Timestamp dateCreation) {
+        this.dateCreation = dateCreation;
+    }
+
+    public java.sql.Timestamp getDateModification() {
+        return dateModification;
+    }
+
+    public void setDateModification(java.sql.Timestamp dateModification) {
+        this.dateModification = dateModification;
+    }
+
+    public Event getEvent() {
+        return event;
+    }
+
+    public void setEvent(Event event) {
+        this.event = event;
+    }
 
     // Alias pour compatibilité avec le controller
-    public String getNom() { return nomComplet; }
-    public void setNom(String nom) { this.nomComplet = nom; }
+    public String getNom() {
+        return nomComplet;
+    }
+
+    public void setNom(String nom) {
+        this.nomComplet = nom;
+    }
 
     public Double getPrixUnitaire() {
         if (event != null && event.getPrix() != null) {

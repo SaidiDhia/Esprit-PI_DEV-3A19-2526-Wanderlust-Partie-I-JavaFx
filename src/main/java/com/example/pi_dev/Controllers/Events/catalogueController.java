@@ -1,10 +1,14 @@
 package com.example.pi_dev.Controllers.Events;
 
 import com.example.pi_dev.Services.Events.WeatherService;
+import com.example.pi_dev.Services.Events.ReservationService;
 import com.example.pi_dev.Utils.Events.Mydatabase;
 import com.example.pi_dev.Entities.Events.Event;
 import com.example.pi_dev.Entities.Events.Activite;
+import com.example.pi_dev.Entities.Events.Reservation;
 import com.example.pi_dev.Session.Session;
+import com.example.pi_dev.Utils.Users.UserSession;
+import com.example.pi_dev.enums.RoleEnum;
 
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
@@ -41,6 +45,8 @@ public class catalogueController {
     private Connection connection;
     private List<Activite> activitesList;
     private List<Event> eventsList;
+    private List<Reservation> reservationsList;
+    private ReservationService reservationService;
     private WeatherService weatherService;
     private WeatherService.WeatherData currentWeather;
 
@@ -53,11 +59,15 @@ public class catalogueController {
     @FXML
     private FlowPane flowEvents;
     @FXML
+    private FlowPane flowReservations;
+    @FXML
     private ScrollPane scrollPaneActivites;
     @FXML
     private ScrollPane scrollPaneEvents;
     @FXML
     private Tab tabActivites;
+    @FXML
+    private Tab tabMesReservations;
     @FXML
     private Tab tabEvents;
     @FXML
@@ -102,10 +112,14 @@ public class catalogueController {
     private Button suppact;
     @FXML
     private Button suppevent;
+    @FXML
+    private Button adminDashboardButton;
 
     public void initialize() {
         initializeDatabase();
+        reservationService = new ReservationService();
         refreshData();
+        updateAdminButtonVisibility();
 
         weatherService = new WeatherService();
         initializeCities();
@@ -166,13 +180,20 @@ public class catalogueController {
     public void refreshData() {
         loadActivites();
         loadEvents();
+        loadReservations();
         displayActivites();
         displayEvents();
+        displayReservations();
     }
 
     private void displayActivites() {
         flowActivites.getChildren().clear();
         for (Activite activite : activitesList) {
+            // Only show activities that are explicitly accepted (visible to everyone only
+            // after approval)
+            if (!isPublishedActivity(activite)) {
+                continue;
+            }
             addActiviteCard(activite);
         }
     }
@@ -180,7 +201,48 @@ public class catalogueController {
     private void displayEvents() {
         flowEvents.getChildren().clear();
         for (Event event : eventsList) {
+            // Only show events that are approved
+            if (!isPublishedEvent(event)) {
+                continue;
+            }
             addEventCard(event);
+        }
+    }
+
+    private void loadReservations() {
+        reservationsList = new ArrayList<>();
+        String currentUserId = Session.getCurrentUserId();
+        if (currentUserId == null || currentUserId.trim().isEmpty() || reservationService == null) {
+            return;
+        }
+
+        try {
+            reservationsList = reservationService.getReservationsByUser(currentUserId);
+        } catch (SQLException e) {
+            System.err.println("Erreur chargement réservations: " + e.getMessage());
+        }
+    }
+
+    private void displayReservations() {
+        if (flowReservations == null) {
+            return;
+        }
+
+        flowReservations.getChildren().clear();
+
+        String currentUserId = Session.getCurrentUserId();
+        if (currentUserId == null || currentUserId.trim().isEmpty()) {
+            flowReservations.getChildren().add(createReservationInfoCard("Connectez-vous pour voir vos réservations."));
+            return;
+        }
+
+        if (reservationsList == null || reservationsList.isEmpty()) {
+            flowReservations.getChildren().add(createReservationInfoCard("Vous n'avez encore effectué aucune réservation."));
+            return;
+        }
+
+        for (Reservation reservation : reservationsList) {
+            addReservationCard(reservation);
         }
     }
 
@@ -199,7 +261,7 @@ public class catalogueController {
             ResultSet rs;
             try {
                 rs = stmt.executeQuery(
-                        "SELECT id, titre, description, type_activite, image, created_by_id FROM activites");
+                        "SELECT id, titre, description, type_activite, image, status, created_by_id FROM activites");
                 while (rs.next()) {
                     Activite activite = new Activite();
                     activite.setId(rs.getInt("id"));
@@ -207,6 +269,7 @@ public class catalogueController {
                     activite.setDescription(rs.getString("description"));
                     activite.setTypeActivite(rs.getString("type_activite"));
                     activite.setImage(rs.getString("image"));
+                    activite.setStatus(rs.getString("status"));
                     activite.setCreatedById(rs.getString("created_by_id"));
                     activitesList.add(activite);
                 }
@@ -220,6 +283,9 @@ public class catalogueController {
                     activite.setTypeActivite(null);
                     activite.setImage(rs.getString("image"));
                     activite.setCreatedById(rs.getString("created_by_id"));
+                    // Default to pending to match Symfony enum and hide from catalogue until
+                    // approved
+                    activite.setStatus("en_attente");
                     activitesList.add(activite);
                 }
             }
@@ -232,7 +298,7 @@ public class catalogueController {
         eventsList = new ArrayList<>();
         try {
             Statement stmt = connection.createStatement();
-            ResultSet rs = stmt.executeQuery("SELECT * FROM events");
+            ResultSet rs = stmt.executeQuery("SELECT *, COALESCE(status, statut) AS effective_status FROM events");
             while (rs.next()) {
                 Event event = new Event();
                 event.setId(rs.getInt("id"));
@@ -246,7 +312,7 @@ public class catalogueController {
                 event.setPlacesDisponibles(rs.getInt("places_disponibles"));
                 event.setOrganisateur(rs.getString("organisateur"));
                 event.setMaterielsNecessaires(rs.getString("materiels_necessaires"));
-                event.setStatut(parseStatutEvent(rs.getString("statut")));
+                event.setStatut(parseStatutEvent(rs.getString("effective_status")));
                 event.setDateCreation(rs.getTimestamp("date_creation"));
                 event.setDateModification(rs.getTimestamp("date_modification"));
                 try {
@@ -262,14 +328,85 @@ public class catalogueController {
 
     private Event.StatutEvent parseStatutEvent(String statut) {
         if (statut == null || statut.trim().isEmpty()) {
-            return Event.StatutEvent.A_VENIR;
+            return Event.StatutEvent.EN_ATTENTE;
         }
 
         String normalized = statut.trim().toUpperCase();
         try {
             return Event.StatutEvent.valueOf(normalized);
         } catch (IllegalArgumentException ex) {
-            return Event.StatutEvent.A_VENIR;
+            return Event.StatutEvent.EN_ATTENTE;
+        }
+    }
+
+    private boolean isAdminUser() {
+        return UserSession.getInstance().getCurrentUser() != null
+                && UserSession.getInstance().getCurrentUser().getRole() == RoleEnum.ADMIN;
+    }
+
+    private void updateAdminButtonVisibility() {
+        if (adminDashboardButton != null) {
+            boolean isAdmin = isAdminUser();
+            adminDashboardButton.setVisible(isAdmin);
+            adminDashboardButton.setManaged(isAdmin);
+        }
+    }
+
+    private boolean isPublishedActivity(Activite activite) {
+        String status = activite.getStatus();
+        if (status == null || status.trim().isEmpty()) {
+            return false;
+        }
+        String normalized = status.trim().toLowerCase();
+        return normalized.equals("accepte");
+    }
+
+    private boolean isPublishedEvent(Event event) {
+        if (event.getStatut() == null) {
+            return true;
+        }
+        return event.getStatut() == Event.StatutEvent.ACCEPTE;
+    }
+
+    private String normalizeReservationStatus(String status) {
+        if (status == null || status.trim().isEmpty()) {
+            return "En attente";
+        }
+
+        String normalized = status.trim().toLowerCase();
+        if (normalized.equals("accepte")) {
+            return "Acceptée";
+        }
+        if (normalized.equals("refuse")) {
+            return "Refusée";
+        }
+        if (normalized.equals("en_attente")) {
+            return "En attente";
+        }
+        return status;
+    }
+
+    @FXML
+    void ouvrirAdminApprovalDashboard(ActionEvent event) {
+        if (!isAdminUser()) {
+            showAlert("Accès réservé aux administrateurs.");
+            return;
+        }
+
+        try {
+            FXMLLoader loader = new FXMLLoader(
+                    getClass().getResource("/com/example/pi_dev/events/ApprovalDashboard.fxml"));
+            Parent root = loader.load();
+            Stage stage = new Stage();
+            stage.setTitle("Validation des activités et événements");
+            stage.setScene(new Scene(root));
+            stage.setWidth(1200);
+            stage.setHeight(800);
+            stage.centerOnScreen();
+            stage.show();
+        } catch (Exception e) {
+            e.printStackTrace();
+            showAlert("Impossible d'ouvrir le tableau de validation.");
         }
     }
 
@@ -621,7 +758,7 @@ public class catalogueController {
 
                 Button supprimerButton = new Button("🗑️ Supprimer");
                 supprimerButton.setStyle(
-                    "-fx-background-color: #f44336; -fx-text-fill: white; -fx-background-radius: 20; -fx-border-radius: 20; -fx-padding: 8 16; -fx-cursor: hand;");
+                        "-fx-background-color: #f44336; -fx-text-fill: white; -fx-background-radius: 20; -fx-border-radius: 20; -fx-padding: 8 16; -fx-cursor: hand;");
                 supprimerButton.setOnAction(e -> supprimerEvent(eventFinal));
 
                 buttonBox.getChildren().addAll(modifierButton, supprimerButton);
@@ -636,6 +773,55 @@ public class catalogueController {
         } catch (Exception e) {
             System.err.println("Erreur carte événement: " + e.getMessage());
         }
+    }
+
+    private void addReservationCard(Reservation reservation) {
+        VBox card = new VBox();
+        card.setSpacing(10);
+        card.setStyle(
+                "-fx-border-color: #cbd5e1; -fx-border-width: 1; -fx-padding: 15; -fx-background-color: white; -fx-background-radius: 10; -fx-border-radius: 10; -fx-cursor: default;");
+        card.setPrefWidth(250);
+
+        Label titleLabel = new Label(reservation.getEvent() != null && reservation.getEvent().getOrganisateur() != null
+                ? reservation.getEvent().getOrganisateur()
+                : "Réservation #" + reservation.getId());
+        titleLabel.setStyle("-fx-font-size: 16px; -fx-font-weight: bold; -fx-text-fill: #0f766e;");
+        titleLabel.setWrapText(true);
+
+        String eventText = "Événement: ";
+        if (reservation.getEvent() != null && reservation.getEvent().getDateDebut() != null) {
+            eventText += reservation.getEvent().getDateDebut().format(DateTimeFormatter.ofPattern("dd/MM/yyyy"));
+        } else {
+            eventText += "Non défini";
+        }
+        Label eventLabel = new Label(eventText);
+        eventLabel.setStyle("-fx-font-size: 12px; -fx-text-fill: #334155;");
+
+        Label personsLabel = new Label("Personnes: " + reservation.getNombrePersonnes());
+        personsLabel.setStyle("-fx-font-size: 12px; -fx-text-fill: #334155;");
+
+        Label totalLabel = new Label(
+                "Prix total: " + (reservation.getPrixTotal() != null ? reservation.getPrixTotal() : 0.0) + " TND");
+        totalLabel.setStyle("-fx-font-size: 12px; -fx-text-fill: #334155;");
+
+        Label statusLabel = new Label("Statut: " + normalizeReservationStatus(
+                reservation.getStatut() != null ? reservation.getStatut().name() : null));
+        statusLabel.setStyle("-fx-font-size: 12px; -fx-font-weight: bold; -fx-text-fill: #92400e;");
+
+        card.getChildren().addAll(titleLabel, eventLabel, personsLabel, totalLabel, statusLabel);
+        flowReservations.getChildren().add(card);
+    }
+
+    private VBox createReservationInfoCard(String text) {
+        VBox card = new VBox();
+        card.setSpacing(10);
+        card.setStyle(
+                "-fx-border-color: #cbd5e1; -fx-border-width: 1; -fx-padding: 15; -fx-background-color: white; -fx-background-radius: 10; -fx-border-radius: 10;");
+        Label label = new Label(text);
+        label.setStyle("-fx-font-size: 13px; -fx-text-fill: #475569;");
+        label.setWrapText(true);
+        card.getChildren().add(label);
+        return card;
     }
 
     private void ouvrirReservation(Event event) {

@@ -32,6 +32,9 @@ public class Event {
     private Activite activite;
 
     public enum StatutEvent {
+        EN_ATTENTE,
+        ACCEPTE,
+        REFUSE,
         A_VENIR,
         EN_COURS,
         ANNULE,
@@ -55,7 +58,7 @@ public class Event {
         this.capaciteMax = (int) capaciteMax;
         this.placesDisponibles = (int) capaciteMax;
         this.prix = BigDecimal.valueOf(prix);
-        this.statut = StatutEvent.A_VENIR;
+        this.statut = StatutEvent.EN_ATTENTE;
         this.photos = new ArrayList<>(); // Initialiser la liste des photos
     }
 
