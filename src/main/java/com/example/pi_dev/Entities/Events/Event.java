@@ -28,6 +28,7 @@ public class Event {
     private Timestamp dateModification;
     private Integer telephone;
     private String createdById;
+    private LocalDateTime dateLimiteInscription;
 
     private Activite activite;
 
@@ -276,6 +277,14 @@ public class Event {
 
     public void setActivite(Activite activite) {
         this.activite = activite;
+    }
+
+    public LocalDateTime getDateLimiteInscription() {
+        return dateLimiteInscription;
+    }
+
+    public void setDateLimiteInscription(LocalDateTime dateLimiteInscription) {
+        this.dateLimiteInscription = dateLimiteInscription;
     }
 
 }

@@ -94,11 +94,18 @@ public class LoginController implements javafx.fxml.Initializable {
                         notifyMainLayoutSuccess(event);
                     } else {
                         try {
-                            String path = "/com/example/pi_dev/main/main_layout.fxml";
+                            // ── If ADMIN → go directly to Admin Dashboard ──
+                            boolean isAdmin = user.getRole() != null &&
+                                user.getRole().name().equalsIgnoreCase("ADMIN");
+
+                            String path = isAdmin
+                                ? "/com/example/pi_dev/events/ApprovalDashboard.fxml"
+                                : "/com/example/pi_dev/main/main_layout.fxml";
+
                             FXMLLoader loader = new FXMLLoader(getClass().getResource(path));
                             Parent root = loader.load();
                             Stage stage = (Stage) ((Node) event.getSource()).getScene().getWindow();
-                            stage.setScene(new Scene(root, 1200, 800));
+                            stage.setScene(new Scene(root, 1300, 820));
                             stage.setMaximized(true);
                             stage.show();
                         } catch (IOException e) {

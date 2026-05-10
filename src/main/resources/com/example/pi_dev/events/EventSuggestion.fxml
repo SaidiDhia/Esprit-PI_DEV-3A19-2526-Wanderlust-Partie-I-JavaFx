@@ -1,0 +1,78 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.ProgressIndicator?>
+<?import javafx.scene.control.ScrollPane?>
+<?import javafx.scene.control.TextArea?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.image.Image?>
+<?import javafx.scene.image.ImageView?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.VBox?>
+<?import javafx.scene.text.Font?>
+
+<ScrollPane fitToWidth="true" style="-fx-background-color: transparent;" xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.example.pi_dev.Controllers.Events.EventSuggestionController">
+   <content>
+      <VBox alignment="TOP_CENTER" prefWidth="550.0" spacing="20.0" style="-fx-background-color: #F8FAFC; -fx-padding: 30;">
+         <children>
+            <VBox alignment="CENTER" spacing="10.0">
+               <children>
+                  <ImageView fitHeight="100.0" fitWidth="100.0" preserveRatio="true">
+                     <image>
+                        <Image url="https://raw.githubusercontent.com/Tarikul-Islam-Anik/Animated-Fluent-Emojis/master/Emojis/Smileys/Robot.png" backgroundLoading="true" />
+                     </image>
+                  </ImageView>
+                  <Label style="-fx-font-size: 24px; -fx-font-weight: bold; -fx-text-fill: #1E293B;" text="L'Assistant Wanderlust" />
+            <Label style="-fx-font-size: 14px; -fx-text-fill: #64748B;" text="Décrivez ce que vous cherchez, notre IA trouvera l'événement parfait." textAlignment="CENTER" wrapText="true" />
+         </children>
+         <VBox.margin>
+            <Insets bottom="10.0" />
+         </VBox.margin>
+      </VBox>
+
+      <VBox spacing="15.0" style="-fx-background-color: white; -fx-background-radius: 12; -fx-padding: 25; -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.05), 10, 0, 0, 5);">
+         <children>
+            <VBox spacing="5.0">
+               <children>
+                  <Label style="-fx-font-weight: bold; -fx-text-fill: #334155;" text="Quel est votre âge ?" />
+                  <TextField fx:id="ageField" promptText="Ex: 25" style="-fx-background-color: #F1F5F9; -fx-background-radius: 8; -fx-padding: 10; -fx-border-color: #E2E8F0; -fx-border-radius: 8;" />
+               </children>
+            </VBox>
+            
+            <VBox spacing="5.0">
+               <children>
+                  <Label style="-fx-font-weight: bold; -fx-text-fill: #334155;" text="Qu'avez-vous envie de faire ?" />
+                  <TextField fx:id="interestsField" promptText="Ex: Randonnée, Musique, Détente, Sport..." style="-fx-background-color: #F1F5F9; -fx-background-radius: 8; -fx-padding: 10; -fx-border-color: #E2E8F0; -fx-border-radius: 8;" />
+               </children>
+            </VBox>
+            
+            <VBox spacing="5.0">
+               <children>
+                  <Label style="-fx-font-weight: bold; -fx-text-fill: #334155;" text="Dans quelle région / ville ?" />
+                  <TextField fx:id="locationField" promptText="Ex: Tunis, Nord, Bizerte..." style="-fx-background-color: #F1F5F9; -fx-background-radius: 8; -fx-padding: 10; -fx-border-color: #E2E8F0; -fx-border-radius: 8;" />
+               </children>
+            </VBox>
+         </children>
+      </VBox>
+
+      <HBox alignment="CENTER" spacing="15.0">
+         <children>
+            <Button fx:id="suggestButton" mnemonicParsing="false" onAction="#getSuggestion" style="-fx-background-color: #8B5CF6; -fx-text-fill: white; -fx-font-weight: bold; -fx-font-size: 14px; -fx-padding: 12 25; -fx-background-radius: 8; -fx-cursor: hand;" text="Trouver mon événement idéal ✨" />
+            <ProgressIndicator fx:id="loadingIndicator" prefHeight="25.0" prefWidth="25.0" />
+         </children>
+      </HBox>
+
+      <Label fx:id="statusLabel" alignment="CENTER" prefWidth="1000.0" />
+
+      <VBox fx:id="resultContainer" spacing="10.0" VBox.vgrow="ALWAYS">
+         <children>
+            <Label style="-fx-font-weight: bold; -fx-text-fill: #1E293B;" text="La recommandation de l'IA :" />
+            <TextArea fx:id="responseArea" editable="false" prefHeight="200.0" style="-fx-control-inner-background: #F8FAFC; -fx-background-radius: 8; -fx-border-color: #E2E8F0; -fx-border-radius: 8; -fx-font-size: 13px;" wrapText="true" VBox.vgrow="ALWAYS" />
+         </children>
+      </VBox>
+   </children>
+</VBox>
+   </content>
+</ScrollPane>

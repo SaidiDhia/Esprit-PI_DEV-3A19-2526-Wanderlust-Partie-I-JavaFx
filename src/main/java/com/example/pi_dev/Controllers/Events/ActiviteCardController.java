@@ -21,14 +21,11 @@ import java.io.File;
 public class ActiviteCardController {
 
     @FXML private Button catalog;
-    @FXML private Button partagerButton;
     @FXML private ImageView activiteImageView;
     @FXML private Label titreLabel;
     @FXML private Label typeLabel;
     @FXML private Label descriptionLabel;
     @FXML private Label categorieLabel;
-    @FXML private VBox weatherWidgetContainer;
-    @FXML private Button disponibleButton;
 
     private Object currentActivite;
 
@@ -104,60 +101,8 @@ public class ActiviteCardController {
     }
 
     @FXML
-    void partagerActivite(ActionEvent event) {
-        try {
-            // Récupérer les informations de l'activité
-            String titre = (String) currentActivite.getClass().getMethod("getTitre").invoke(currentActivite);
-            String type = (String) currentActivite.getClass().getMethod("getTypeActivite").invoke(currentActivite);
-            String description = (String) currentActivite.getClass().getMethod("getDescription").invoke(currentActivite);
-
-            // Créer le message de partage
-            String partageMessage = "🌟 *Wanderlust Activity* 🌟\n\n" +
-                    "📋 Titre: " + titre + "\n" +
-                    "🏷️ Type: " + type + "\n" +
-                    "📝 Description: " + (description.length() > 100 ? description.substring(0, 100) + "..." : description) + "\n\n" +
-                    "Découvrez cette amazing activity sur Wanderlust ! 🚀";
-
-            // Copier dans le presse-papiers
-            Clipboard clipboard = Toolkit.getDefaultToolkit().getSystemClipboard();
-            StringSelection selection = new StringSelection(partageMessage);
-            clipboard.setContents(selection, null);
-
-            // Afficher la confirmation
-            Alert alert = new Alert(Alert.AlertType.INFORMATION);
-            alert.setTitle("Partage réussi");
-            alert.setHeaderText("✅ Activité partagée !");
-            alert.setContentText("Les détails de l'activité ont été copiés dans le presse-papiers.\n\n" +
-                    "Vous pouvez maintenant les coller où vous voulez partager !");
-            alert.showAndWait();
-
-        } catch (Exception e) {
-            Alert alert = new Alert(Alert.AlertType.ERROR);
-            alert.setTitle("Erreur de partage");
-            alert.setHeaderText("❌ Erreur lors du partage");
-            alert.setContentText("Une erreur est survenue lors du partage de l'activité: " + e.getMessage());
-            alert.showAndWait();
-            e.printStackTrace();
-        }
-    }
-
-    @FXML
     void goToCatalogue(ActionEvent event) {
         fermerFenetre();
-    }
-
-    @FXML
-    void marquerDisponible(ActionEvent event) {
-        try {
-            // Afficher une simple confirmation pour le moment
-            Alert alert = new Alert(Alert.AlertType.INFORMATION);
-            alert.setTitle("Succès");
-            alert.setHeaderText("✅ Disponibilité mise à jour !");
-            alert.setContentText("L'activité a été marquée comme disponible.");
-            alert.showAndWait();
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
     }
 
     @FXML

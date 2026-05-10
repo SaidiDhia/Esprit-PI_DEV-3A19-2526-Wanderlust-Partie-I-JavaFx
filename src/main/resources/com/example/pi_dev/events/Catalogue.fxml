@@ -51,7 +51,7 @@
                         <Button fx:id="refreshWeather" onAction="#refreshWeather" style="-fx-background-color: #86A7BF; -fx-text-fill: white; -fx-background-radius: 20; -fx-padding: 8 16; -fx-font-size: 12px; -fx-cursor: hand;" text="🔄 Actualiser" />
                     </children>
                 </HBox>
-                <VBox fx:id="weatherWidgetContainer" style="-fx-background-color: #F8FAFC; -fx-background-radius: 12; -fx-padding: 15; -fx-margin-top: 10;">
+                <VBox fx:id="weatherWidgetContainer" style="-fx-background-color: #F8FAFC; -fx-background-radius: 12; -fx-padding: 15;">
                     <children>
                         <HBox alignment="CENTER_LEFT" spacing="10">
                             <children>
@@ -62,7 +62,7 @@
                         </HBox>
                         <VBox fx:id="weatherInfoContainer" style="-fx-background-color: transparent; -fx-padding: 10;">
                             <children>
-                                <Label style="-fx-font-size: 14px; -fx-text-fill: #64748B; -fx-alignment: center;" text="Chargement des données météo..." />
+                                <Label style="-fx-font-size: 14px; -fx-text-fill: #64748B;" text="Chargement des données météo..." />
                             </children>
                         </VBox>
                     </children>
@@ -75,17 +75,14 @@
                 <HBox alignment="CENTER" spacing="20">
                     <children>
                         <Label style="-fx-font-size: 20px; -fx-text-fill: #1A4E85;" text="🔍" />
-                        <TextField fx:id="txtRecherche" onAction="#handleRecherche" promptText="Rechercher une activité, un lieu..." style="-fx-border-color: #2D70B3; -fx-border-radius: 25; -fx-background-radius: 25; -fx-padding: 12 20; -fx-font-size: 14px; -fx-pref-width: 300;" />
+                        <TextField fx:id="txtRecherche" onAction="#handleRecherche" promptText="Rechercher une activité, un lieu..." style="-fx-border-color: #2D70B3; -fx-border-radius: 25; -fx-background-radius: 25; -fx-padding: 12 20; -fx-font-size: 14px;" prefWidth="300" />
                         <Button fx:id="recherche" onAction="#handleRecherche" style="-fx-background-color: #1A4E85; -fx-text-fill: white; -fx-background-radius: 25; -fx-border-radius: 25; -fx-padding: 12 24; -fx-font-size: 14px; -fx-cursor: hand;" text="Rechercher" />
                         <Region HBox.hgrow="ALWAYS" />
-                        <Button fx:id="orgactivite" onAction="#ouvrirGestionActivites" prefWidth="180" style="-fx-background-color: #2D70B3; -fx-text-fill: white; -fx-background-radius: 25; -fx-border-radius: 25; -fx-padding: 12 24; -fx-font-size: 14px; -fx-cursor: hand;" text="📋ajouter activités" />
+                        <Button fx:id="orgactivite" onAction="#ouvrirGestionActivites" prefWidth="180" style="-fx-background-color: #2D70B3; -fx-text-fill: white; -fx-background-radius: 25; -fx-border-radius: 25; -fx-padding: 12 24; -fx-font-size: 14px; -fx-cursor: hand;" text="📋 Ajouter activité" />
                         <Button fx:id="orgevent" onAction="#ouvrirOrganisation" prefWidth="200" style="-fx-background-color: linear-gradient(to bottom right, #86A7BF, #2D70B3); -fx-text-fill: white; -fx-background-radius: 25; -fx-border-radius: 25; -fx-padding: 12 24; -fx-font-size: 14px; -fx-font-weight: bold; -fx-cursor: hand;" text="🎯 Voulez-vous organiser ?" />
                         <Button fx:id="adminDashboardButton" onAction="#ouvrirAdminApprovalDashboard" prefWidth="220" style="-fx-background-color: #111827; -fx-text-fill: white; -fx-background-radius: 25; -fx-border-radius: 25; -fx-padding: 12 24; -fx-font-size: 14px; -fx-font-weight: bold; -fx-cursor: hand;" text="🛡️ Validation admin" />
-                        <Button fx:id="googleCalendarBtn" onAction="#ouvrirGoogleCalendar" prefWidth="180" style="-fx-background-color: #4285f4; -fx-text-fill: white; -fx-background-radius: 25; -fx-border-radius: 25; -fx-padding: 12 24; -fx-font-size: 14px; -fx-cursor: hand;" text="📅 Google Calendar" />
-                        <Button fx:id="googleMapsBtn" onAction="#ouvrirGoogleMaps" prefWidth="180" style="-fx-background-color: #34a853; -fx-text-fill: white; -fx-background-radius: 25; -fx-border-radius: 25; -fx-padding: 12 24; -fx-font-size: 14px; -fx-cursor: hand;" text="🗺️ Google Maps" />
                     </children>
                 </HBox>
-                <HBox alignment="CENTER" spacing="15" />
             </children>
         </VBox>
         <TabPane style="-fx-background-color: transparent; -fx-border-color: transparent;">
@@ -94,21 +91,19 @@
                     <content>
                         <VBox style="-fx-background-color: #f8faf8; -fx-padding: 30;">
                             <children>
-                                <HBox alignment="CENTER_LEFT" spacing="15" style="-fx-background-color: linear-gradient(to bottom right, #1A4E85, #0F2C4F); -fx-background-radius: 12; -fx-padding: 20; ">
+                                <HBox alignment="CENTER_LEFT" spacing="15" style="-fx-background-color: linear-gradient(to bottom right, #1A4E85, #0F2C4F); -fx-background-radius: 12; -fx-padding: 20;">
                                     <children>
                                         <Label style="-fx-font-size: 24px; -fx-text-fill: white;" text="🏃‍♂️" />
                                         <VBox spacing="5">
                                             <children>
                                                 <Label style="-fx-font-size: 20px; -fx-font-weight: bold; -fx-text-fill: white;" text="Nos Activités Outdoor" />
-                                                <Label style="-fx-font-size: 14px; -fx-text-fill: #0F2C4F;" text="Vivez des expériences uniques au cœur de la nature tunisienne" />
+                                                <Label style="-fx-font-size: 14px; -fx-text-fill: #B5D4F4;" text="Vivez des expériences uniques au cœur de la nature tunisienne" />
                                             </children>
                                         </VBox>
                                         <Region HBox.hgrow="ALWAYS" />
                                     </children>
                                 </HBox>
-                                <FlowPane fx:id="flowActivites" hgap="20" style="-fx-background-color: transparent; -fx-padding: 10;" vgap="20" prefWidth="1100" minHeight="400">
-                                    <!-- Les cards d'activités seront ajoutées dynamiquement par le contrôleur -->
-                                </FlowPane>
+                                <FlowPane fx:id="flowActivites" hgap="20" style="-fx-background-color: transparent; -fx-padding: 10;" vgap="20" prefWidth="1100" minHeight="400" />
                             </children>
                         </VBox>
                     </content>
@@ -117,7 +112,7 @@
                     <content>
                         <VBox style="-fx-background-color: #f8faf8; -fx-padding: 30;">
                             <children>
-                                <HBox alignment="CENTER_LEFT" spacing="15" style="-fx-background-color: linear-gradient(to bottom right, #0F766E, #134E4A); -fx-background-radius: 12; -fx-padding: 20; ">
+                                <HBox alignment="CENTER_LEFT" spacing="15" style="-fx-background-color: linear-gradient(to bottom right, #0F766E, #134E4A); -fx-background-radius: 12; -fx-padding: 20;">
                                     <children>
                                         <Label style="-fx-font-size: 24px; -fx-text-fill: white;" text="🎫" />
                                         <VBox spacing="5">
@@ -129,9 +124,7 @@
                                         <Region HBox.hgrow="ALWAYS" />
                                     </children>
                                 </HBox>
-                                <FlowPane fx:id="flowReservations" hgap="20" style="-fx-background-color: transparent; -fx-padding: 10;" vgap="20" prefWidth="1100" minHeight="400">
-                                    <!-- Les cards de réservation seront ajoutées dynamiquement par le contrôleur -->
-                                </FlowPane>
+                                <FlowPane fx:id="flowReservations" hgap="20" style="-fx-background-color: transparent; -fx-padding: 10;" vgap="20" prefWidth="1100" minHeight="400" />
                             </children>
                         </VBox>
                     </content>
@@ -140,7 +133,7 @@
                     <content>
                         <VBox style="-fx-background-color: #f8faf8; -fx-padding: 30;">
                             <children>
-                                <HBox alignment="CENTER_LEFT" spacing="15" style="-fx-background-color: linear-gradient(to bottom right, #2D70B3, #1A4E85); -fx-background-radius: 12; -fx-padding: 20; ">
+                                <HBox alignment="CENTER_LEFT" spacing="15" style="-fx-background-color: linear-gradient(to bottom right, #2D70B3, #1A4E85); -fx-background-radius: 12; -fx-padding: 20;">
                                     <children>
                                         <Label style="-fx-font-size: 24px; -fx-text-fill: white;" text="🎉" />
                                         <VBox spacing="5">
@@ -150,11 +143,11 @@
                                             </children>
                                         </VBox>
                                         <Region HBox.hgrow="ALWAYS" />
+                                        <Button onAction="#ouvrirSuggestionIA" style="-fx-background-color: #8B5CF6; -fx-text-fill: white; -fx-font-weight: bold; -fx-padding: 10 20; -fx-background-radius: 8; -fx-cursor: hand;" text="🤖 Suggestions IA" />
+                                        <Button onAction="#ouvrirCarteEvents" style="-fx-background-color: #F59E0B; -fx-text-fill: white; -fx-font-weight: bold; -fx-padding: 10 20; -fx-background-radius: 8; -fx-cursor: hand;" text="🗺️ Événements sur la carte" />
                                     </children>
                                 </HBox>
-                                <FlowPane fx:id="flowEvents" hgap="20" style="-fx-background-color: transparent; -fx-padding: 10;" vgap="20" prefWidth="1100" minHeight="400">
-                                    <!-- Les cards d'événements seront ajoutées dynamiquement par le contrôleur -->
-                                </FlowPane>
+                                <FlowPane fx:id="flowEvents" hgap="20" style="-fx-background-color: transparent; -fx-padding: 10;" vgap="20" prefWidth="1100" minHeight="400" />
                             </children>
                         </VBox>
                     </content>

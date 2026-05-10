@@ -1,4 +1,4 @@
-package com.example.pi_dev.Controllers.Events;
+package com.example.pi_dev.Utils.Events;
 
 public class CatalogueRefreshManager {
     private static CatalogueRefreshManager instance;

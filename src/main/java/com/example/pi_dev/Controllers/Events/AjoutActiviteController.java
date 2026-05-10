@@ -4,6 +4,7 @@ import com.example.pi_dev.Entities.Events.CategorieActivite;
 import com.example.pi_dev.Entities.Events.TypeActivite;
 import com.example.pi_dev.Session.Session;
 import com.example.pi_dev.Utils.Events.Mydatabase;
+import com.example.pi_dev.Utils.Events.CatalogueRefreshManager;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.scene.control.*;
@@ -15,6 +16,7 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.sql.Types;
+import java.sql.Timestamp;
 
 public class AjoutActiviteController {
 
@@ -36,6 +38,8 @@ public class AjoutActiviteController {
     private Button ajouterButton;
     @FXML
     private Button annulerButton;
+    @FXML
+    private Button enhanceDescBtn;
 
     private Connection connection;
     private String selectedImagePath = "";
@@ -87,6 +91,45 @@ public class AjoutActiviteController {
             imageField1.setText(selectedFile.getName());
             showAlert("Image sélectionnée : " + selectedFile.getName());
         }
+    }
+
+    @FXML
+    void enhanceDescription(ActionEvent event) {
+        CategorieActivite categorie = categorieCombo.getValue();
+        TypeActivite type = typeactField.getValue();
+        String currentDesc = descriptionArea.getText().trim();
+
+        if (categorie == null || type == null) {
+            showAlert("Veuillez sélectionner une catégorie et un type d'activité avant d'améliorer la description.");
+            return;
+        }
+
+        String promptBase = "Rédige une description attrayante et engageante pour une activité touristique de catégorie '" 
+                + categorie.toString() + "' et de type '" + type.getNom() + "'. ";
+        if (!currentDesc.isEmpty()) {
+            promptBase += "Voici les détails initiaux à inclure et améliorer : " + currentDesc + ". ";
+        }
+        promptBase += "Garde la description concise, environ 3 à 4 phrases maximum. Ne pas inclure de texte introductif comme 'Voici une description', donne directement le texte final.";
+
+        final String finalPrompt = promptBase;
+
+        enhanceDescBtn.setDisable(true);
+        enhanceDescBtn.setText("⏳ Génération...");
+
+        new Thread(() -> {
+            com.example.pi_dev.Services.Events.EventsGeminiService geminiService = new com.example.pi_dev.Services.Events.EventsGeminiService();
+            String generatedDesc = geminiService.generateResponse(finalPrompt);
+            
+            javafx.application.Platform.runLater(() -> {
+                if (generatedDesc != null && !generatedDesc.startsWith("Error")) {
+                    descriptionArea.setText(generatedDesc.trim());
+                } else {
+                    showAlert("Erreur lors de la génération : " + generatedDesc);
+                }
+                enhanceDescBtn.setDisable(false);
+                enhanceDescBtn.setText("✨ Améliorer avec l'IA");
+            });
+        }).start();
     }
 
     @FXML
@@ -154,7 +197,7 @@ public class AjoutActiviteController {
                 }
             }
 
-            String sql = "INSERT INTO activites (titre, description, type_activite, categorie, image, status, age_minimum, created_by_id, date_creation, date_modification) VALUES (?, ?, ?, ?, ?, ?, ?, ?, NOW(), NOW())";
+            String sql = "INSERT INTO activites (titre, description, type_activite, categorie, image, status, age_minimum, created_by_id, date_creation, date_modification) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
             PreparedStatement pstmt = connection.prepareStatement(sql);
             pstmt.setString(1, titre);
             pstmt.setString(2, description);
@@ -175,6 +218,10 @@ public class AjoutActiviteController {
             } else {
                 pstmt.setString(8, currentUserId);
             }
+
+            Timestamp now = new Timestamp(System.currentTimeMillis());
+            pstmt.setTimestamp(9, now);
+            pstmt.setTimestamp(10, now);
 
             pstmt.executeUpdate();
 
