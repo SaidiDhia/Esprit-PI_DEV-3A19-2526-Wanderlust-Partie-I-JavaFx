@@ -3,6 +3,7 @@ package com.example.pi_dev.Services.Events;
 import com.example.pi_dev.Entities.Events.Event;
 import com.example.pi_dev.Entities.Events.Reservation;
 import com.example.pi_dev.Utils.Events.Mydatabase;
+import com.example.pi_dev.Services.Events.EventService;
 
 import java.sql.*;
 import java.util.ArrayList;
@@ -10,7 +11,7 @@ import java.util.List;
 
 public class ReservationService {
 
-    private final Connection cnx;
+    private Connection cnx;
 
     public ReservationService() {
         cnx = Mydatabase.getInstance().getConnextion();
@@ -18,17 +19,19 @@ public class ReservationService {
     }
 
     private void ensureUserColumnExists() {
-        try (Statement st = cnx.createStatement()) {
-            st.executeUpdate("ALTER TABLE reservations ADD COLUMN IF NOT EXISTS user_id VARCHAR(36) NULL AFTER id_event");
+        try {
+            boolean exists = false;
+            try (Statement st = cnx.createStatement();
+                 ResultSet rs = st.executeQuery("SHOW COLUMNS FROM reservations LIKE 'user_id'")) {
+                if (rs.next()) exists = true;
+            }
+            if (!exists) {
+                try (Statement st = cnx.createStatement()) {
+                    st.executeUpdate("ALTER TABLE reservations ADD COLUMN user_id VARCHAR(36) NULL AFTER id_event");
+                }
+            }
         } catch (SQLException e) {
             System.err.println("Impossible de vérifier la colonne user_id des réservations: " + e.getMessage());
-        }
-    }
-
-    private boolean hasDateModificationColumn() throws SQLException {
-        DatabaseMetaData metaData = cnx.getMetaData();
-        try (ResultSet rs = metaData.getColumns(cnx.getCatalog(), null, "reservations", "date_modification")) {
-            return rs.next();
         }
     }
 
@@ -74,9 +77,6 @@ public class ReservationService {
         if (generatedKeys.next()) {
             r.setId(generatedKeys.getInt(1));
         }
-
-        EventService es = new EventService();
-        es.diminuerPlaces(r.getIdEvent(), r.getNombrePersonnes());
     }
 
     // READ
@@ -110,6 +110,33 @@ public class ReservationService {
             list.add(r);
         }
         return list;
+    }
+
+    public Reservation findById(int id) throws SQLException {
+        String sql = "SELECT r.*, e.organisateur, e.lieu, e.date_debut, e.date_fin, e.prix AS event_prix " +
+                "FROM reservations r LEFT JOIN events e ON e.id = r.id_event " +
+                "WHERE r.id = ?";
+        try (PreparedStatement ps = cnx.prepareStatement(sql)) {
+            ps.setInt(1, id);
+            try (ResultSet rs = ps.executeQuery()) {
+                if (rs.next()) {
+                    Reservation r = mapReservation(rs);
+                    Event event = new Event();
+                    event.setId(rs.getInt("id_event"));
+                    event.setOrganisateur(rs.getString("organisateur"));
+                    event.setLieu(rs.getString("lieu"));
+                    if (rs.getTimestamp("date_debut") != null)
+                        event.setDateDebut(rs.getTimestamp("date_debut").toLocalDateTime());
+                    if (rs.getTimestamp("date_fin") != null)
+                        event.setDateFin(rs.getTimestamp("date_fin").toLocalDateTime());
+                    if (rs.getBigDecimal("event_prix") != null)
+                        event.setPrix(rs.getBigDecimal("event_prix"));
+                    r.setEvent(event);
+                    return r;
+                }
+            }
+        }
+        return null;
     }
 
     // UPDATE
@@ -179,15 +206,24 @@ public class ReservationService {
             return list;
         }
 
+        // Fallback: Use email if available to find reservations made without a valid session ID
+        String userEmail = "";
+        if (com.example.pi_dev.Utils.Users.UserSession.getInstance().getCurrentUser() != null) {
+            userEmail = com.example.pi_dev.Utils.Users.UserSession.getInstance().getCurrentUser().getEmail();
+        }
+
         String sql = "SELECT r.*, e.organisateur, e.lieu, e.date_debut, e.date_fin, e.prix AS event_prix " +
                 "FROM reservations r LEFT JOIN events e ON e.id = r.id_event " +
-                "WHERE r.user_id = ? ORDER BY r.id DESC";
+                "WHERE (r.user_id = ? OR (r.email = ? AND r.email IS NOT NULL AND r.email != '')) ORDER BY r.id DESC";
 
         try (PreparedStatement ps = cnx.prepareStatement(sql)) {
             ps.setString(1, userId);
+            ps.setString(2, userEmail);
             try (ResultSet rs = ps.executeQuery()) {
                 while (rs.next()) {
                     Reservation r = mapReservation(rs);
+                    // Force ensure status is set even if NULL in DB
+                    if (r.getStatut() == null) r.setStatut(Reservation.StatutReservation.EN_ATTENTE);
                     Event event = new Event();
                     event.setId(rs.getInt("id_event"));
                     event.setOrganisateur(rs.getString("organisateur"));
@@ -209,26 +245,27 @@ public class ReservationService {
     // DELETE
     public void supprimer(int idReservation) throws SQLException {
 
-        String selectSql = "SELECT id_event, nombre_personnes FROM reservations WHERE id=?";
+        String selectSql = "SELECT id_event, nombre_personnes, statut FROM reservations WHERE id=?";
         PreparedStatement selectPs = cnx.prepareStatement(selectSql);
         selectPs.setInt(1, idReservation);
         ResultSet rs = selectPs.executeQuery();
 
-        int idEvent = 0;
-        int nombre = 0;
-
         if (rs.next()) {
-            idEvent = rs.getInt("id_event");
-            nombre = rs.getInt("nombre_personnes");
+            int idEvent = rs.getInt("id_event");
+            int nombre = rs.getInt("nombre_personnes");
+            String statut = rs.getString("statut");
+
+            String deleteSql = "DELETE FROM reservations WHERE id=?";
+            PreparedStatement deletePs = cnx.prepareStatement(deleteSql);
+            deletePs.setInt(1, idReservation);
+            deletePs.executeUpdate();
+
+            // Only release places if the reservation was already accepted
+            if (statut != null && statut.equalsIgnoreCase("accepte")) {
+                EventService es = new EventService();
+                es.diminuerPlaces(idEvent, -nombre);
+            }
         }
-
-        String deleteSql = "DELETE FROM reservations WHERE id=?";
-        PreparedStatement deletePs = cnx.prepareStatement(deleteSql);
-        deletePs.setInt(1, idReservation);
-        deletePs.executeUpdate();
-
-        EventService es = new EventService();
-        es.diminuerPlaces(idEvent, -nombre);
     }
 
     private Reservation mapReservation(ResultSet rs) throws SQLException {
@@ -245,19 +282,38 @@ public class ReservationService {
 
         String statutStr = rs.getString("statut");
         if (statutStr != null) {
-            try {
-                r.setStatut(Reservation.StatutReservation.valueOf(statutStr.toUpperCase()));
-            } catch (IllegalArgumentException e) {
+            String normalized = statutStr.trim().toUpperCase().replace(" ", "_");
+            
+            // Handle synonyms and common variations (especially from Symfony/External)
+            if (normalized.contains("ACCEPT") || normalized.contains("APPROV") || normalized.equals("VALIDATED") || 
+                normalized.equals("1") || normalized.contains("CONFIRME")) {
+                r.setStatut(Reservation.StatutReservation.ACCEPTE);
+            } else if (normalized.contains("REFUS") || normalized.contains("REJECT") || normalized.equals("CANCELLED") || 
+                       normalized.equals("2") || normalized.contains("ANNULE")) {
+                r.setStatut(Reservation.StatutReservation.REFUSE);
+            } else if (normalized.contains("ATTENTE") || normalized.contains("PENDING") || normalized.equals("0")) {
                 r.setStatut(Reservation.StatutReservation.EN_ATTENTE);
+            } else {
+                try {
+                    r.setStatut(Reservation.StatutReservation.valueOf(normalized));
+                } catch (IllegalArgumentException e) {
+                    r.setStatut(Reservation.StatutReservation.EN_ATTENTE);
+                }
             }
+        } else {
+            r.setStatut(Reservation.StatutReservation.EN_ATTENTE);
         }
 
-        r.setDateCreation(rs.getTimestamp("date_creation"));
-        if (hasDateModificationColumn()) {
-            r.setDateModification(rs.getTimestamp("date_modification"));
-        } else {
-            r.setDateModification(null);
-        }
+        r.setDateCreation(getSafeTimestamp(rs, "date_creation"));
+        r.setDateModification(getSafeTimestamp(rs, "date_modification"));
         return r;
+    }
+
+    private java.sql.Timestamp getSafeTimestamp(ResultSet rs, String column) {
+        try {
+            return rs.getTimestamp(column);
+        } catch (SQLException e) {
+            return null;
+        }
     }
 }
