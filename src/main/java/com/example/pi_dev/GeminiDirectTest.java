@@ -10,7 +10,7 @@ import java.time.Duration;
 public class GeminiDirectTest {
     public static void main(String[] args) {
         String apiKey = "AIzaSyDs0rgnlSxeM1gLuwRAcz4zil6umqabVVc";
-        String url = "https://generativelanguage.googleapis.com/v1beta/models/gemini-pro:generateContent?key=" + apiKey;
+        String url = "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=" + apiKey;
 
         String jsonBody = "{\"contents\":[{\"parts\":[{\"text\":\"Say hello in French\"}]}]}";
 

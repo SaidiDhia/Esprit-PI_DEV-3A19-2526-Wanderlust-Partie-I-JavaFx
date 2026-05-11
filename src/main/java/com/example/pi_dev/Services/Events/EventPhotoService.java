@@ -17,7 +17,7 @@ public class EventPhotoService {
 
     // CREATE
     public void ajouter(EventPhoto photo) throws SQLException {
-        String sql = "INSERT INTO event_photos (id_event, chemin_photo, description) VALUES (?, ?, ?)";
+        String sql = "INSERT INTO events_images (events_id, chemin_photo, description) VALUES (?, ?, ?)";
 
         PreparedStatement ps = cnx.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS);
 
@@ -26,17 +26,11 @@ public class EventPhotoService {
         ps.setString(3, photo.getDescription());
 
         ps.executeUpdate();
-
-        ResultSet generatedKeys = ps.getGeneratedKeys();
-        if (generatedKeys.next()) {
-            photo.setId(generatedKeys.getInt(1));
-        }
     }
 
-    // READ
     public List<EventPhoto> getPhotosByEvent(int idEvent) throws SQLException {
         List<EventPhoto> photos = new ArrayList<>();
-        String sql = "SELECT * FROM event_photos WHERE id_event = ? ORDER BY date_creation ASC";
+        String sql = "SELECT * FROM events_images WHERE events_id = ? ORDER BY id ASC";
 
         PreparedStatement ps = cnx.prepareStatement(sql);
         ps.setInt(1, idEvent);
@@ -46,10 +40,9 @@ public class EventPhotoService {
         while (rs.next()) {
             EventPhoto photo = new EventPhoto();
             photo.setId(rs.getInt("id"));
-            photo.setIdEvent(rs.getInt("id_event"));
+            photo.setIdEvent(rs.getInt("events_id"));
             photo.setCheminPhoto(rs.getString("chemin_photo"));
             photo.setDescription(rs.getString("description"));
-            photo.setDateCreation(rs.getTimestamp("date_creation"));
 
             photos.add(photo);
         }
@@ -57,9 +50,8 @@ public class EventPhotoService {
         return photos;
     }
 
-    // UPDATE
     public void modifier(EventPhoto photo) throws SQLException {
-        String sql = "UPDATE event_photos SET chemin_photo=?, description=? WHERE id=?";
+        String sql = "UPDATE events_images SET chemin_photo=?, description=? WHERE id=?";
 
         PreparedStatement ps = cnx.prepareStatement(sql);
         ps.setString(1, photo.getCheminPhoto());
@@ -69,9 +61,8 @@ public class EventPhotoService {
         ps.executeUpdate();
     }
 
-    // DELETE
     public void supprimer(int idPhoto) throws SQLException {
-        String sql = "DELETE FROM event_photos WHERE id=?";
+        String sql = "DELETE FROM events_images WHERE id=?";
 
         PreparedStatement ps = cnx.prepareStatement(sql);
         ps.setInt(1, idPhoto);
@@ -79,9 +70,8 @@ public class EventPhotoService {
         ps.executeUpdate();
     }
 
-    // DELETE toutes les photos d'un événement
     public void supprimerPhotosEvent(int idEvent) throws SQLException {
-        String sql = "DELETE FROM event_photos WHERE id_event=?";
+        String sql = "DELETE FROM events_images WHERE events_id=?";
 
         PreparedStatement ps = cnx.prepareStatement(sql);
         ps.setInt(1, idEvent);
@@ -99,7 +89,7 @@ public class EventPhotoService {
 
     // Méthode pour obtenir la première photo d'un événement
     public EventPhoto getPremierePhoto(int idEvent) throws SQLException {
-        String sql = "SELECT * FROM event_photos WHERE id_event = ? ORDER BY date_creation ASC LIMIT 1";
+        String sql = "SELECT * FROM events_images WHERE events_id = ? LIMIT 1";
 
         PreparedStatement ps = cnx.prepareStatement(sql);
         ps.setInt(1, idEvent);
@@ -109,10 +99,9 @@ public class EventPhotoService {
         if (rs.next()) {
             EventPhoto photo = new EventPhoto();
             photo.setId(rs.getInt("id"));
-            photo.setIdEvent(rs.getInt("id_event"));
+            photo.setIdEvent(rs.getInt("events_id"));
             photo.setCheminPhoto(rs.getString("chemin_photo"));
             photo.setDescription(rs.getString("description"));
-            photo.setDateCreation(rs.getTimestamp("date_creation"));
 
             return photo;
         }

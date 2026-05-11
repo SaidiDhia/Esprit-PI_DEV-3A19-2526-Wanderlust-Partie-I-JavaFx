@@ -2,136 +2,308 @@ package com.example.pi_dev.Controllers.Events;
 
 import com.example.pi_dev.Entities.Events.Event;
 import com.example.pi_dev.Entities.Events.Activite;
-import com.example.pi_dev.Services.Events.WeatherService;
 import com.example.pi_dev.Session.Session;
 import com.example.pi_dev.Utils.Events.Mydatabase;
+import com.example.pi_dev.Utils.Events.CatalogueRefreshManager;
+import javafx.application.Platform;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
+import javafx.geometry.Pos;
 import javafx.scene.control.*;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
+import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.HBox;
+import javafx.scene.layout.Region;
 import javafx.scene.layout.VBox;
+import javafx.scene.web.WebEngine;
+import javafx.scene.web.WebView;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
 
+import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.IOException;
+import java.net.URI;
 import java.net.URL;
+import java.net.URLEncoder;
+import java.net.http.HttpClient;
+import java.net.http.HttpRequest;
+import java.net.http.HttpResponse;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.nio.file.StandardCopyOption;
 import java.sql.*;
+import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.ResourceBundle;
+import java.util.Timer;
+import java.util.TimerTask;
 
 public class modifierEventController implements Initializable {
 
-    @FXML
-    private ComboBox<String> activiteCombo;
-    @FXML
-    private VBox activitesSelectionneesContainer;
-    @FXML
-    private TextField nomorgField;
-    @FXML
-    private TextField lieuField;
-    @FXML
-    private TextField emailField;
-    @FXML
-    private TextField telephoneorgField;
-    @FXML
-    private DatePicker dateDebutPicker;
-    @FXML
-    private DatePicker dateFinPicker;
-    @FXML
-    private TextField prixField;
-    @FXML
-    private TextField capaciteField;
-    @FXML
-    private TextArea equipementField;
-    @FXML
-    private TextArea descriptionField;
-    @FXML
-    private Label imageStatusLabel;
-    @FXML
-    private Button importerImageButton;
-    @FXML
-    private ImageView imagePrincipaleView;
-    @FXML
-    private HBox photosContainer;
-    @FXML
-    private Button ajouterPhotoButton;
-    @FXML
-    private TextField videoYoutubeField;
-    @FXML
-    private CheckBox check1;
-    @FXML
-    private CheckBox check2;
-    @FXML
-    private CheckBox check3;
-    @FXML
-    private CheckBox check4;
+    @FXML private WebView mapWebView;
+    @FXML private TextField lieuField;
+    @FXML private DatePicker dateDebutPicker;
+    @FXML private TextField heureDebutField;
+    @FXML private DatePicker dateFinPicker;
+    @FXML private TextField heureFinField;
+    @FXML private DatePicker dateLimitePicker;
+    @FXML private ComboBox<String> activiteCombo;
+    @FXML private VBox activitesSelectionneesContainer;
+    @FXML private TextField prixField;
+    @FXML private TextField capaciteField;
+    @FXML private TextField nomorgField;
+    @FXML private TextField telephoneorgField;
+    @FXML private TextField emailField;
+    @FXML private HBox photosContainer;
+    @FXML private TextField videoYoutubeField;
+    @FXML private TextArea equipementField;
+    @FXML private TextArea descriptionField;
+    @FXML private ImageView imagePrincipaleView;
+    @FXML private Label imageStatusLabel;
+    @FXML private Button modifierEventButton;
+    @FXML private Button annulerEventButton;
+    @FXML private CheckBox check1;
+    @FXML private CheckBox check2;
+    @FXML private CheckBox check3;
+    @FXML private CheckBox check4;
+    @FXML private Button genererEquipementBtn;
 
     private Connection connection;
-    private WeatherService weatherService;
     private List<Object> activitesList = new ArrayList<>();
+    private List<Object> activitesSelectionnees = new ArrayList<>();
     private Event currentEvent;
     private String currentEventOwnerId;
-    private List<String> photosPaths = new ArrayList<>();
-    private String imagePrincipalePath;
+    private List<byte[]> photosData = new ArrayList<>();
+    private byte[] imagePrincipaleData;
     private static final String UPLOADS_DIR = "uploads/events/";
+    private Timer geocodeTimer;
+
+    private static final String MAP_HTML = "<!DOCTYPE html><html><head><meta charset='UTF-8'>" +
+            "<link rel='stylesheet' href='https://unpkg.com/leaflet@1.9.4/dist/leaflet.css'/>" +
+            "<script src='https://unpkg.com/leaflet@1.9.4/dist/leaflet.js'></script>" +
+            "<style>body{margin:0;padding:0;}#map{width:100%;height:280px;}</style></head>" +
+            "<body><div id='map'></div><script>" +
+            "var map=L.map('map').setView([36.8,10.18],7);" +
+            "L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{attribution:'© OpenStreetMap'}).addTo(map);" +
+            "var marker;" +
+            "function moveMap(lat,lng,label){if(marker)map.removeLayer(marker);" +
+            "marker=L.marker([lat,lng]).addTo(map).bindPopup(label).openPopup();map.setView([lat,lng],13);}" +
+            "</script></body></html>";
 
     @Override
     public void initialize(URL url, ResourceBundle rb) {
         connection = Mydatabase.getInstance().getConnextion();
-        weatherService = new WeatherService();
+        com.example.pi_dev.Utils.Events.DatabaseUtils.ensureSchemaCorrect(connection);
         loadActivites();
-        createDirectoriesIfNotExists();
+        createUploadsDirectory();
+        initMap();
+        setupLieuListener();
     }
 
-    private void createDirectoriesIfNotExists() {
-        try {
-            Path uploadsPath = Paths.get(UPLOADS_DIR);
-            if (!Files.exists(uploadsPath)) {
-                Files.createDirectories(uploadsPath);
-                System.out.println("Répertoire uploads créé: " + uploadsPath.toAbsolutePath());
-            }
-        } catch (IOException e) {
-            System.err.println("Erreur lors de la création du répertoire uploads: " + e.getMessage());
+    private void initMap() {
+        if (mapWebView != null) {
+            mapWebView.getEngine().getLoadWorker().stateProperty().addListener((obs, oldState, newState) -> {
+                if (newState == javafx.concurrent.Worker.State.SUCCEEDED) {
+                    System.out.println("Map WebView loaded.");
+                    if (lieuField != null && !lieuField.getText().isEmpty()) {
+                        geocodeAndMoveMap(lieuField.getText().trim());
+                    }
+                }
+            });
+            mapWebView.getEngine().loadContent(MAP_HTML);
         }
+    }
+
+    private void setupLieuListener() {
+        if (lieuField != null) {
+            lieuField.textProperty().addListener((obs, oldVal, newVal) -> {
+                if (geocodeTimer != null) geocodeTimer.cancel();
+                if (newVal == null || newVal.trim().length() < 3) return;
+                geocodeTimer = new Timer();
+                geocodeTimer.schedule(new TimerTask() {
+                    @Override
+                    public void run() { geocodeAndMoveMap(newVal.trim()); }
+                }, 800);
+            });
+        }
+    }
+
+    private void createUploadsDirectory() {
+        try {
+            Path path = Paths.get(UPLOADS_DIR);
+            if (!Files.exists(path)) Files.createDirectories(path);
+        } catch (IOException e) {
+            System.err.println("Erreur création répertoire uploads: " + e.getMessage());
+        }
+    }
+
+    private void geocodeAndMoveMap(String query) {
+        new Thread(() -> {
+            try {
+                String encoded = URLEncoder.encode(query, "UTF-8");
+                String url = "https://nominatim.openstreetmap.org/search?q=" + encoded + "&format=json&limit=1";
+                HttpClient client = HttpClient.newHttpClient();
+                HttpRequest req = HttpRequest.newBuilder()
+                        .uri(URI.create(url))
+                        .header("User-Agent", "WanderlustJavaFX/1.0")
+                        .build();
+                HttpResponse<String> resp = client.send(req, HttpResponse.BodyHandlers.ofString());
+                String body = resp.body();
+                if (body.contains("\"lat\"")) {
+                    int latIdx = body.indexOf("\"lat\":\"") + 7;
+                    int latEnd = body.indexOf("\"", latIdx);
+                    int lonIdx = body.indexOf("\"lon\":\"") + 7;
+                    int lonEnd = body.indexOf("\"", lonIdx);
+                    double lat = Double.parseDouble(body.substring(latIdx, latEnd));
+                    double lon = Double.parseDouble(body.substring(lonIdx, lonEnd));
+                    String jsLabel = query.replace("'", "\\'");
+                    Platform.runLater(() -> {
+                        if (mapWebView != null) {
+                            try {
+                                mapWebView.getEngine().executeScript("moveMap(" + lat + "," + lon + ",'" + jsLabel + "')");
+                            } catch (Exception e) {
+                                System.err.println("Map script error (not ready yet): " + e.getMessage());
+                            }
+                        }
+                    });
+                }
+            } catch (Exception e) {
+                System.err.println("Geocode error: " + e.getMessage());
+            }
+        }).start();
     }
 
     private void loadActivites() {
         try {
-            String sql = "SELECT id, titre, type_activite, description, image FROM activites";
+            String sql = "SELECT id, titre, type_activite, description, image, status FROM activites";
             Statement st = connection.createStatement();
             ResultSet rs = st.executeQuery(sql);
-
             while (rs.next()) {
-                int id = rs.getInt("id");
-                String titre = rs.getString("titre");
-                String type = rs.getString("type_activite");
-                String description = rs.getString("description");
-                String imagePath = rs.getString("image");
-
-                Activite activite = new Activite();
-                activite.setId(id);
-                activite.setTitre(titre);
-                activite.setTypeActivite(type);
-                activite.setDescription(description);
-                activite.setImage(imagePath);
-
-                activitesList.add(activite);
-                activiteCombo.getItems().add(titre);
-                System.out.println("Activité ajoutée au combo: " + titre);
+                String status = rs.getString("status");
+                if (!"accepte".equalsIgnoreCase(status != null ? status.trim() : "")) continue;
+                Activite a = new Activite();
+                a.setId(rs.getInt("id"));
+                a.setTitre(rs.getString("titre"));
+                a.setTypeActivite(rs.getString("type_activite"));
+                a.setDescription(rs.getString("description"));
+                a.setImage(rs.getString("image"));
+                activitesList.add(a);
+                activiteCombo.getItems().add(a.getTitre());
             }
         } catch (SQLException e) {
-            System.err.println("Erreur lors du chargement des activités: " + e.getMessage());
-            e.printStackTrace();
+            System.err.println("Erreur chargement activités: " + e.getMessage());
         }
+    }
+
+    @FXML
+    void ajouterActivite(ActionEvent event) {
+        String selected = activiteCombo.getValue();
+        if (selected == null || selected.isEmpty()) return;
+        for (Object a : activitesSelectionnees) {
+            if (((Activite) a).getTitre().equals(selected)) return;
+        }
+        for (Object a : activitesList) {
+            if (((Activite) a).getTitre().equals(selected)) {
+                activitesSelectionnees.add(a);
+                updateActivitesDisplay();
+                activiteCombo.setValue(null);
+                return;
+            }
+        }
+    }
+
+    private void updateActivitesDisplay() {
+        activitesSelectionneesContainer.getChildren().clear();
+        for (int i = 0; i < activitesSelectionnees.size(); i++) {
+            Activite a = (Activite) activitesSelectionnees.get(i);
+            HBox row = new HBox(10);
+            row.setAlignment(Pos.CENTER_LEFT);
+            row.setStyle("-fx-background-color: white; -fx-background-radius: 8; -fx-padding: 8 12; -fx-border-color: #E2E8F0; -fx-border-width: 1; -fx-border-radius: 8;");
+            Label num = new Label("🌿");
+            Label name = new Label(a.getTitre());
+            name.setStyle("-fx-font-size: 13px; -fx-text-fill: #0F2C4F; -fx-font-weight: bold;");
+            Region spacer = new Region();
+            HBox.setHgrow(spacer, javafx.scene.layout.Priority.ALWAYS);
+            final int idx = i;
+            Button remove = new Button("✕");
+            remove.setStyle("-fx-background-color: #FEE2E2; -fx-text-fill: #EF4444; -fx-background-radius: 6; -fx-padding: 3 8; -fx-cursor: hand;");
+            remove.setOnAction(e -> { activitesSelectionnees.remove(idx); updateActivitesDisplay(); });
+            row.getChildren().addAll(num, name, spacer, remove);
+            activitesSelectionneesContainer.getChildren().add(row);
+        }
+    }
+
+    @FXML
+    void genererEquipement(ActionEvent event) {
+        if (activitesSelectionnees.isEmpty()) return;
+        genererEquipementBtn.setDisable(true);
+        genererEquipementBtn.setText("⏳ Génération...");
+        StringBuilder sb = new StringBuilder();
+        for (Object obj : activitesSelectionnees) {
+            Activite a = (Activite) obj;
+            sb.append("- ").append(a.getTitre()).append("\n");
+        }
+        final String prompt = "Génère une liste de matériels pour un événement avec ces activités :\n" + sb;
+        new Thread(() -> {
+            com.example.pi_dev.Services.Events.EventsGeminiService gemini = new com.example.pi_dev.Services.Events.EventsGeminiService();
+            String result = gemini.generateResponse(prompt);
+            Platform.runLater(() -> {
+                if (result != null) equipementField.setText(result);
+                genererEquipementBtn.setDisable(false);
+                genererEquipementBtn.setText("✨ Générer avec l'IA");
+            });
+        }).start();
+    }
+
+    @FXML
+    void importerImage(MouseEvent event) {
+        FileChooser fc = new FileChooser();
+        fc.setTitle("Choisir l'image principale");
+        fc.getExtensionFilters().add(new FileChooser.ExtensionFilter("Images", "*.jpg", "*.png", "*.jpeg", "*.webp"));
+        File f = fc.showOpenDialog(null);
+        if (f == null) return;
+        try {
+            byte[] bytes = Files.readAllBytes(f.toPath());
+            imagePrincipaleData = bytes;
+            
+            // Clear previous thumbnail if it was the principal one
+            photosContainer.getChildren().clear(); 
+            addImageThumbnail(bytes, f.getName());
+        } catch (IOException e) { System.err.println("Img err: " + e.getMessage()); }
+    }
+
+    @FXML
+    void ajouterPhoto(ActionEvent event) {
+        FileChooser fc = new FileChooser();
+        fc.setTitle("Ajouter des photos");
+        fc.getExtensionFilters().add(new FileChooser.ExtensionFilter("Images", "*.jpg", "*.png", "*.jpeg", "*.webp"));
+        List<File> files = fc.showOpenMultipleDialog(null);
+        if (files == null) return;
+        for (File f : files) {
+            try {
+                byte[] bytes = Files.readAllBytes(f.toPath());
+                photosData.add(bytes);
+                addImageThumbnail(bytes, f.getName());
+            } catch (IOException e) { System.err.println("Img err: " + e.getMessage()); }
+        }
+    }
+
+    private void addImageThumbnail(byte[] bytes, String name) {
+        try {
+            ByteArrayInputStream bis = new ByteArrayInputStream(bytes);
+            Image img = new Image(bis, 90, 90, true, true);
+            ImageView iv = new ImageView(img);
+            iv.setFitWidth(90); iv.setFitHeight(90); iv.setPreserveRatio(true);
+            VBox box = new VBox(5, iv, new Label(name.length() > 10 ? name.substring(0, 8) + "…" : name));
+            box.setAlignment(Pos.CENTER);
+            box.setStyle("-fx-background-color: white; -fx-border-color: #E2E8F0; -fx-padding: 5; -fx-border-radius: 5;");
+            photosContainer.getChildren().add(box);
+        } catch (Exception ignore) {}
     }
 
     public void setEventId(int eventId) {
@@ -144,7 +316,6 @@ public class modifierEventController implements Initializable {
             if (rs.next()) {
                 currentEvent = new Event();
                 currentEvent.setId(rs.getInt("id"));
-                currentEvent.setIdActivite(rs.getInt("id_activite"));
                 currentEvent.setLieu(rs.getString("lieu"));
                 currentEvent.setOrganisateur(rs.getString("organisateur"));
                 currentEvent.setEmail(rs.getString("email"));
@@ -153,441 +324,219 @@ public class modifierEventController implements Initializable {
                 currentEvent.setMaterielsNecessaires(rs.getString("materiels_necessaires"));
                 currentEvent.setPrix(rs.getBigDecimal("prix"));
                 currentEvent.setCapaciteMax(rs.getInt("capacite_max"));
-                currentEvent.setDateDebut(
-                        rs.getTimestamp("date_debut") != null ? rs.getTimestamp("date_debut").toLocalDateTime() : null);
-                currentEvent.setDateFin(
-                        rs.getTimestamp("date_fin") != null ? rs.getTimestamp("date_fin").toLocalDateTime() : null);
+                currentEvent.setDateDebut(rs.getTimestamp("date_debut") != null ? rs.getTimestamp("date_debut").toLocalDateTime() : null);
+                currentEvent.setDateFin(rs.getTimestamp("date_fin") != null ? rs.getTimestamp("date_fin").toLocalDateTime() : null);
                 currentEvent.setImage(rs.getString("image"));
                 currentEvent.setVideoYoutube(rs.getString("video_youtube"));
+                currentEvent.setDateLimiteInscription(rs.getTimestamp("date_limite_inscription") != null ? rs.getTimestamp("date_limite_inscription").toLocalDateTime() : null);
                 currentEventOwnerId = rs.getString("created_by_id");
 
+                // Load associated activities
+                try (PreparedStatement psAct = connection.prepareStatement(
+                        "SELECT a.* FROM activites a JOIN events_activities ea ON a.id = ea.activities_id WHERE ea.events_id = ?")) {
+                    psAct.setInt(1, eventId);
+                    ResultSet rsAct = psAct.executeQuery();
+                    while (rsAct.next()) {
+                        Activite a = new Activite();
+                        a.setId(rsAct.getInt("id"));
+                        a.setTitre(rsAct.getString("titre"));
+                        activitesSelectionnees.add(a);
+                    }
+                    updateActivitesDisplay();
+                } catch (SQLException ignore) {}
+
                 setEventData(currentEvent);
-                enforceOwnership();
             }
         } catch (SQLException e) {
-            System.err.println("Erreur lors du chargement de l'événement: " + e.getMessage());
             e.printStackTrace();
         }
     }
 
     public void setEventData(Event event) {
         this.currentEvent = event;
+        if (nomorgField != null) nomorgField.setText(event.getOrganisateur() != null ? event.getOrganisateur() : "");
+        if (lieuField != null) {
+            lieuField.setText(event.getLieu() != null ? event.getLieu() : "");
+            geocodeAndMoveMap(lieuField.getText());
+        }
+        if (emailField != null) emailField.setText(event.getEmail() != null ? event.getEmail() : "");
+        if (telephoneorgField != null) telephoneorgField.setText(event.getTelephone() != null ? event.getTelephone().toString() : "");
+        if (descriptionField != null) descriptionField.setText(event.getDescription() != null ? event.getDescription() : "");
+        if (equipementField != null) equipementField.setText(event.getMaterielsNecessaires() != null ? event.getMaterielsNecessaires() : "");
+        if (videoYoutubeField != null) videoYoutubeField.setText(event.getVideoYoutube() != null ? event.getVideoYoutube() : "");
+        if (prixField != null) prixField.setText(event.getPrix() != null ? String.valueOf(event.getPrix()) : "0");
+        if (capaciteField != null) capaciteField.setText(event.getCapaciteMax() != null ? String.valueOf(event.getCapaciteMax()) : "20");
 
-        try {
-            System.out.println("DEBUG: Chargement de l'événement ID: " + event.getId());
-
-            if (nomorgField != null) {
-                nomorgField.setText(event.getOrganisateur() != null ? event.getOrganisateur() : "");
-            }
-            if (lieuField != null) {
-                lieuField.setText(event.getLieu() != null ? event.getLieu() : "");
-            }
-            if (emailField != null) {
-                emailField.setText(event.getEmail() != null ? event.getEmail() : "");
-                System.out.println("DEBUG: Email field rempli avec: " + event.getEmail());
-            }
-            if (telephoneorgField != null) {
-                telephoneorgField.setText(event.getTelephone() != null ? event.getTelephone().toString() : "");
-                System.out.println("DEBUG: Téléphone field rempli avec: " + event.getTelephone());
-            }
-            if (descriptionField != null) {
-                descriptionField.setText(event.getDescription() != null ? event.getDescription() : "");
-            }
-            if (equipementField != null) {
-                equipementField.setText(event.getMaterielsNecessaires() != null ? event.getMaterielsNecessaires() : "");
-            }
-            if (videoYoutubeField != null) {
-                videoYoutubeField.setText(event.getVideoYoutube() != null ? event.getVideoYoutube() : "");
-            }
-            if (prixField != null) {
-                prixField.setText(event.getPrix() != null ? String.valueOf(event.getPrix()) : "0");
-            }
-            if (capaciteField != null) {
-                capaciteField.setText(event.getCapaciteMax() != null ? String.valueOf(event.getCapaciteMax()) : "20");
-            }
-
-            if (dateDebutPicker != null && event.getDateDebut() != null) {
-                dateDebutPicker.setValue(event.getDateDebut().toLocalDate());
-            }
-            if (dateFinPicker != null && event.getDateFin() != null) {
-                dateFinPicker.setValue(event.getDateFin().toLocalDate());
-            }
-
-            if (imagePrincipaleView != null && event.getImage() != null && !event.getImage().trim().isEmpty()) {
-                try {
-                    File imageFile = new File(event.getImage());
-                    if (imageFile.exists()) {
-                        Image image = new Image(imageFile.toURI().toString());
-                        imagePrincipaleView.setImage(image);
-                        imagePrincipalePath = event.getImage();
-                        if (imageStatusLabel != null) {
-                            imageStatusLabel.setText("Image actuelle: " + imageFile.getName());
-                        }
-                    }
-                } catch (Exception e) {
-                    System.err.println("Erreur lors du chargement de l'image: " + e.getMessage());
-                }
-            }
-
-            if (activiteCombo != null && event.getIdActivite() > 0) {
-                for (int i = 0; i < activitesList.size(); i++) {
-                    Activite activite = (Activite) activitesList.get(i);
-                    if (activite.getId() == event.getIdActivite()) {
-                        activiteCombo.getSelectionModel().select(i);
-                        System.out.println("DEBUG: Activité sélectionnée: " + activite.getTitre());
-                        break;
-                    }
-                }
-            }
-
-            System.out.println("DEBUG: Événement chargé avec succès");
-
-        } catch (Exception e) {
-            System.err.println("Erreur lors de la récupération des données de l'événement: " + e.getMessage());
-            e.printStackTrace();
+        if (dateDebutPicker != null && event.getDateDebut() != null) {
+            dateDebutPicker.setValue(event.getDateDebut().toLocalDate());
+            if (heureDebutField != null) heureDebutField.setText(event.getDateDebut().toLocalTime().toString());
+        }
+        if (dateFinPicker != null && event.getDateFin() != null) {
+            dateFinPicker.setValue(event.getDateFin().toLocalDate());
+            if (heureFinField != null) heureFinField.setText(event.getDateFin().toLocalTime().toString());
+        }
+        if (dateLimitePicker != null && event.getDateLimiteInscription() != null) {
+            dateLimitePicker.setValue(event.getDateLimiteInscription().toLocalDate());
         }
     }
 
     @FXML
     void modifierEvent(ActionEvent event) {
         try {
-            if (!isOwner()) {
-                showAlert("Vous n'êtes pas autorisé à modifier cet événement");
-                return;
+            if (!check1.isSelected() || !check2.isSelected() || !check3.isSelected() || !check4.isSelected()) {
+                showAlert("Veuillez cocher toutes les cases de validation"); return;
             }
-
-            if (!areValidationChecksSelected()) {
-                showAlert("Veuillez cocher toutes les cases de validation avant de soumettre");
-                return;
+            if (activitesSelectionnees.isEmpty()) {
+                showAlert("Veuillez ajouter au moins une activité"); return;
             }
-
+            
             String nomEvent = nomorgField.getText().trim();
             String lieu = lieuField.getText().trim();
             String email = emailField.getText().trim();
-            String description = descriptionField.getText().trim();
             String equipement = equipementField.getText().trim();
             String videoYoutube = videoYoutubeField.getText().trim();
 
-            if (nomEvent.isEmpty()) {
-                showAlert("Le nom de l'événement est obligatoire");
-                return;
-            }
-
-            if (lieu.isEmpty()) {
-                showAlert("Le lieu de l'événement est obligatoire");
-                return;
-            }
-
-            if (description.isEmpty()) {
-                showAlert("La description de l'événement est obligatoire");
-                return;
-            }
-
-            if (dateDebutPicker.getValue() == null) {
-                showAlert("La date de début est obligatoire");
-                return;
-            }
-
-            if (dateFinPicker.getValue() == null) {
-                showAlert("La date de fin est obligatoire");
-                return;
-            }
-
-            if (dateFinPicker.getValue().isBefore(dateDebutPicker.getValue())) {
-                showAlert("La date de fin doit être après la date de début");
-                return;
+            if (nomEvent.isEmpty() || lieu.isEmpty()) {
+                showAlert("Le nom et le lieu sont obligatoires"); return;
             }
 
             double prixValue = 0;
-            try {
-                String prix = prixField.getText().trim();
-                if (!prix.isEmpty()) {
-                    prixValue = Double.parseDouble(prix);
-                    if (prixValue < 0) {
-                        showAlert("Le prix ne peut pas être négatif");
-                        return;
-                    }
-                }
-            } catch (NumberFormatException e) {
-                showAlert("Veuillez entrer un prix valide");
-                return;
-            }
-
+            try { prixValue = Double.parseDouble(prixField.getText()); } catch (Exception ignore) {}
             int capaciteValue = 20;
-            try {
-                String capacite = capaciteField.getText().trim();
-                if (!capacite.isEmpty()) {
-                    capaciteValue = Integer.parseInt(capacite);
-                    if (capaciteValue <= 0) {
-                        showAlert("La capacité doit être supérieure à 0");
-                        return;
-                    }
-                }
-            } catch (NumberFormatException e) {
-                showAlert("Veuillez entrer une capacité valide");
-                return;
+            try { capaciteValue = Integer.parseInt(capaciteField.getText()); } catch (Exception ignore) {}
+
+            LocalDateTime dateDebut = buildDateTime(dateDebutPicker.getValue(), heureDebutField.getText());
+            LocalDateTime dateFin = (dateFinPicker.getValue() != null) ? buildDateTime(dateFinPicker.getValue(), heureFinField.getText()) : dateDebut.plusHours(2);
+
+            Timestamp dateLimite;
+            if (dateLimitePicker.getValue() != null) {
+                dateLimite = Timestamp.valueOf(dateLimitePicker.getValue().atStartOfDay());
+            } else {
+                dateLimite = Timestamp.valueOf(dateDebut.minusDays(1));
             }
 
-            int activiteId = getSelectedActiviteId();
+            String primaryImagePath = currentEvent.getImage();
+            if (imagePrincipaleData != null) primaryImagePath = savePhotoToUploads(imagePrincipaleData);
 
-            String sql = "UPDATE events SET id_activite = ?, lieu = ?, organisateur = ?, email = ?, telephone = ?, description = ?, materiels_necessaires = ?, date_debut = ?, date_fin = ?, prix = ?, capacite_max = ?, places_disponibles = ?, status = ?, statut = ?, date_modification = CURRENT_TIMESTAMP, video_youtube = ?, image = ? WHERE id = ? AND created_by_id = ?";
+            String sql = "UPDATE events SET lieu = ?, organisateur = ?, email = ?, telephone = ?, description = ?, materiels_necessaires = ?, date_debut = ?, date_fin = ?, prix = ?, capacite_max = ?, statut = ?, date_modification = CURRENT_TIMESTAMP, video_youtube = ?, image = ?, date_limite_inscription = ? WHERE id = ?";
 
             PreparedStatement pstmt = connection.prepareStatement(sql);
-            pstmt.setInt(1, activiteId);
-            pstmt.setString(2, lieu);
-            pstmt.setString(3, nomEvent);
-            pstmt.setString(4, email);
-            pstmt.setString(5, telephoneorgField.getText().trim());
-            pstmt.setString(6, description);
-            pstmt.setString(7, equipement);
-            pstmt.setTimestamp(8,
-                    dateDebutPicker.getValue() != null
-                            ? java.sql.Timestamp.valueOf(dateDebutPicker.getValue().atStartOfDay())
-                            : null);
-            pstmt.setTimestamp(9,
-                    dateFinPicker.getValue() != null
-                            ? java.sql.Timestamp.valueOf(dateFinPicker.getValue().atStartOfDay())
-                            : null);
-            pstmt.setDouble(10, prixValue);
-            pstmt.setInt(11, capaciteValue);
-            pstmt.setInt(12, capaciteValue);
-            pstmt.setString(13, "en_attente");
-            pstmt.setString(14, "en_attente");
-            pstmt.setString(15, videoYoutube);
-            pstmt.setString(16, imagePrincipalePath != null ? imagePrincipalePath
-                    : (currentEvent != null ? currentEvent.getImage() : ""));
-            pstmt.setInt(17, currentEvent != null ? currentEvent.getId() : 0);
-            pstmt.setString(18, Session.getCurrentUserId());
+            pstmt.setString(1, lieu);
+            pstmt.setString(2, nomEvent);
+            pstmt.setString(3, email);
+            pstmt.setString(4, telephoneorgField.getText().trim());
+            pstmt.setString(5, descriptionField.getText());
+            pstmt.setString(6, equipement);
+            pstmt.setTimestamp(7, Timestamp.valueOf(dateDebut));
+            pstmt.setTimestamp(8, Timestamp.valueOf(dateFin));
+            pstmt.setDouble(9, prixValue);
+            pstmt.setInt(10, capaciteValue);
+            pstmt.setString(11, "EN_ATTENTE");
+            pstmt.setString(12, videoYoutube);
+            pstmt.setString(13, primaryImagePath);
+            pstmt.setTimestamp(14, dateLimite);
+            pstmt.setInt(15, currentEvent.getId());
 
             int rowsAffected = pstmt.executeUpdate();
 
             if (rowsAffected > 0) {
-                showAlert("Événement modifié avec succès!");
+                // Update activities (join table)
+                PreparedStatement delLink = connection.prepareStatement("DELETE FROM events_activities WHERE events_id = ?");
+                delLink.setInt(1, currentEvent.getId());
+                delLink.executeUpdate();
 
+                for (Object obj : activitesSelectionnees) {
+                    Activite a = (Activite) obj;
+                    PreparedStatement insLink = connection.prepareStatement("INSERT INTO events_activities (events_id, activities_id) VALUES (?, ?)");
+                    insLink.setInt(1, currentEvent.getId());
+                    insLink.setInt(2, a.getId());
+                    insLink.executeUpdate();
+                }
+
+                // Additional photos
+                for (byte[] pData : photosData) {
+                    String pPath = savePhotoToUploads(pData);
+                    if (pPath != null) {
+                        PreparedStatement photoPstmt = connection.prepareStatement("INSERT INTO events_images (events_id, chemin_photo, description) VALUES (?, ?, ?)");
+                        photoPstmt.setInt(1, currentEvent.getId());
+                        photoPstmt.setString(2, pPath);
+                        photoPstmt.setString(3, "Photo supplémentaire (Modif)");
+                        photoPstmt.executeUpdate();
+                    }
+                }
+
+                showAlert("Événement mis à jour avec succès!");
                 CatalogueRefreshManager.getInstance().requestRefresh();
                 fermerFenetre();
-            } else {
-                showAlert("Erreur lors de la modification de l'événement");
             }
-
         } catch (Exception e) {
-            System.err.println("ERREUR lors de la modification de l'événement:");
             e.printStackTrace();
-            showAlert("Erreur lors de la modification de l'événement: " + e.getMessage());
+            showAlert("Erreur modif: " + e.getMessage());
         }
     }
 
-    private boolean areValidationChecksSelected() {
-        boolean c1 = check1 == null || check1.isSelected();
-        boolean c2 = check2 == null || check2.isSelected();
-        boolean c3 = check3 == null || check3.isSelected();
-        boolean c4 = check4 == null || check4.isSelected();
-        return c1 && c2 && c3 && c4;
-    }
-
-    private void enforceOwnership() {
-        if (!isOwner()) {
-            showAlert("Vous n'êtes pas autorisé à modifier cet événement");
-            disableForm();
-        }
-    }
-
-    private boolean isOwner() {
-        String currentUserId = Session.getCurrentUserId();
-        if (currentUserId == null || currentUserId.isBlank()) {
-            return false;
-        }
-        if (currentEventOwnerId == null || currentEventOwnerId.isBlank()) {
-            return false;
-        }
-        return currentUserId.equals(currentEventOwnerId);
-    }
-
-    private void disableForm() {
-        if (nomorgField != null)
-            nomorgField.setDisable(true);
-        if (lieuField != null)
-            lieuField.setDisable(true);
-        if (emailField != null)
-            emailField.setDisable(true);
-        if (telephoneorgField != null)
-            telephoneorgField.setDisable(true);
-        if (dateDebutPicker != null)
-            dateDebutPicker.setDisable(true);
-        if (dateFinPicker != null)
-            dateFinPicker.setDisable(true);
-        if (prixField != null)
-            prixField.setDisable(true);
-        if (capaciteField != null)
-            capaciteField.setDisable(true);
-        if (equipementField != null)
-            equipementField.setDisable(true);
-        if (descriptionField != null)
-            descriptionField.setDisable(true);
-        if (videoYoutubeField != null)
-            videoYoutubeField.setDisable(true);
-        if (activiteCombo != null)
-            activiteCombo.setDisable(true);
-        if (importerImageButton != null)
-            importerImageButton.setDisable(true);
-        if (ajouterPhotoButton != null)
-            ajouterPhotoButton.setDisable(true);
-    }
-
-    private int getSelectedActiviteId() {
-        String selectedTitre = activiteCombo.getValue();
-        if (selectedTitre != null && !selectedTitre.trim().isEmpty()) {
-            try {
-                for (Object activiteObj : activitesList) {
-                    if (activiteObj instanceof Activite) {
-                        Activite currentActivite = (Activite) activiteObj;
-                        if (selectedTitre.equals(currentActivite.getTitre())) {
-                            return currentActivite.getId();
-                        }
-                    }
-                }
-            } catch (Exception e) {
-                System.err.println("Erreur lors de la récupération de l'ID de l'activité: " + e.getMessage());
-            }
-        }
-        return 1;
-    }
-
-    @FXML
-    void importerImage(ActionEvent event) {
-        FileChooser fileChooser = new FileChooser();
-        fileChooser.setTitle("Choisir une image pour l'événement");
-        fileChooser.getExtensionFilters().addAll(
-                new FileChooser.ExtensionFilter("Images", "*.png", "*.jpg", "*.jpeg", "*.gif"));
-
-        File selectedFile = fileChooser.showOpenDialog(null);
-        if (selectedFile != null) {
-            try {
-                Image image = new Image(selectedFile.toURI().toString());
-                imagePrincipaleView.setImage(image);
-                imagePrincipalePath = selectedFile.getAbsolutePath();
-
-                imageStatusLabel.setText("Nouvelle image: " + selectedFile.getName());
-
-                System.out.println("Image sélectionnée: " + imagePrincipalePath);
-
-            } catch (Exception e) {
-                showAlert("Erreur lors du chargement de l'image: " + e.getMessage());
-            }
-        }
-    }
-
-    @FXML
-    void ajouterPhoto(ActionEvent event) {
-        FileChooser fileChooser = new FileChooser();
-        fileChooser.setTitle("Ajouter des photos supplémentaires");
-
-        FileChooser.ExtensionFilter extFilter = new FileChooser.ExtensionFilter(
-                "Fichiers images (*.jpg, *.jpeg, *.png, *.gif)", "*.jpg", "*.jpeg", "*.png", "*.gif");
-        fileChooser.getExtensionFilters().add(extFilter);
-
-        List<File> selectedFiles = fileChooser.showOpenMultipleDialog(null);
-
-        if (selectedFiles != null && !selectedFiles.isEmpty()) {
-            for (File selectedFile : selectedFiles) {
-                try {
-                    String fileName = System.currentTimeMillis() + "_" + selectedFile.getName();
-                    Path targetPath = Paths.get(UPLOADS_DIR + fileName);
-                    Files.copy(selectedFile.toPath(), targetPath, StandardCopyOption.REPLACE_EXISTING);
-
-                    String photoPath = UPLOADS_DIR + fileName;
-                    photosPaths.add(photoPath);
-
-                    createPhotoThumbnail(photoPath, selectedFile);
-
-                    System.out.println("Photo supplémentaire ajoutée: " + photoPath);
-
-                } catch (IOException e) {
-                    System.err.println("Erreur lors de la copie de la photo: " + e.getMessage());
-                }
-            }
-        }
-    }
-
-    private void createPhotoThumbnail(String photoPath, File originalFile) {
+    private LocalDateTime buildDateTime(java.time.LocalDate date, String heureText) {
+        if (date == null) return LocalDateTime.now();
         try {
-            HBox container = new HBox(5);
-            container.setStyle("-fx-background-color: #f0f0f0; -fx-border-radius: 5; -fx-padding: 5;");
-            ImageView thumb = new ImageView(new Image(originalFile.toURI().toString()));
-            thumb.setFitHeight(60);
-            thumb.setFitWidth(60);
-            thumb.setPreserveRatio(true);
-            Button del = new Button("❌");
-            del.setStyle("-fx-background-color: transparent; -fx-border: none; -fx-cursor: hand;");
-            del.setOnAction(e -> {
-                photosContainer.getChildren().remove(container);
-                photosPaths.remove(photoPath);
-            });
-            container.getChildren().addAll(thumb, del);
-            if (photosContainer != null)
-                photosContainer.getChildren().add(container);
-        } catch (Exception e) {
-            System.err.println("Erreur vignette: " + e.getMessage());
-        }
-    }
-
-    @FXML
-    void goToCatalogue(ActionEvent event) {
-        fermerFenetre();
-    }
-
-    @FXML
-    void annulerEvent(ActionEvent event) {
-        Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
-        alert.setTitle("Annuler la modification");
-        alert.setHeaderText("Êtes-vous sûr de vouloir annuler ?");
-        alert.setContentText("Toutes les modifications non sauvegardées seront perdues.");
-        alert.showAndWait().ifPresent(r -> {
-            if (r == ButtonType.OK)
-                fermerFenetre();
-        });
-    }
-
-    @FXML
-    void supprimerEvent(ActionEvent event) {
-        Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
-        alert.setTitle("Supprimer l'événement");
-        alert.setHeaderText("Êtes-vous sûr de vouloir supprimer cet événement ?");
-        alert.setContentText("Cette action est irréversible et supprimera définitivement l'événement.");
-
-        alert.showAndWait().ifPresent(response -> {
-            if (response == ButtonType.OK && currentEvent != null) {
-                try {
-                    String sql = "DELETE FROM events WHERE id = ?";
-                    PreparedStatement pstmt = connection.prepareStatement(sql);
-                    pstmt.setInt(1, currentEvent.getId());
-                    int rowsAffected = pstmt.executeUpdate();
-
-                    if (rowsAffected > 0) {
-                        showAlert("Événement supprimé avec succès!");
-                        CatalogueRefreshManager.getInstance().requestRefresh();
-                        fermerFenetre();
-                    } else {
-                        showAlert("Erreur lors de la suppression de l'événement");
-                    }
-                } catch (SQLException e) {
-                    System.err.println("Erreur lors de la suppression: " + e.getMessage());
-                    showAlert("Erreur lors de la suppression: " + e.getMessage());
-                }
+            if (heureText != null && !heureText.trim().isEmpty()) {
+                LocalTime time = LocalTime.parse(heureText.trim());
+                return date.atTime(time);
             }
-        });
+        } catch (Exception ignore) {}
+        return date.atStartOfDay();
     }
 
-    private void fermerFenetre() {
-        Stage stage = (Stage) nomorgField.getScene().getWindow();
-        stage.close();
+    private String savePhotoToUploads(byte[] data) {
+        if (data == null || data.length == 0) return null;
+        try {
+            String ext = detectExt(data);
+            String fileName = "event_mod_" + System.currentTimeMillis() + "_" + (int)(Math.random() * 1000) + "." + ext;
+            Path target = Paths.get(UPLOADS_DIR, fileName);
+            Files.write(target, data);
+            return target.toString().replace("\\", "/");
+        } catch (IOException e) { return null; }
+    }
+
+    private String detectExt(byte[] b) {
+        if (b.length >= 4) {
+            if ((b[0] & 0xFF) == 0x89 && b[1] == 0x50) return "png";
+            if ((b[0] & 0xFF) == 0xFF && (b[1] & 0xFF) == 0xD8) return "jpg";
+        }
+        return "png";
     }
 
     private void showAlert(String message) {
         Alert alert = new Alert(Alert.AlertType.INFORMATION);
-        alert.setTitle("Information");
-        alert.setHeaderText(null);
-        alert.setContentText(message);
-        alert.showAndWait();
+        alert.setContentText(message); alert.showAndWait();
+    }
+
+    private void fermerFenetre() {
+        try {
+            Stage stage = (Stage) nomorgField.getScene().getWindow();
+            stage.close();
+        } catch (Exception ignore) {}
+    }
+
+    @FXML
+    void goToCatalogue(ActionEvent event) { fermerFenetre(); }
+
+    @FXML
+    void annulerEvent(ActionEvent event) { fermerFenetre(); }
+
+    @FXML
+    void supprimerEvent(ActionEvent event) {
+        Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
+        alert.setTitle("Supprimer"); alert.setHeaderText("Supprimer cet événement ?");
+        alert.showAndWait().ifPresent(r -> {
+            if (r == ButtonType.OK) {
+                try {
+                    PreparedStatement ps = connection.prepareStatement("DELETE FROM events WHERE id = ?");
+                    ps.setInt(1, currentEvent.getId());
+                    ps.executeUpdate();
+                    CatalogueRefreshManager.getInstance().requestRefresh();
+                    fermerFenetre();
+                } catch (SQLException e) { e.printStackTrace(); }
+            }
+        });
     }
 }

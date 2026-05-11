@@ -49,7 +49,7 @@ public class MainLayoutController {
         updateUserInfo();
         // Load default view (e.g., Events)
         if (UserSession.getInstance().isLoggedIn()) {
-            handleEvents();
+            loadDefaultView();
         } else {
             loadView("/com/example/pi_dev/user/login.fxml");
         }
@@ -58,10 +58,13 @@ public class MainLayoutController {
     public void updateUserInfo() {
         boolean loggedIn = UserSession.getInstance().isLoggedIn();
         
-        // Control navbar visibility based on login status
+        // Control navbar visibility based on login status and role
         if (navBarRow != null) {
-            navBarRow.setVisible(loggedIn);
-            navBarRow.setManaged(loggedIn);
+            User currentUser = UserSession.getInstance().getCurrentUser();
+            boolean isAdmin = currentUser != null && currentUser.getRole() == RoleEnum.ADMIN;
+            // Admins get their own dashboard nav — hide the main navbar
+            navBarRow.setVisible(loggedIn && !isAdmin);
+            navBarRow.setManaged(loggedIn && !isAdmin);
         }
 
         if (loggedIn) {
@@ -121,7 +124,17 @@ public class MainLayoutController {
             );
         }
         updateUserInfo();
-        handleEvents();
+        loadDefaultView();
+    }
+
+    /** Redirect admin to ApprovalDashboard, regular users to Catalogue */
+    private void loadDefaultView() {
+        User user = UserSession.getInstance().getCurrentUser();
+        if (user != null && user.getRole() == RoleEnum.ADMIN) {
+            loadView("/com/example/pi_dev/events/ApprovalDashboard.fxml");
+        } else {
+            loadView("/com/example/pi_dev/events/Catalogue.fxml");
+        }
     }
 
     @FXML

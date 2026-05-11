@@ -1,19 +1,34 @@
 package com.example.pi_dev.Controllers.Events;
 
+import com.example.pi_dev.Services.Events.EventPhotoService;
 import com.example.pi_dev.Services.Events.WeatherService;
 import com.example.pi_dev.Services.Events.ReservationService;
+import com.example.pi_dev.Services.Events.DynamicPricingEngine;
 import com.example.pi_dev.Utils.Events.Mydatabase;
 import com.example.pi_dev.Entities.Events.Event;
 import com.example.pi_dev.Entities.Events.Activite;
 import com.example.pi_dev.Entities.Events.Reservation;
+import com.example.pi_dev.Entities.Events.EventPhoto;
 import com.example.pi_dev.Session.Session;
 import com.example.pi_dev.Utils.Users.UserSession;
 import com.example.pi_dev.enums.RoleEnum;
+import com.example.pi_dev.Utils.Events.CatalogueRefreshManager;
+import javafx.scene.control.TextArea;
+import javafx.scene.web.WebView;
+import javafx.scene.web.WebEngine;
+import javafx.concurrent.Worker;
+import netscape.javascript.JSObject;
+import com.google.gson.Gson;
+import com.google.gson.JsonArray;
+import com.google.gson.JsonObject;
+import java.net.URLEncoder;
 
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
+import javafx.geometry.Insets;
 import javafx.geometry.Pos;
+import javafx.scene.layout.GridPane;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.Alert;
@@ -22,6 +37,7 @@ import javafx.scene.control.ButtonType;
 import javafx.scene.control.ComboBox;
 import javafx.scene.control.Label;
 import javafx.scene.control.ScrollPane;
+import javafx.scene.control.Separator;
 import javafx.scene.control.Tab;
 import javafx.scene.control.TextField;
 import javafx.scene.image.Image;
@@ -29,9 +45,10 @@ import javafx.scene.image.ImageView;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.FlowPane;
 import javafx.scene.layout.HBox;
+import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
+import javafx.scene.layout.AnchorPane;
 import javafx.stage.Stage;
-
 import java.io.File;
 import java.io.IOException;
 import java.sql.*;
@@ -117,6 +134,7 @@ public class catalogueController {
 
     public void initialize() {
         initializeDatabase();
+        com.example.pi_dev.Utils.Events.DatabaseUtils.ensureSchemaCorrect(connection);
         reservationService = new ReservationService();
         refreshData();
         updateAdminButtonVisibility();
@@ -159,14 +177,20 @@ public class catalogueController {
 
     private void startRefreshListener() {
         Thread refreshThread = new Thread(() -> {
+            long lastAutoRefresh = System.currentTimeMillis();
             while (true) {
                 try {
-                    Thread.sleep(1000);
-                    if (CatalogueRefreshManager.getInstance().isRefreshRequested()) {
+                    Thread.sleep(1000); // Check every second for manual requests
+                    
+                    boolean manualRefresh = CatalogueRefreshManager.getInstance().isRefreshRequested();
+                    boolean autoRefresh = (System.currentTimeMillis() - lastAutoRefresh) > 10000; // Auto refresh every 10s
+                    
+                    if (manualRefresh || autoRefresh) {
                         javafx.application.Platform.runLater(() -> {
                             refreshData();
-                            CatalogueRefreshManager.getInstance().resetRefresh();
+                            if (manualRefresh) CatalogueRefreshManager.getInstance().resetRefresh();
                         });
+                        if (autoRefresh) lastAutoRefresh = System.currentTimeMillis();
                     }
                 } catch (InterruptedException e) {
                     break;
@@ -212,12 +236,15 @@ public class catalogueController {
     private void loadReservations() {
         reservationsList = new ArrayList<>();
         String currentUserId = Session.getCurrentUserId();
-        if (currentUserId == null || currentUserId.trim().isEmpty() || reservationService == null) {
+        
+        // Even if userId is null, we can try to fetch by email in the service
+        if (reservationService == null) {
             return;
         }
 
         try {
-            reservationsList = reservationService.getReservationsByUser(currentUserId);
+            // Passing "" if null to the service which now handles email fallback
+            reservationsList = reservationService.getReservationsByUser(currentUserId != null ? currentUserId : "");
         } catch (SQLException e) {
             System.err.println("Erreur chargement réservations: " + e.getMessage());
         }
@@ -253,6 +280,7 @@ public class catalogueController {
             System.err.println("Database connection error: " + e.getMessage());
         }
     }
+
 
     private void loadActivites() {
         activitesList = new ArrayList<>();
@@ -301,8 +329,23 @@ public class catalogueController {
             ResultSet rs = stmt.executeQuery("SELECT *, COALESCE(status, statut) AS effective_status FROM events");
             while (rs.next()) {
                 Event event = new Event();
-                event.setId(rs.getInt("id"));
-                event.setIdActivite(rs.getInt("id_activite"));
+                int eventId = rs.getInt("id");
+                event.setId(eventId);
+                
+                // Get activities for this event from join table
+                try (PreparedStatement psAct = connection.prepareStatement(
+                        "SELECT activities_id FROM events_activities WHERE events_id = ? LIMIT 1")) {
+                    psAct.setInt(1, eventId);
+                    try (ResultSet rsAct = psAct.executeQuery()) {
+                        if (rsAct.next()) {
+                            event.setIdActivite(rsAct.getInt("activities_id"));
+                        }
+                    }
+                } catch (SQLException e) {
+                    // Fallback to id_activite column if join table fetch fails
+                    try { event.setIdActivite(rs.getInt("id_activite")); } catch (Exception ignore) {}
+                }
+
                 event.setDateDebut(
                         rs.getTimestamp("date_debut") != null ? rs.getTimestamp("date_debut").toLocalDateTime() : null);
                 event.setDateFin(
@@ -315,10 +358,14 @@ public class catalogueController {
                 event.setStatut(parseStatutEvent(rs.getString("effective_status")));
                 event.setDateCreation(rs.getTimestamp("date_creation"));
                 event.setDateModification(rs.getTimestamp("date_modification"));
-                try {
-                    event.setCreatedById(rs.getString("created_by_id"));
-                } catch (Exception ignore) {
-                }
+                try { event.setLieu(rs.getString("lieu")); } catch (Exception ignore) {}
+                try { event.setDescription(rs.getString("description")); } catch (Exception ignore) {}
+                try { event.setCreatedById(rs.getString("created_by_id")); } catch (Exception ignore) {}
+                try { event.setEmail(rs.getString("email")); } catch (Exception ignore) {}
+                try { event.setTelephone(rs.getInt("telephone")); } catch (Exception ignore) {}
+                try { event.setVideoYoutube(rs.getString("video_youtube")); } catch (Exception ignore) {}
+                try { event.setImage(rs.getString("image")); } catch (Exception ignore) {}
+                
                 eventsList.add(event);
             }
         } catch (SQLException e) {
@@ -469,52 +516,7 @@ public class catalogueController {
         }
     }
 
-    @FXML
-    void ouvrirGoogleCalendar(ActionEvent event) {
-        try {
-            System.out.println("Ouverture de l'interface Google Calendar...");
-            FXMLLoader loader = new FXMLLoader(
-                    getClass().getResource("/com/example/pi_dev/events/googleCalendar.fxml"));
-            Parent root = loader.load();
 
-            Stage stage = new Stage();
-            stage.setTitle("Google Calendar - Configuration");
-            stage.setScene(new Scene(root));
-            stage.setWidth(500);
-            stage.setHeight(600);
-            stage.centerOnScreen();
-            stage.show();
-
-            System.out.println("Interface Google Calendar ouverte avec succès");
-
-        } catch (Exception e) {
-            System.err.println("Erreur lors de l'ouverture de Google Calendar: " + e.getMessage());
-            showAlert("Erreur", "Impossible d'ouvrir l'interface Google Calendar.");
-        }
-    }
-
-    @FXML
-    void ouvrirGoogleMaps(ActionEvent event) {
-        try {
-            System.out.println("Ouverture de l'interface Google Maps...");
-            FXMLLoader loader = new FXMLLoader(getClass().getResource("/com/example/pi_dev/events/googleMaps.fxml"));
-            Parent root = loader.load();
-
-            Stage stage = new Stage();
-            stage.setTitle("Google Maps - Localisation d'Événements");
-            stage.setScene(new Scene(root));
-            stage.setWidth(850);
-            stage.setHeight(750);
-            stage.centerOnScreen();
-            stage.show();
-
-            System.out.println("Interface Google Maps ouverte avec succès");
-
-        } catch (Exception e) {
-            System.err.println("Erreur lors de l'ouverture de Google Maps: " + e.getMessage());
-            showAlert("Erreur", "Impossible d'ouvrir l'interface Google Maps.");
-        }
-    }
 
     @FXML
     void ouvrirOrganisation(ActionEvent event) {
@@ -541,6 +543,92 @@ public class catalogueController {
             System.err.println("Erreur inattendue: " + e.getMessage());
             e.printStackTrace();
             showAlert("Erreur inattendue lors de l'ouverture de l'interface");
+        }
+    }
+
+    @FXML
+    void ouvrirCarteEvents(ActionEvent event) {
+        try {
+            WebView webView = new WebView();
+            WebEngine engine = webView.getEngine();
+            
+            JavaBridge bridge = new JavaBridge();
+
+            engine.getLoadWorker().stateProperty().addListener((obs, oldState, newState) -> {
+                if (newState == Worker.State.SUCCEEDED) {
+                    JSObject window = (JSObject) engine.executeScript("window");
+                    window.setMember("javaBridge", bridge);
+
+                    JsonArray jsonArray = new JsonArray();
+                    for (Event e : eventsList) {
+                        if (!isPublishedEvent(e)) continue;
+                        JsonObject obj = new JsonObject();
+                        obj.addProperty("id", e.getId());
+                        obj.addProperty("lieu", e.getLieu() != null ? e.getLieu() : "Lieu inconnu");
+                        obj.addProperty("dateDebut", e.getDateDebut() != null ? e.getDateDebut().format(DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm")) : "Date non définie");
+                        obj.addProperty("places", e.getPlacesDisponibles() != null ? e.getPlacesDisponibles() : 0);
+                        obj.addProperty("organisateur", e.getOrganisateur() != null ? e.getOrganisateur() : "Wanderlust");
+                        obj.addProperty("prix", e.getPrix() != null ? e.getPrix() + " TND" : "Gratuit");
+                        jsonArray.add(obj);
+                    }
+                    
+                    String jsonStr = new Gson().toJson(jsonArray);
+                    engine.executeScript("loadEventsData(" + jsonStr + ");");
+                }
+            });
+
+            java.net.URL resource = getClass().getResource("/com/example/pi_dev/events/map.html");
+            if (resource == null) {
+                throw new IOException("Fichier map.html introuvable.");
+            }
+            engine.load(resource.toExternalForm());
+
+            Stage stage = new Stage();
+            stage.setTitle("Wanderlust - Carte des Événements");
+            stage.setScene(new Scene(webView, 1000, 700));
+            stage.centerOnScreen();
+            stage.show();
+        } catch (Exception e) {
+            System.err.println("Erreur chargement carte: " + e.getMessage());
+            e.printStackTrace();
+            showAlert("Impossible de charger la carte interactive.");
+        }
+    }
+
+    public class JavaBridge {
+        public void openEvent(int id) {
+            javafx.application.Platform.runLater(() -> {
+                for (Event e : eventsList) {
+                    if (e.getId() == id) {
+                        ouvrirDetailsEvent(e);
+                        break;
+                    }
+                }
+            });
+        }
+    }
+
+    @FXML
+    void ouvrirSuggestionIA(ActionEvent event) {
+        try {
+            javafx.fxml.FXMLLoader loader = new javafx.fxml.FXMLLoader(getClass().getResource("/com/example/pi_dev/events/EventSuggestion.fxml"));
+            javafx.scene.Parent root = loader.load();
+
+            EventSuggestionController controller = loader.getController();
+            
+            // Pass only published events to the AI
+            java.util.List<Event> publishedEvents = eventsList.stream().filter(this::isPublishedEvent).collect(java.util.stream.Collectors.toList());
+            controller.setEventsList(publishedEvents);
+
+            Stage stage = new Stage();
+            stage.setTitle("Wanderlust - Assistant IA");
+            stage.setScene(new Scene(root));
+            stage.centerOnScreen();
+            stage.show();
+        } catch (Exception e) {
+            System.err.println("Erreur ouverture IA: " + e.getMessage());
+            e.printStackTrace();
+            showAlert("Erreur lors de l'ouverture de l'assistant IA.");
         }
     }
 
@@ -635,10 +723,10 @@ public class catalogueController {
 
     private void addActiviteCard(Activite activite) {
         VBox card = new VBox();
-        card.setSpacing(10);
+        card.setSpacing(12);
         card.setStyle(
-                "-fx-border-color: #ccc; -fx-border-width: 1; -fx-padding: 10; -fx-background-color: white; -fx-background-radius: 8; -fx-border-radius: 8; -fx-cursor: hand;");
-        card.setPrefWidth(200);
+                "-fx-background-color: white; -fx-background-radius: 12; -fx-border-radius: 12; -fx-border-color: #e2e8f0; -fx-border-width: 1; -fx-padding: 15; -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.08), 10, 0, 0, 4); -fx-cursor: hand;");
+        card.setPrefWidth(220);
 
         ImageView imageView = new ImageView();
         imageView.setFitWidth(180);
@@ -658,19 +746,19 @@ public class catalogueController {
         }
 
         Label titleLabel = new Label(activite.getTitre());
-        titleLabel.setStyle("-fx-font-weight: bold; -fx-font-size: 14px; -fx-text-fill: #1a5f3f;");
+        titleLabel.setStyle("-fx-font-weight: bold; -fx-font-size: 16px; -fx-text-fill: #0F2C4F;");
         titleLabel.setWrapText(true);
 
         card.getChildren().addAll(imageView, titleLabel);
 
         if (activite.getTypeActivite() != null && !activite.getTypeActivite().isEmpty()) {
-            Label typeLabel = new Label("Type: " + activite.getTypeActivite());
-            typeLabel.setStyle("-fx-font-size: 12px; -fx-text-fill: #666;");
+            Label typeLabel = new Label("🎯 " + activite.getTypeActivite());
+            typeLabel.setStyle("-fx-font-size: 13px; -fx-font-weight: bold; -fx-text-fill: #2D70B3; -fx-background-color: #EBF8FF; -fx-padding: 3 8; -fx-background-radius: 6;");
             card.getChildren().add(typeLabel);
         }
 
         Label descLabel = new Label(activite.getDescription() != null ? activite.getDescription() : "");
-        descLabel.setStyle("-fx-font-size: 11px; -fx-text-fill: #555;");
+        descLabel.setStyle("-fx-font-size: 12px; -fx-text-fill: #64748B;");
         descLabel.setWrapText(true);
         descLabel.setMaxHeight(60);
 
@@ -720,7 +808,7 @@ public class catalogueController {
             VBox card = new VBox();
             card.setSpacing(10);
             card.setStyle(
-                    "-fx-border-color: #ccc; -fx-border-width: 1; -fx-padding: 15; -fx-background-color: white; -fx-background-radius: 10; -fx-border-radius: 10; -fx-cursor: hand;");
+                    "-fx-border-color: #ccc; -fx-border-width: 1; -fx-padding: 15; -fx-background-color: white; -fx-background-radius: 10; -fx-border-radius: 10; -fx-cursor: default;");
 
             Label titleLabel = new Label(event.getOrganisateur() != null ? event.getOrganisateur() : "");
             titleLabel.setStyle("-fx-font-size: 16px; -fx-font-weight: bold; -fx-text-fill: #1a5f3f;");
@@ -736,8 +824,28 @@ public class catalogueController {
                             : "Non défini"));
             dateFinLabel.setStyle("-fx-font-size: 12px; -fx-text-fill: #333;");
 
-            Label prixLabel = new Label("💰 Prix: " + (event.getPrix() != null ? event.getPrix() + " TND" : "0 TND"));
-            prixLabel.setStyle("-fx-font-size: 14px; -fx-font-weight: bold; -fx-text-fill: #2d7a2d;");
+            DynamicPricingEngine.PricingResult pricing = DynamicPricingEngine.calculatePrice(event);
+            
+            VBox priceBox = new VBox(2);
+            if (pricing.discountPercentage > 0) {
+                Label oldPrix = new Label(String.format("%.2f TND", pricing.originalPrice));
+                oldPrix.setStyle("-fx-font-size: 12px; -fx-text-fill: #94A3B8; -fx-strikethrough: true;");
+                
+                HBox newPriceRow = new HBox(8);
+                newPriceRow.setAlignment(Pos.CENTER_LEFT);
+                Label newPrix = new Label(String.format("%.2f TND", pricing.finalPrice));
+                newPrix.setStyle("-fx-font-size: 16px; -fx-font-weight: bold; -fx-text-fill: #DC2626;"); // Red color like screenshot
+                
+                Label badge = new Label(String.format("-%.0f%%", pricing.discountPercentage * 100));
+                badge.setStyle("-fx-background-color: #EA580C; -fx-text-fill: white; -fx-padding: 2 6; -fx-background-radius: 10; -fx-font-size: 11px; -fx-font-weight: bold;");
+                
+                newPriceRow.getChildren().addAll(newPrix, badge);
+                priceBox.getChildren().addAll(oldPrix, newPriceRow);
+            } else {
+                Label prixLabel = new Label("💰 Prix: " + (event.getPrix() != null ? event.getPrix() + " TND" : "0 TND"));
+                prixLabel.setStyle("-fx-font-size: 14px; -fx-font-weight: bold; -fx-text-fill: #2d7a2d;");
+                priceBox.getChildren().add(prixLabel);
+            }
 
             Label capaciteLabel = new Label("👥 Capacité: " + event.getCapaciteMax());
             capaciteLabel.setStyle("-fx-font-size: 12px; -fx-text-fill: #666;");
@@ -745,11 +853,19 @@ public class catalogueController {
             Label placesLabel = new Label("🎫 Places: " + event.getPlacesDisponibles());
             placesLabel.setStyle("-fx-font-size: 12px; -fx-text-fill: #666;");
 
-            HBox buttonBox = new HBox(5);
+            HBox buttonBox = new HBox(6);
             buttonBox.setAlignment(Pos.CENTER);
 
-            String currentUser = Session.getCurrentUserId();
             final Event eventFinal = event;
+
+            // View button — always visible for everyone
+            Button viewButton = new Button("👁️ Détails");
+            viewButton.setStyle("-fx-background-color: #2D70B3; -fx-text-fill: white; -fx-background-radius: 20; -fx-padding: 8 16; -fx-font-size: 12px; -fx-cursor: hand; -fx-font-weight: bold;");
+            viewButton.setOnAction(e -> ouvrirDetailsEvent(eventFinal));
+            buttonBox.getChildren().add(viewButton);
+
+            // Modifier / Supprimer — only for the creator
+            String currentUser = Session.getCurrentUserId();
             if (currentUser != null && currentUser.equals(event.getCreatedById())) {
                 Button modifierButton = new Button("✏️ Modifier");
                 modifierButton.setStyle(
@@ -763,11 +879,9 @@ public class catalogueController {
 
                 buttonBox.getChildren().addAll(modifierButton, supprimerButton);
             }
-            card.getChildren().addAll(titleLabel, dateDebutLabel, dateFinLabel, prixLabel, capaciteLabel, placesLabel,
-                    buttonBox);
 
-            card.setOnMouseClicked(e -> ouvrirReservation(eventFinal));
-
+            card.getChildren().addAll(titleLabel, dateDebutLabel, dateFinLabel, priceBox, capaciteLabel, placesLabel, buttonBox);
+            // card.setOnMouseClicked(e -> ouvrirReservation(eventFinal)); // Removed action on card click
             flowEvents.getChildren().add(card);
 
         } catch (Exception e) {
@@ -775,41 +889,543 @@ public class catalogueController {
         }
     }
 
+    private void ouvrirDetailsEvent(Event event) {
+        try {
+            Stage dialog = new Stage();
+            dialog.setTitle("Wanderlust - " + (event.getOrganisateur() != null ? event.getOrganisateur() : "Détails"));
+
+            VBox mainContainer = new VBox(0);
+            mainContainer.setStyle("-fx-background-color: #F8FAFC;");
+
+            // --- HERO SECTION ---
+            StackPane heroSection = new StackPane();
+            heroSection.setPrefHeight(240);
+            heroSection.setStyle("-fx-background-color: #1E293B;");
+
+            // Hero Image
+            if (event.getImage() != null && !event.getImage().isBlank()) {
+                try {
+                    String path = event.getImage();
+                    if (!path.startsWith("http") && !path.startsWith("file")) {
+                        path = new File(path).toURI().toString();
+                    }
+                    ImageView heroImg = new ImageView(new Image(path, 800, 400, true, true));
+                    heroImg.setOpacity(0.6);
+                    heroImg.setFitWidth(700);
+                    heroImg.setPreserveRatio(true);
+                    heroSection.getChildren().add(heroImg);
+                } catch (Exception ignore) {}
+            }
+
+            // Hero Overlay Text
+            VBox heroText = new VBox(10);
+            heroText.setAlignment(Pos.BOTTOM_LEFT);
+            heroText.setPadding(new Insets(0, 40, 30, 40));
+            
+            HBox titleRow = new HBox(15);
+            titleRow.setAlignment(Pos.CENTER_LEFT);
+            Label heroTitle = new Label(event.getOrganisateur() != null ? event.getOrganisateur().toUpperCase() : "AVENTURE WANDERLUST");
+            heroTitle.setStyle("-fx-font-size: 28px; -fx-font-weight: bold; -fx-text-fill: white; -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.5), 10, 0, 0, 0);");
+            
+            Button shareBtn = new Button("🔗 PARTAGER");
+            shareBtn.setStyle("-fx-background-color: rgba(255,255,255,0.2); -fx-text-fill: white; -fx-background-radius: 20; -fx-font-size: 11px; -fx-font-weight: bold; -fx-cursor: hand;");
+            
+            VBox commentsList = new VBox(10); // Moved up to be accessible
+            shareBtn.setOnAction(e -> ouvrirPartageDialog(event, dialog, commentsList));
+            
+            titleRow.getChildren().addAll(heroTitle, shareBtn);
+            
+            Label heroSubtitle = new Label("📍 " + (event.getLieu() != null ? event.getLieu() : "Lieu non défini"));
+            heroSubtitle.setStyle("-fx-font-size: 16px; -fx-text-fill: #E2E8F0; -fx-font-weight: bold;");
+            
+            heroText.getChildren().addAll(titleRow, heroSubtitle);
+            
+            // Close Button
+            Button closeBtn = new Button("✕");
+            closeBtn.setStyle("-fx-background-color: rgba(0,0,0,0.3); -fx-text-fill: white; -fx-font-size: 20px; -fx-background-radius: 50; -fx-padding: 5 12; -fx-cursor: hand;");
+            StackPane.setAlignment(closeBtn, Pos.TOP_RIGHT);
+            StackPane.setMargin(closeBtn, new Insets(15));
+            closeBtn.setOnAction(e -> dialog.close());
+            
+            heroSection.getChildren().addAll(heroText, closeBtn);
+
+            // --- CONTENT SECTION ---
+            VBox content = new VBox(25);
+            content.setPadding(new Insets(30, 40, 40, 40));
+            content.setStyle("-fx-background-color: transparent;");
+
+            // ... (Quick Info remains) ...
+            HBox quickInfo = new HBox(30);
+            quickInfo.setAlignment(Pos.CENTER);
+            quickInfo.getChildren().addAll(
+                createStatCard("💰 PRIX", (event.getPrix() != null ? event.getPrix() + " TND" : "GRATUIT"), "#F0FDF4", "#166534"),
+                createStatCard("👥 PLACES DISPONIBLES", (event.getPlacesDisponibles() != null ? event.getPlacesDisponibles() + " SUR " + event.getCapaciteMax() : "N/A"), "#EFF6FF", "#1E40AF")
+            );
+
+            // Detailed Info Section
+            VBox detailBox = new VBox(20);
+            detailBox.setStyle("-fx-background-color: white; -fx-background-radius: 15; -fx-padding: 25; -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.04), 10, 0, 0, 4);");
+
+            // Dates & Time
+            VBox dateBox = new VBox(8);
+            Label dateHead = new Label("📅 HORAIRES DE L'ÉVÉNEMENT");
+            dateHead.setStyle("-fx-font-size: 13px; -fx-font-weight: bold; -fx-text-fill: #64748B; -fx-letter-spacing: 1;");
+            String debutStr = event.getDateDebut() != null ? event.getDateDebut().format(DateTimeFormatter.ofPattern("EEEE dd MMMM yyyy 'à' HH:mm")) : "N/A";
+            String finStr = event.getDateFin() != null ? event.getDateFin().format(DateTimeFormatter.ofPattern("EEEE dd MMMM yyyy 'à' HH:mm")) : "N/A";
+            Label dateFull = new Label("Du " + debutStr + "\nAu " + finStr);
+            dateFull.setStyle("-fx-font-size: 15px; -fx-text-fill: #1E293B; -fx-line-spacing: 5;");
+            dateBox.getChildren().addAll(dateHead, dateFull);
+
+            // Contact & Equipment
+            GridPane grid = new GridPane();
+            grid.setHgap(40);
+            grid.setVgap(25);
+            VBox contactSection = createInfoSection("📞 CONTACT", 
+                "✉️ " + (event.getEmail() != null ? event.getEmail() : "Non fourni"),
+                "📱 " + (event.getTelephone() != null && event.getTelephone() != 0 ? event.getTelephone() : "Non fourni"));
+            VBox equipSection = createInfoSection("🎒 ÉQUIPEMENTS", 
+                (event.getMaterielsNecessaires() != null && !event.getMaterielsNecessaires().isBlank() 
+                    ? event.getMaterielsNecessaires() : "Aucun matériel spécifique requis."));
+            grid.add(contactSection, 0, 0);
+            grid.add(equipSection, 1, 0);
+            detailBox.getChildren().addAll(dateBox, new Separator(), grid);
+
+            // Multimedia (Video, Activities & Gallery)
+            VBox multimediaBox = new VBox(25);
+            
+            // Activities
+            VBox activitySection = new VBox(10);
+            Label activityHead = new Label("🎯 ACTIVITÉS ASSOCIÉES");
+            activityHead.setStyle("-fx-font-size: 13px; -fx-font-weight: bold; -fx-text-fill: #64748B;");
+            activitySection.getChildren().add(activityHead);
+            FlowPane activityChips = new FlowPane(10, 10);
+            loadActivityChips(event, activityChips);
+            activitySection.getChildren().add(activityChips);
+            multimediaBox.getChildren().add(activitySection);
+
+            // Video Link
+            if (event.getVideoYoutube() != null && !event.getVideoYoutube().isBlank()) {
+                HBox ytBox = new HBox(10);
+                ytBox.setAlignment(Pos.CENTER_LEFT);
+                ytBox.setStyle("-fx-background-color: #FEF2F2; -fx-padding: 15; -fx-background-radius: 10; -fx-cursor: hand;");
+                Label ytLabel = new Label("🎬 VOIR LA VIDÉO DE PRÉSENTATION SUR YOUTUBE");
+                ytLabel.setStyle("-fx-text-fill: #991B1B; -fx-font-weight: bold; -fx-font-size: 13px;");
+                ytBox.getChildren().add(ytLabel);
+                ytBox.setOnMouseClicked(e -> { try { java.awt.Desktop.getDesktop().browse(new java.net.URI(event.getVideoYoutube())); } catch (Exception ignored) {} });
+                multimediaBox.getChildren().add(ytBox);
+            }
+
+            // Photo Album (Carousel)
+            VBox albumBox = createCarousel(event);
+            multimediaBox.getChildren().add(albumBox);
+
+            // --- REVIEWS SECTION ---
+            VBox reviewSection = new VBox(15);
+            reviewSection.setStyle("-fx-background-color: #F1F5F9; -fx-padding: 20; -fx-background-radius: 15;");
+            Label reviewTitle = new Label("💬 AVIS & COMMENTAIRES");
+            reviewTitle.setStyle("-fx-font-size: 13px; -fx-font-weight: bold; -fx-text-fill: #475569;");
+            loadComments(event.getId(), commentsList);
+            reviewSection.getChildren().addAll(reviewTitle, commentsList);
+
+            // Final Action Button
+            Button reserverBtn = new Button("CONFIRMER MA RÉSERVATION");
+            reserverBtn.setStyle("-fx-background-color: #2563EB; -fx-text-fill: white; -fx-background-radius: 12; -fx-padding: 18; -fx-font-size: 16px; -fx-font-weight: bold; -fx-cursor: hand;");
+            reserverBtn.setMaxWidth(Double.MAX_VALUE);
+            reserverBtn.setOnAction(e -> { dialog.close(); ouvrirReservation(event); });
+
+            content.getChildren().addAll(quickInfo, detailBox, multimediaBox, reviewSection, reserverBtn);
+            mainContainer.getChildren().addAll(heroSection, content);
+
+            ScrollPane mainScroll = new ScrollPane(mainContainer);
+            mainScroll.setFitToWidth(true);
+            mainScroll.setStyle("-fx-background-color: #F8FAFC; -fx-border-color: transparent;");
+
+            Scene scene = new Scene(mainScroll, 720, Math.min(900, javafx.stage.Screen.getPrimary().getVisualBounds().getHeight() - 50));
+            dialog.setScene(scene);
+            dialog.setResizable(true);
+            dialog.centerOnScreen();
+            dialog.show();
+
+        } catch (Exception e) {
+            System.err.println("Erreur design details: " + e.getMessage());
+            e.printStackTrace();
+            showAlert("Erreur lors de l'affichage des détails.");
+        }
+    }
+
+    private void ouvrirPartageDialog(Event event, Stage parent, VBox commentsContainerToRefresh) {
+        Stage shareDialog = new Stage();
+        shareDialog.initOwner(parent);
+        shareDialog.setTitle("Partager l'événement");
+
+        VBox layout = new VBox(15);
+        layout.setStyle("-fx-padding: 20; -fx-background-color: white;");
+        layout.setAlignment(Pos.CENTER);
+
+        Label head = new Label("Partager avec un commentaire");
+        head.setStyle("-fx-font-weight: bold; -fx-font-size: 14px;");
+
+        TextArea commentArea = new TextArea();
+        commentArea.setPromptText("Votre avis ou commentaire sur cet événement...");
+        commentArea.setPrefRowCount(3);
+
+        HBox networks = new HBox(10);
+        networks.setAlignment(Pos.CENTER);
+        Button fb = new Button("Facebook"); fb.setStyle("-fx-background-color: #1877F2; -fx-text-fill: white;");
+        Button tw = new Button("Twitter"); tw.setStyle("-fx-background-color: #1DA1F2; -fx-text-fill: white;");
+        networks.getChildren().addAll(fb, tw);
+
+        Button submitBtn = new Button("PUBLIER MON AVIS");
+        submitBtn.setStyle("-fx-background-color: #2563EB; -fx-text-fill: white; -fx-font-weight: bold; -fx-padding: 10 20;");
+        
+        fb.setOnAction(e -> {
+            try {
+                String url = "https://www.facebook.com/sharer/sharer.php?u=" + URLEncoder.encode("http://wanderlust.com/event/" + event.getId(), "UTF-8") + 
+                             "&quote=" + URLEncoder.encode(commentArea.getText() + "\nRegardez cet événement Wanderlust !", "UTF-8");
+                java.awt.Desktop.getDesktop().browse(new java.net.URI(url));
+            } catch (Exception ex) { ex.printStackTrace(); }
+        });
+
+        tw.setOnAction(e -> {
+            try {
+                String url = "https://twitter.com/intent/tweet?text=" + URLEncoder.encode(commentArea.getText() + " #Wanderlust #Aventure", "UTF-8") + 
+                             "&url=" + URLEncoder.encode("http://wanderlust.com/event/" + event.getId(), "UTF-8");
+                java.awt.Desktop.getDesktop().browse(new java.net.URI(url));
+            } catch (Exception ex) { ex.printStackTrace(); }
+        });
+
+        submitBtn.setOnAction(e -> {
+            String comment = commentArea.getText().trim();
+            if (!comment.isEmpty()) {
+                saveComment(event.getId(), comment);
+                
+                // Refresh the UI
+                if (commentsContainerToRefresh != null) {
+                    commentsContainerToRefresh.getChildren().clear();
+                    loadComments(event.getId(), commentsContainerToRefresh);
+                }
+                
+                shareDialog.close();
+                showAlert("Merci ! Votre avis a été publié.");
+            }
+        });
+
+        layout.getChildren().addAll(head, commentArea, networks, submitBtn);
+        shareDialog.setScene(new Scene(layout, 400, 300));
+        shareDialog.show();
+    }
+
+    private void saveComment(int eventId, String comment) {
+        System.out.println("DEBUG: Sauvegarde du commentaire pour l'événement ID: " + eventId);
+        try {
+            String sql = "INSERT INTO event_reviews (events_id, user_name, comment, date_creation) VALUES (?, ?, ?, CURRENT_TIMESTAMP)";
+            PreparedStatement pstmt = connection.prepareStatement(sql);
+            pstmt.setInt(1, eventId);
+            pstmt.setString(2, "Utilisateur"); // On pourrait utiliser Session.getCurrentUserName()
+            pstmt.setString(3, comment);
+            int affected = pstmt.executeUpdate();
+            System.out.println("DEBUG: Commentaire sauvegardé, lignes affectées: " + affected);
+        } catch (SQLException e) {
+            System.err.println("Erreur sauvegarde avis: " + e.getMessage());
+            e.printStackTrace();
+        }
+    }
+
+    private void loadComments(int eventId, VBox container) {
+        System.out.println("DEBUG: Chargement des commentaires pour l'événement ID: " + eventId);
+        try {
+            String sql = "SELECT user_name, comment, date_creation FROM event_reviews WHERE events_id = ? ORDER BY date_creation DESC";
+            PreparedStatement pstmt = connection.prepareStatement(sql);
+            pstmt.setInt(1, eventId);
+            ResultSet rs = pstmt.executeQuery();
+            boolean hasComments = false;
+            container.getChildren().clear(); // Clear existing children to avoid duplicates
+            
+            while (rs.next()) {
+                hasComments = true;
+                VBox card = new VBox(5);
+                card.setStyle("-fx-background-color: white; -fx-padding: 10; -fx-background-radius: 8; -fx-border-color: #E2E8F0; -fx-border-radius: 8;");
+                
+                Label user = new Label("👤 " + rs.getString("user_name"));
+                user.setStyle("-fx-font-weight: bold; -fx-text-fill: #1E293B;");
+                
+                Label text = new Label(rs.getString("comment"));
+                text.setWrapText(true);
+                text.setStyle("-fx-text-fill: #475569;");
+                
+                Timestamp ts = rs.getTimestamp("date_creation");
+                String dateStr = (ts != null) ? ts.toLocalDateTime().format(DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm")) : "Date inconnue";
+                Label date = new Label(dateStr);
+                date.setStyle("-fx-font-size: 10px; -fx-text-fill: #94A3B8;");
+                
+                card.getChildren().addAll(user, text, date);
+                container.getChildren().add(card);
+            }
+            if (!hasComments) {
+                Label noMsg = new Label("Aucun avis pour le moment. Soyez le premier à partager !");
+                noMsg.setStyle("-fx-text-fill: #94A3B8; -fx-font-style: italic;");
+                container.getChildren().add(noMsg);
+            }
+            System.out.println("DEBUG: Nombre de commentaires chargés: " + (hasComments ? "plusieurs" : "zéro"));
+        } catch (SQLException e) {
+            System.err.println("Erreur chargement avis: " + e.getMessage());
+            e.printStackTrace();
+        }
+    }
+
+    private void loadActivityChips(Event event, FlowPane container) {
+        try {
+            String sql = "SELECT a.titre FROM activites a JOIN events_activities ea ON a.id = ea.activities_id WHERE ea.events_id = ?";
+            PreparedStatement ps = connection.prepareStatement(sql);
+            ps.setInt(1, event.getId());
+            ResultSet rs = ps.executeQuery();
+            boolean found = false;
+            while (rs.next()) {
+                found = true;
+                Label chip = new Label(rs.getString("titre"));
+                chip.setStyle("-fx-background-color: #F3E8FF; -fx-text-fill: #6B21A8; -fx-padding: 8 15; -fx-background-radius: 20; -fx-font-weight: bold; -fx-font-size: 12px;");
+                container.getChildren().add(chip);
+            }
+            if (!found) {
+                Label noAct = new Label("Aucune activité associée.");
+                noAct.setStyle("-fx-text-fill: #94A3B8; -fx-font-style: italic;");
+                container.getChildren().add(noAct);
+            }
+        } catch (SQLException ignore) {}
+    }
+
+    private VBox createCarousel(Event event) {
+        VBox albumBox = new VBox(15);
+        albumBox.setAlignment(Pos.CENTER);
+        Label albumTitle = new Label("📸 ALBUM PHOTOS");
+        albumTitle.setStyle("-fx-font-size: 13px; -fx-font-weight: bold; -fx-text-fill: #64748B;");
+        
+        List<String> allImagePaths = new ArrayList<>();
+        if (event.getImage() != null && !event.getImage().isBlank()) allImagePaths.add(event.getImage());
+        try {
+            EventPhotoService eps = new EventPhotoService();
+            List<EventPhoto> photos = eps.getPhotosByEvent(event.getId());
+            for (EventPhoto p : photos) allImagePaths.add(p.getCheminPhoto());
+        } catch (Exception ignore) {}
+
+        if (allImagePaths.isEmpty()) {
+            Label noPhoto = new Label("Aucun visuel disponible.");
+            noPhoto.setStyle("-fx-text-fill: #94A3B8; -fx-font-style: italic;");
+            albumBox.getChildren().addAll(albumTitle, noPhoto);
+        } else {
+            StackPane imageContainer = new StackPane();
+            imageContainer.setPrefSize(500, 350);
+            imageContainer.setStyle("-fx-background-color: white; -fx-background-radius: 15; -fx-border-color: #E2E8F0; -fx-border-radius: 15; -fx-padding: 10;");
+            ImageView carouselImageView = new ImageView();
+            carouselImageView.setFitWidth(480); carouselImageView.setFitHeight(330); carouselImageView.setPreserveRatio(true);
+            imageContainer.getChildren().add(carouselImageView);
+            HBox controls = new HBox(20); controls.setAlignment(Pos.CENTER);
+            Button prevBtn = new Button("◀"); prevBtn.setStyle("-fx-background-color: #BFDBFE; -fx-text-fill: #1E40AF; -fx-background-radius: 30; -fx-pref-width: 50; -fx-pref-height: 50; -fx-font-weight: bold; -fx-cursor: hand;");
+            Label counterLabel = new Label(); counterLabel.setStyle("-fx-font-size: 16px; -fx-font-weight: bold; -fx-text-fill: #64748B;");
+            Button nextBtn = new Button("▶"); nextBtn.setStyle("-fx-background-color: #BFDBFE; -fx-text-fill: #1E40AF; -fx-background-radius: 30; -fx-pref-width: 50; -fx-pref-height: 50; -fx-font-weight: bold; -fx-cursor: hand;");
+            final int[] currentIndex = {0};
+            Runnable updateCarousel = () -> {
+                String path = allImagePaths.get(currentIndex[0]);
+                try {
+                    if (!path.startsWith("http") && !path.startsWith("file")) {
+                        File f = new File(path); if (!f.exists()) f = new File(System.getProperty("user.dir") + "/" + path);
+                        path = f.toURI().toString();
+                    }
+                    carouselImageView.setImage(new Image(path, 600, 400, true, true, true));
+                    counterLabel.setText((currentIndex[0] + 1) + " / " + allImagePaths.size());
+                } catch (Exception e) {}
+            };
+            prevBtn.setOnAction(e -> { currentIndex[0] = (currentIndex[0] - 1 + allImagePaths.size()) % allImagePaths.size(); updateCarousel.run(); });
+            nextBtn.setOnAction(e -> { currentIndex[0] = (currentIndex[0] + 1) % allImagePaths.size(); updateCarousel.run(); });
+            updateCarousel.run();
+            controls.getChildren().addAll(prevBtn, counterLabel, nextBtn);
+            albumBox.getChildren().addAll(albumTitle, imageContainer, controls);
+        }
+        return albumBox;
+    }
+
+    private VBox createStatCard(String title, String value, String bgColor, String textColor) {
+        VBox card = new VBox(5);
+        card.setAlignment(Pos.CENTER);
+        card.setPrefWidth(180);
+        card.setStyle("-fx-background-color: " + bgColor + "; -fx-background-radius: 12; -fx-padding: 15;");
+        
+        Label t = new Label(title);
+        t.setStyle("-fx-font-size: 11px; -fx-font-weight: bold; -fx-text-fill: " + textColor + "; -fx-opacity: 0.8;");
+        
+        Label v = new Label(value);
+        v.setStyle("-fx-font-size: 18px; -fx-font-weight: bold; -fx-text-fill: " + textColor + ";");
+        
+        card.getChildren().addAll(t, v);
+        return card;
+    }
+
+    private VBox createInfoSection(String title, String... lines) {
+        VBox section = new VBox(8);
+        Label head = new Label(title);
+        head.setStyle("-fx-font-size: 13px; -fx-font-weight: bold; -fx-text-fill: #64748B;");
+        section.getChildren().add(head);
+        for (String line : lines) {
+            Label l = new Label(line);
+            l.setStyle("-fx-font-size: 14px; -fx-text-fill: #1E293B;");
+            l.setWrapText(true);
+            section.getChildren().add(l);
+        }
+        return section;
+    }
+
+    private String getEventActivityTitle(Event event) {
+        if (event.getIdActivite() <= 0) return "DIVERS";
+        try {
+            String actSql = "SELECT titre FROM activites WHERE id = ?";
+            PreparedStatement actPs = connection.prepareStatement(actSql);
+            actPs.setInt(1, event.getIdActivite());
+            ResultSet actRs = actPs.executeQuery();
+            if (actRs.next()) return actRs.getString("titre").toUpperCase();
+        } catch (SQLException ignore) {}
+        return "ACTIVITÉ";
+    }
+
+    private void addDetailRow(GridPane grid, int row, String label, String value) {
+        Label lbl = new Label(label);
+        lbl.setStyle("-fx-font-weight: bold; -fx-text-fill: #475569;");
+        Label val = new Label(value != null ? value : "N/A");
+        val.setStyle("-fx-text-fill: #1E293B;");
+        grid.add(lbl, 0, row);
+        grid.add(val, 1, row);
+    }
+
+    private void addThumbnail(HBox container, String path) {
+        if (path == null || path.isBlank()) return;
+        try {
+            String finalPath = path;
+            if (!finalPath.startsWith("http") && !finalPath.startsWith("file")) {
+                // Try absolute path first
+                File f = new File(finalPath);
+                if (!f.exists()) {
+                    // Try relative to project root
+                    f = new File(System.getProperty("user.dir") + "/" + finalPath);
+                }
+                finalPath = f.toURI().toString();
+            }
+            Image img = new Image(finalPath, 200, 150, true, true, true);
+            img.errorProperty().addListener((obs, oldVal, newVal) -> {
+                if (newVal) System.err.println("Error loading image: " + path);
+            });
+            
+            ImageView iv = new ImageView(img);
+            iv.setStyle("-fx-effect: dropshadow(gaussian, rgba(0,0,0,0.15), 8, 0, 0, 3); -fx-background-radius: 8;");
+            
+            // Add click to enlarge? Maybe later.
+            container.getChildren().add(iv);
+        } catch (Exception e) {
+            System.err.println("Failed to add thumbnail for path: " + path + " -> " + e.getMessage());
+        }
+    }
+
     private void addReservationCard(Reservation reservation) {
         VBox card = new VBox();
-        card.setSpacing(10);
-        card.setStyle(
-                "-fx-border-color: #cbd5e1; -fx-border-width: 1; -fx-padding: 15; -fx-background-color: white; -fx-background-radius: 10; -fx-border-radius: 10; -fx-cursor: default;");
-        card.setPrefWidth(250);
+        card.setSpacing(12);
+        card.setStyle("-fx-background-color: white; -fx-background-radius: 15; -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.1), 10, 0, 0, 4); -fx-padding: 20;");
+        card.setPrefWidth(320);
+
+        // Header with status badge
+        HBox header = new HBox();
+        header.setAlignment(Pos.CENTER_LEFT);
+        header.setSpacing(10);
 
         Label titleLabel = new Label(reservation.getEvent() != null && reservation.getEvent().getOrganisateur() != null
                 ? reservation.getEvent().getOrganisateur()
                 : "Réservation #" + reservation.getId());
-        titleLabel.setStyle("-fx-font-size: 16px; -fx-font-weight: bold; -fx-text-fill: #0f766e;");
+        titleLabel.setStyle("-fx-font-size: 16px; -fx-font-weight: bold; -fx-text-fill: #1E293B;");
         titleLabel.setWrapText(true);
+        HBox.setHgrow(titleLabel, javafx.scene.layout.Priority.ALWAYS);
 
-        String eventText = "Événement: ";
-        if (reservation.getEvent() != null && reservation.getEvent().getDateDebut() != null) {
-            eventText += reservation.getEvent().getDateDebut().format(DateTimeFormatter.ofPattern("dd/MM/yyyy"));
+        String status = reservation.getStatut() != null ? reservation.getStatut().name().toLowerCase() : "en_attente";
+        Label statusBadge = new Label(normalizeReservationStatus(status));
+        String badgeStyle = "-fx-padding: 4 10; -fx-background-radius: 20; -fx-font-size: 11px; -fx-font-weight: bold; -fx-text-fill: white;";
+        
+        if (status.equals("accepte")) {
+            badgeStyle += "-fx-background-color: #10B981;"; // Emerald 500
+        } else if (status.equals("refuse")) {
+            badgeStyle += "-fx-background-color: #EF4444;"; // Red 500
         } else {
-            eventText += "Non défini";
+            badgeStyle += "-fx-background-color: #F59E0B;"; // Amber 500
         }
-        Label eventLabel = new Label(eventText);
-        eventLabel.setStyle("-fx-font-size: 12px; -fx-text-fill: #334155;");
+        statusBadge.setStyle(badgeStyle);
 
-        Label personsLabel = new Label("Personnes: " + reservation.getNombrePersonnes());
-        personsLabel.setStyle("-fx-font-size: 12px; -fx-text-fill: #334155;");
+        header.getChildren().addAll(titleLabel, statusBadge);
 
-        Label totalLabel = new Label(
-                "Prix total: " + (reservation.getPrixTotal() != null ? reservation.getPrixTotal() : 0.0) + " TND");
-        totalLabel.setStyle("-fx-font-size: 12px; -fx-text-fill: #334155;");
+        // Info lines
+        VBox infoBox = new VBox(8);
+        
+        HBox lieuBox = new HBox(8);
+        lieuBox.setAlignment(Pos.CENTER_LEFT);
+        Label lieuIcon = new Label("📍");
+        Label lieuText = new Label(reservation.getEvent() != null && reservation.getEvent().getLieu() != null ? reservation.getEvent().getLieu() : "Lieu non défini");
+        lieuText.setStyle("-fx-text-fill: #64748B; -fx-font-size: 13px;");
+        lieuBox.getChildren().addAll(lieuIcon, lieuText);
 
-        Label statusLabel = new Label("Statut: " + normalizeReservationStatus(
-                reservation.getStatut() != null ? reservation.getStatut().name() : null));
-        statusLabel.setStyle("-fx-font-size: 12px; -fx-font-weight: bold; -fx-text-fill: #92400e;");
+        HBox dateBox = new HBox(8);
+        dateBox.setAlignment(Pos.CENTER_LEFT);
+        Label dateIcon = new Label("📅");
+        String dateStr = "Non défini";
+        if (reservation.getEvent() != null && reservation.getEvent().getDateDebut() != null) {
+            dateStr = reservation.getEvent().getDateDebut().format(DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm"));
+        }
+        Label dateText = new Label(dateStr);
+        dateText.setStyle("-fx-text-fill: #64748B; -fx-font-size: 13px;");
+        dateBox.getChildren().addAll(dateIcon, dateText);
 
-        card.getChildren().addAll(titleLabel, eventLabel, personsLabel, totalLabel, statusLabel);
+        HBox paxBox = new HBox(8);
+        paxBox.setAlignment(Pos.CENTER_LEFT);
+        Label paxIcon = new Label("👥");
+        Label paxText = new Label(reservation.getNombrePersonnes() + " participant(s)");
+        paxText.setStyle("-fx-text-fill: #64748B; -fx-font-size: 13px;");
+        paxBox.getChildren().addAll(paxIcon, paxText);
+
+        infoBox.getChildren().addAll(lieuBox, dateBox, paxBox);
+
+        Separator sep = new Separator();
+        sep.setStyle("-fx-padding: 5 0;");
+
+        HBox footer = new HBox();
+        footer.setAlignment(Pos.CENTER_LEFT);
+        Label totalTitle = new Label("Total payé");
+        totalTitle.setStyle("-fx-text-fill: #94A3B8; -fx-font-size: 12px;");
+        HBox.setHgrow(totalTitle, javafx.scene.layout.Priority.ALWAYS);
+
+        Label totalValue = new Label(String.format("%.2f TND", reservation.getPrixTotal() != null ? reservation.getPrixTotal() : 0.0));
+        totalValue.setStyle("-fx-font-size: 18px; -fx-font-weight: bold; -fx-text-fill: #0F172A;");
+
+        Button viewBtn = new Button("Détails");
+        viewBtn.setStyle("-fx-background-color: #F1F5F9; -fx-text-fill: #475569; -fx-padding: 5 15; -fx-background-radius: 8; -fx-cursor: hand; -fx-font-weight: bold;");
+        viewBtn.setOnAction(e -> showReservationDetails(reservation));
+
+        footer.getChildren().addAll(totalTitle, totalValue, viewBtn);
+        HBox.setMargin(viewBtn, new javafx.geometry.Insets(0, 0, 0, 10));
+
+        card.getChildren().addAll(header, infoBox, sep, footer);
         flowReservations.getChildren().add(card);
+    }
+
+    private void showReservationDetails(Reservation reservation) {
+        try {
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/com/example/pi_dev/events/ReservationDetails.fxml"));
+            AnchorPane root = loader.load();
+            
+            ReservationDetailsController controller = loader.getController();
+            controller.setReservationData(reservation);
+            
+            Stage stage = new Stage();
+            stage.setTitle("Détails de la réservation");
+            stage.initModality(javafx.stage.Modality.APPLICATION_MODAL);
+            stage.setScene(new javafx.scene.Scene(root));
+            stage.show();
+        } catch (IOException e) {
+            System.err.println("Erreur ouverture détails réservation: " + e.getMessage());
+            e.printStackTrace();
+        }
     }
 
     private VBox createReservationInfoCard(String text) {
@@ -838,7 +1454,8 @@ public class catalogueController {
             stage.centerOnScreen();
             stage.show();
         } catch (IOException e) {
-            showAlert("Erreur lors de l'ouverture de la réservation");
+            e.printStackTrace();
+            showAlert("Erreur lors de l'ouverture de la réservation: " + e.getMessage());
         }
     }
 

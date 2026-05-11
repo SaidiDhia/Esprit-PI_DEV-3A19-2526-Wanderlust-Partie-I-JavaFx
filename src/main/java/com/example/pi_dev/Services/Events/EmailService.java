@@ -12,13 +12,10 @@ public class EmailService {
     private static final String EMAIL_FROM = "wanderlusttunisie582@gmail.com";
     private static final String EMAIL_PASSWORD = "nwes wdeh bwet ctsz";
 
-    private GoogleMapsService mapsService;
+
     private boolean isInitialized = false;
 
-    public EmailService() {
-        this.mapsService = new GoogleMapsService();
-        this.mapsService.initialize();
-    }
+
 
     public boolean initialize() {
         try {
@@ -151,8 +148,6 @@ public class EmailService {
             if (event.getLieu() != null && !event.getLieu().trim().isEmpty()) {
                 content.append("<p><span class='info-label'>Lieu:</span> <span class='info-value'>").append(event.getLieu()).append("</span></p>");
 
-                String mapsLink = generateMapsLink(event.getLieu());
-                content.append("<p><span class='info-label'>🗺️ Itinéraire:</span> <a href='").append(mapsLink).append("' class='maps-button'>Voir sur Google Maps</a></p>");
             }
 
             if (event.getDateDebut() != null) {
@@ -199,32 +194,7 @@ public class EmailService {
         return content.toString();
     }
 
-    private String generateMapsLink(String location) {
-        try {
-            var coordsFuture = mapsService.getCoordinates(location);
-            var coords = coordsFuture.get();
 
-            if (coords != null) {
-                return String.format(
-                        "https://www.google.com/maps/search/?api=1&query=%.6f,%.6f",
-                        coords.getLatitude(),
-                        coords.getLongitude()
-                );
-            } else {
-                return "https://www.google.com/maps/search/?api=1&query=" +
-                        java.net.URLEncoder.encode(location, "UTF-8");
-            }
-
-        } catch (Exception e) {
-            System.err.println("Erreur lors de la génération du lien Maps: " + e.getMessage());
-            try {
-                return "https://www.google.com/maps/search/?api=1&query=" +
-                        java.net.URLEncoder.encode(location, "UTF-8");
-            } catch (Exception ex) {
-                return "https://www.google.com/maps";
-            }
-        }
-    }
 
     public boolean sendReminderEmail(Reservation reservation) {
         if (!isInitialized) {

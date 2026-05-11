@@ -14,9 +14,11 @@
 <?import javafx.scene.layout.HBox?>
 <?import javafx.scene.layout.Region?>
 <?import javafx.scene.layout.VBox?>
+<?import javafx.scene.web.WebView?>
 
-<VBox style="-fx-background-color: linear-gradient(to bottom, #CAD4DC, #ffffff); -fx-padding: 0;" xmlns="http://javafx.com/javafx/25" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.example.pi_dev.Controllers.Events.EventController">
+<VBox style="-fx-background-color: #F1F5F9; -fx-padding: 0;" xmlns="http://javafx.com/javafx/25" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.example.pi_dev.Controllers.Events.EventController">
    <children>
+      <!-- Header -->
       <HBox alignment="CENTER_LEFT" style="-fx-background-color: linear-gradient(to bottom right, #86A7BF, #2D70B3); -fx-padding: 20; -fx-spacing: 20;">
          <children>
             <ImageView fitHeight="50" fitWidth="50">
@@ -27,223 +29,203 @@
             <VBox spacing="5">
                <children>
                   <Label style="-fx-font-size: 24px; -fx-font-weight: bold; -fx-text-fill: white;" text="Wanderlust" />
-                  <Label style="-fx-font-size: 14px; -fx-text-fill: #86A7BF;" text="Organiser un événement" />
+                  <Label style="-fx-font-size: 14px; -fx-text-fill: #CAD4DC;" text="Organiser un événement" />
                </children>
             </VBox>
             <Region HBox.hgrow="ALWAYS" />
             <HBox alignment="CENTER" spacing="15">
                <children>
-                  <Button style="-fx-background-color: #1A4E85; -fx-text-fill: white; -fx-background-radius: 6; -fx-padding: 8 16; -fx-font-size: 14px; -fx-cursor: hand;" text="🎯 Organisation" />
-                  <Button fx:id="adminDashboardButton" onAction="#ouvrirAdminApprovalDashboard" style="-fx-background-color: #111827; -fx-text-fill: white; -fx-background-radius: 6; -fx-padding: 8 16; -fx-font-size: 14px; -fx-cursor: hand;" text="🛡️ Validation admin" />
+                  <Button fx:id="adminDashboardButton" onAction="#ouvrirAdminApprovalDashboard" style="-fx-background-color: #111827; -fx-text-fill: white; -fx-background-radius: 8; -fx-padding: 8 16; -fx-font-size: 13px; -fx-cursor: hand;" text="🛡️ Admin" />
                </children>
             </HBox>
          </children>
       </HBox>
+
       <ScrollPane fitToWidth="true" hbarPolicy="NEVER" style="-fx-background-color: transparent; -fx-border-color: transparent;" VBox.vgrow="ALWAYS">
          <content>
-            <VBox maxWidth="1000" spacing="30" style="-fx-padding: 40;">
+            <VBox maxWidth="900" spacing="20" style="-fx-padding: 30;">
                <children>
-                  <VBox alignment="CENTER" spacing="20" style="-fx-background-color: linear-gradient(to bottom right, #1A4E85, #0F2C4F); -fx-background-radius: 15; -fx-padding: 40;">
+
+                  <!-- Title -->
+                  <Label style="-fx-font-size: 28px; -fx-font-weight: bold; -fx-text-fill: #0F2C4F;" text="Créer un événement" />
+
+                  <!-- Section: Lieu -->
+                  <VBox spacing="15" style="-fx-background-color: white; -fx-background-radius: 12; -fx-padding: 25; -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.06), 10, 0, 0, 4);">
                      <children>
-                        <Label style="-fx-font-size: 48px; -fx-text-fill: white;" text="🎯" />
-                        <Label style="-fx-font-size: 28px; -fx-font-weight: bold; -fx-text-fill: white;" text="Créez votre propre aventure" />
-                        <Label style="-fx-font-size: 16px; -fx-text-fill: #CAD4DC; -fx-alignment: center; -fx-wrap-text: true;" text="Organisez un événement unique et partagez votre passion pour la nature tunisienne" />
-                     </children>
-                  </VBox>
-                  <VBox spacing="30" style="-fx-background-color: white; -fx-background-radius: 15; -fx-border-color: #e0e0e0; -fx-border-width: 1; -fx-padding: 40;">
-                     <children>
-                        <Label style="-fx-font-size: 24px; -fx-font-weight: bold; -fx-text-fill: #0F2C4F;" text="📋 Informations de l'événement" />
-                        <Separator style="-fx-background-color: #e0e0e0;" />
-                        <VBox spacing="15">
+                        <Label style="-fx-font-size: 18px; -fx-font-weight: bold; -fx-text-fill: #0F2C4F;" text="Lieu" />
+                        <Separator style="-fx-background-color: #e2e8f0;" />
+                        <VBox spacing="8">
                            <children>
-                              <Label style="-fx-font-size: 16px; -fx-font-weight: bold; -fx-text-fill: #1A4E85;" text="🌿 Activités concernées *" />
-                              <VBox spacing="10">
-                                 <children>
-                                    <HBox alignment="CENTER_LEFT" spacing="15">
-                                       <children>
-                                          <ComboBox fx:id="activiteCombo" prefWidth="300" promptText="Sélectionnez une activité" style="-fx-border-color: #2D70B3; -fx-border-radius: 8; -fx-background-radius: 8; -fx-padding: 12 16; -fx-font-size: 14px;" HBox.hgrow="ALWAYS" />
-                                          <Button fx:id="ajouterActiviteButton" onAction="#ajouterActivite" style="-fx-background-color: #4CAF50; -fx-text-fill: white; -fx-background-radius: 8; -fx-border-radius: 8; -fx-padding: 12 20; -fx-font-size: 14px; -fx-cursor: hand;" text="➕ Ajouter" />
-                                       </children>
-                                    </HBox>
-                                    <VBox fx:id="activitesSelectionneesContainer" spacing="8" style="-fx-background-color: #f8f9fa; -fx-background-radius: 8; -fx-padding: 15;">
-                                       <children>
-                                          <Label style="-fx-font-size: 12px; -fx-text-fill: #666; -fx-font-style: italic;" text="Aucune activité sélectionnée" />
-                                       </children>
-                                    </VBox>
-                                 </children>
-                              </VBox>
-                              <Label style="-fx-font-size: 12px; -fx-text-fill: #999999; -fx-font-style: italic;" text="* Vous pouvez ajouter plusieurs activités pour cet événement" />
-                           </children>
-                        </VBox>
-                        <VBox spacing="20">
-                           <children>
-                              <Label style="-fx-font-size: 16px; -fx-font-weight: bold; -fx-text-fill: #1A4E85;" text="📍 Détails de l'événement" />
-                              <VBox spacing="8">
-                                 <children>
-                                    <Label style="-fx-font-size: 14px; -fx-font-weight: bold; -fx-text-fill: #0F2C4F;" text="Lieu de l'événement *" />
-                                    <TextField fx:id="lieuField" promptText="Lieu de l'événement" style="-fx-border-color: #2D70B3; -fx-border-radius: 8; -fx-background-radius: 8; -fx-padding: 12 16; -fx-font-size: 14px;" />
-                                 </children>
-                              </VBox>
-                              <VBox spacing="8">
-                                 <children>
-                                    <Label style="-fx-font-size: 14px; -fx-font-weight: bold; -fx-text-fill: #0F2C4F;" text="Description de l'événement" />
-                                    <TextArea fx:id="descriptionField" prefHeight="80" promptText="Décrivez votre événement en détail..." style="-fx-border-color: #2D70B3; -fx-border-radius: 8; -fx-background-radius: 8; -fx-padding: 12 16; -fx-font-size: 14px; -fx-wrap-text: true;" />
-                                 </children>
-                              </VBox>
-                              <HBox spacing="20">
-                                 <children>
-                                    <VBox spacing="8" HBox.hgrow="ALWAYS">
-                                       <children>
-                                          <Label style="-fx-font-size: 14px; -fx-font-weight: bold; -fx-text-fill: #0F2C4F;" text="Date de début *" />
-                                          <DatePicker fx:id="dateDebutPicker" style="-fx-border-color: #2D70B3; -fx-border-radius: 8; -fx-background-radius: 8; -fx-padding: 12 16; -fx-font-size: 14px;" />
-                                       </children>
-                                    </VBox>
-                                    <VBox spacing="8" HBox.hgrow="ALWAYS">
-                                       <children>
-                                          <Label style="-fx-font-size: 14px; -fx-font-weight: bold; -fx-text-fill: #0F2C4F;" text="Date de fin *" />
-                                          <DatePicker fx:id="dateFinPicker" style="-fx-border-color: #2D70B3; -fx-border-radius: 8; -fx-background-radius: 8; -fx-padding: 12 16; -fx-font-size: 14px;" />
-                                       </children>
-                                    </VBox>
-                                 </children>
-                              </HBox>
-                              <HBox spacing="20">
-                                 <children>
-                                    <VBox spacing="8" HBox.hgrow="ALWAYS">
-                                       <children>
-                                          <Label style="-fx-font-size: 14px; -fx-font-weight: bold; -fx-text-fill: #0F2C4F;" text="Prix par personne (TND) *" />
-                                          <TextField fx:id="prixField" promptText="Ex: 450" style="-fx-border-color: #2D70B3; -fx-border-radius: 8; -fx-background-radius: 8; -fx-padding: 12 16; -fx-font-size: 14px;" />
-                                       </children>
-                                    </VBox>
-                                    <VBox spacing="8" HBox.hgrow="ALWAYS">
-                                       <children>
-                                          <Label style="-fx-font-size: 14px; -fx-font-weight: bold; -fx-text-fill: #0F2C4F;" text="Capacité maximale *" />
-                                          <TextField fx:id="capaciteField" promptText="Ex: 12" style="-fx-border-color: #2D70B3; -fx-border-radius: 8; -fx-background-radius: 8; -fx-padding: 12 16; -fx-font-size: 14px;" />
-                                       </children>
-                                    </VBox>
-                                 </children>
-                              </HBox>
-                           </children>
-                        </VBox>
-                        <VBox spacing="20">
-                           <children>
-                              <Label style="-fx-font-size: 16px; -fx-font-weight: bold; -fx-text-fill: #1A4E85;" text="📝 Informations complémentaires" />
-                              <VBox spacing="8">
-                                 <children>
-                                    <Label style="-fx-font-size: 14px; -fx-font-weight: bold; -fx-text-fill: #0F2C4F;" text="Équipement nécessaire" />
-                                    <TextArea fx:id="equipementField" prefHeight="80" promptText="Listez l'équipement que les participants doivent apporter..." style="-fx-border-color: #2D70B3; -fx-border-radius: 8; -fx-background-radius: 8; -fx-padding: 12 16; -fx-font-size: 14px; -fx-wrap-text: true;" />
-                                 </children>
-                              </VBox>
-                              <HBox spacing="20">
-                                 <children>
-                                    <VBox spacing="8" HBox.hgrow="ALWAYS">
-                                       <children>
-                                          <Label style="-fx-font-size: 14px; -fx-font-weight: bold; -fx-text-fill: #0F2C4F;" text="Votre nom" />
-                                          <TextField fx:id="nomorgField" promptText="Votre nom complet" style="-fx-border-color: #2D70B3; -fx-border-radius: 8; -fx-background-radius: 8; -fx-padding: 12 16; -fx-font-size: 14px;" />
-                                       </children>
-                                    </VBox>
-                                    <VBox spacing="8" HBox.hgrow="ALWAYS">
-                                       <children>
-                                          <Label style="-fx-font-size: 14px; -fx-font-weight: bold; -fx-text-fill: #0F2C4F;" text="Téléphone de contact" />
-                                          <TextField fx:id="telephoneorgField" promptText="+216 XX XXX XXX" style="-fx-border-color: #2D70B3; -fx-border-radius: 8; -fx-background-radius: 8; -fx-padding: 12 16; -fx-font-size: 14px;" />
-                                       </children>
-                                    </VBox>
-                                 </children>
-                              </HBox>
-                              <VBox spacing="8">
-                                 <children>
-                                    <VBox spacing="8">
-                                       <children>
-                                          <Label style="-fx-font-size: 14px; -fx-font-weight: bold; -fx-text-fill: #0F2C4F;" text="Email de contact" />
-                                          <TextField fx:id="emailField" promptText="Email de l'organisateur" style="-fx-border-color: #2D70B3; -fx-border-radius: 8; -fx-background-radius: 8; -fx-padding: 12 16; -fx-font-size: 14px;" />
-                                       </children>
-                                    </VBox>
-                                    <Label style="-fx-font-size: 14px; -fx-font-weight: bold; -fx-text-fill: #0F2C4F;" text="URL vidéo YouTube (optionnel)" />
-                                    <TextField fx:id="videoYoutubeField" promptText="https://www.youtube.com/watch?v=..." style="-fx-border-color: #2D70B3; -fx-border-radius: 8; -fx-background-radius: 8; -fx-padding: 12 16; -fx-font-size: 14px;" />
-                                 </children>
-                              </VBox>
-                              <VBox spacing="8">
-                                 <children>
-                                    <Label style="-fx-font-size: 14px; -fx-font-weight: bold; -fx-text-fill: #0F2C4F;" text="Image de l'événement" />
-                                    <HBox spacing="10">
-                                       <children>
-                                          <ImageView fx:id="imagePrincipaleView" fitHeight="100" fitWidth="100" preserveRatio="true" style="-fx-border-color: #2D70B3; -fx-border-radius: 8; -fx-background-color: #f5f5f5;" />
-                                          <VBox spacing="5">
-                                             <children>
-                                                <Button fx:id="importerImageButton" onAction="#importerImage" style="-fx-background-color: #4CAF50; -fx-text-fill: white; -fx-background-radius: 8; -fx-border-radius: 8; -fx-padding: 10 20; -fx-font-size: 14px; -fx-cursor: hand;" text="📷 Image principale" />
-                                                <Label fx:id="imageStatusLabel" style="-fx-font-size: 12px; -fx-text-fill: #666;" text="Aucune image sélectionnée" />
-                                             </children>
-                                          </VBox>
-                                       </children>
-                                    </HBox>
-                                 </children>
-                              </VBox>
-                              <VBox spacing="8">
-                                 <children>
-                                    <HBox alignment="CENTER_LEFT" spacing="15">
-                                       <children>
-                                          <Label style="-fx-font-size: 14px; -fx-font-weight: bold; -fx-text-fill: #0F2C4F;" text="Photos supplémentaires" />
-                                          <Button fx:id="ajouterPhotoButton" onAction="#ajouterPhoto" style="-fx-background-color: #2196F3; -fx-text-fill: white; -fx-background-radius: 8; -fx-border-radius: 8; -fx-padding: 8 16; -fx-font-size: 14px; -fx-cursor: hand;" text="➕ Ajouter" />
-                                       </children>
-                                    </HBox>
-                                    <ScrollPane fitToWidth="true" hbarPolicy="NEVER" prefHeight="100" style="-fx-background-color: #f9f9f9; -fx-border-color: #e0e0e0; -fx-border-radius: 8;">
-                                       <content>
-                                          <HBox fx:id="photosContainer" alignment="CENTER_LEFT" spacing="10" style="-fx-padding: 10;">
-                                             <!-- Les photos seront ajoutées dynamiquement ici -->
-                                          </HBox>
-                                       </content>
-                                    </ScrollPane>
-                                 </children>
-                              </VBox>
-                        </children>
-                        </VBox>
-                        <VBox spacing="15" style="-fx-background-color: #f8faf8; -fx-background-radius: 10; -fx-padding: 25;">
-                           <children>
-                              <Label style="-fx-font-size: 16px; -fx-font-weight: bold; -fx-text-fill: #1A4E85;" text="📋 Règles et conditions" />
-                              <VBox spacing="10">
-                                 <children>
-                                    <CheckBox fx:id="check1" style="-fx-font-size: 14px; -fx-text-fill: #333333;" text="Je m'engage à respecter les normes de sécurité" />
-                                    <CheckBox fx:id="check2" style="-fx-font-size: 14px; -fx-text-fill: #333333;" text="Je confirme être qualifié pour encadrer cette activité" />
-                                    <CheckBox fx:id="check3" style="-fx-font-size: 14px; -fx-text-fill: #333333;" text="J'accepte que Wanderlust vérifie les informations fournies" />
-                                    <CheckBox fx:id="check4" style="-fx-font-size: 14px; -fx-text-fill: #333333;" text="Je m'engage à informer les participants de tous les risques" />
-                                 </children>
-                              </VBox>
-                           </children>
-                        </VBox>
-                        <VBox spacing="15">
-                           <children>
-                              <Button fx:id="ajouterEventButton" maxWidth="Infinity" onAction="#ajouterEvent" style="-fx-background-color: linear-gradient(to bottom right, #1A4E85, #0F2C4F); -fx-text-fill: white; -fx-background-radius: 25; -fx-border-radius: 25; -fx-padding: 15 30; -fx-font-size: 16px; -fx-font-weight: bold; -fx-cursor: hand;" text="🎉 Soumettre l'événement" />
-                              <Button fx:id="annulerEventButton" maxWidth="Infinity" onAction="#annulerEvent" style="-fx-background-color: #ffebee; -fx-text-fill: #cc6666; -fx-background-radius: 25; -fx-border-radius: 25; -fx-padding: 12 25; -fx-font-size: 14px; -fx-cursor: hand;" text="❌ Annuler" />
-                           </children>
-                        </VBox>
-                        <VBox spacing="12" style="-fx-background-color: #e8f5e8; -fx-background-radius: 10; -fx-padding: 20;">
-                           <children>
-                              <Label style="-fx-font-size: 16px; -fx-font-weight: bold; -fx-text-fill: #1A4E85;" text="⏱️ Processus de validation" />
-                              <VBox spacing="8">
-                                 <children>
-                                    <HBox alignment="TOP_LEFT" spacing="10">
-                                       <children>
-                                          <Label style="-fx-font-size: 14px; -fx-font-weight: bold; -fx-text-fill: #2D70B3;" text="1️⃣" />
-                                          <Label style="-fx-font-size: 12px; -fx-text-fill: #333333; -fx-wrap-text: true;" text="Soumission de votre événement (24-48h pour validation)" />
-                                       </children>
-                                    </HBox>
-                                    <HBox alignment="TOP_LEFT" spacing="10">
-                                       <children>
-                                          <Label style="-fx-font-size: 14px; -fx-font-weight: bold; -fx-text-fill: #2D70B3;" text="2️⃣" />
-                                          <Label style="-fx-font-size: 12px; -fx-text-fill: #333333; -fx-wrap-text: true;" text="Vérification par notre équipe (sécurité, qualité, conformité)" />
-                                       </children>
-                                    </HBox>
-                                    <HBox alignment="TOP_LEFT" spacing="10">
-                                       <children>
-                                          <Label style="-fx-font-size: 14px; -fx-font-weight: bold; -fx-text-fill: #2D70B3;" text="3️⃣" />
-                                          <Label style="-fx-font-size: 12px; -fx-text-fill: #333333; -fx-wrap-text: true;" text="Publication dans le catalogue et ouverture des réservations" />
-                                       </children>
-                                    </HBox>
-                                 </children>
-                              </VBox>
+                              <Label style="-fx-font-size: 14px; -fx-font-weight: bold; -fx-text-fill: #334155;" text="Lieu" />
+                              <TextField fx:id="lieuField" promptText="Entrez une adresse..." style="-fx-background-color: #F8FAFC; -fx-border-color: #CBD5E1; -fx-border-radius: 8; -fx-background-radius: 8; -fx-padding: 12 15; -fx-font-size: 14px;" />
+                              <Label style="-fx-font-size: 12px; -fx-text-fill: #94A3B8; -fx-font-style: italic;" text="Tapez l'adresse — la carte se positionnera automatiquement." />
+                              <WebView fx:id="mapWebView" prefHeight="280" />
                            </children>
                         </VBox>
                      </children>
                   </VBox>
+
+                  <!-- Section: Dates et horaires -->
+                  <VBox spacing="15" style="-fx-background-color: white; -fx-background-radius: 12; -fx-padding: 25; -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.06), 10, 0, 0, 4);">
+                     <children>
+                        <Label style="-fx-font-size: 18px; -fx-font-weight: bold; -fx-text-fill: #0F2C4F;" text="Dates et horaires" />
+                        <Separator style="-fx-background-color: #e2e8f0;" />
+                        <HBox spacing="20">
+                           <children>
+                              <VBox spacing="6" HBox.hgrow="ALWAYS">
+                                 <children>
+                                    <Label style="-fx-font-size: 14px; -fx-font-weight: bold; -fx-text-fill: #334155;" text="Date et heure de début" />
+                                    <DatePicker fx:id="dateDebutPicker" maxWidth="Infinity" style="-fx-background-color: #F8FAFC; -fx-border-color: #CBD5E1; -fx-border-radius: 8; -fx-background-radius: 8;" />
+                                    <TextField fx:id="heureDebutField" promptText="HH:mm (ex: 09:00)" maxWidth="200" style="-fx-background-color: #F8FAFC; -fx-border-color: #CBD5E1; -fx-border-radius: 8; -fx-background-radius: 8; -fx-padding: 10 15; -fx-font-size: 13px;" />
+                                 </children>
+                              </VBox>
+                              <VBox spacing="6" HBox.hgrow="ALWAYS">
+                                 <children>
+                                    <Label style="-fx-font-size: 14px; -fx-font-weight: bold; -fx-text-fill: #334155;" text="Date et heure de fin" />
+                                    <DatePicker fx:id="dateFinPicker" maxWidth="Infinity" style="-fx-background-color: #F8FAFC; -fx-border-color: #CBD5E1; -fx-border-radius: 8; -fx-background-radius: 8;" />
+                                    <TextField fx:id="heureFinField" promptText="HH:mm (ex: 18:00)" maxWidth="200" style="-fx-background-color: #F8FAFC; -fx-border-color: #CBD5E1; -fx-border-radius: 8; -fx-background-radius: 8; -fx-padding: 10 15; -fx-font-size: 13px;" />
+                                 </children>
+                              </VBox>
+                           </children>
+                        </HBox>
+                        <VBox spacing="6">
+                           <children>
+                              <Label style="-fx-font-size: 14px; -fx-font-weight: bold; -fx-text-fill: #334155;" text="Date limite d'inscription" />
+                              <DatePicker fx:id="dateLimitePicker" maxWidth="420" style="-fx-background-color: #F8FAFC; -fx-border-color: #CBD5E1; -fx-border-radius: 8; -fx-background-radius: 8;" />
+                           </children>
+                        </VBox>
+                     </children>
+                  </VBox>
+
+                  <!-- Section: Activités associées -->
+                  <VBox spacing="15" style="-fx-background-color: white; -fx-background-radius: 12; -fx-padding: 25; -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.06), 10, 0, 0, 4);">
+                     <children>
+                        <Label style="-fx-font-size: 18px; -fx-font-weight: bold; -fx-text-fill: #0F2C4F;" text="Activités associées" />
+                        <Separator style="-fx-background-color: #e2e8f0;" />
+                        <HBox alignment="CENTER_LEFT" spacing="15">
+                           <children>
+                              <ComboBox fx:id="activiteCombo" prefWidth="360" promptText="Sélectionnez une activité" style="-fx-background-color: #F8FAFC; -fx-border-color: #CBD5E1; -fx-border-radius: 8; -fx-background-radius: 8; -fx-font-size: 14px;" />
+                              <Button fx:id="ajouterActiviteButton" onAction="#ajouterActivite" style="-fx-background-color: #2D70B3; -fx-text-fill: white; -fx-background-radius: 8; -fx-padding: 11 20; -fx-font-size: 14px; -fx-font-weight: bold; -fx-cursor: hand;" text="➕ Ajouter des activités" />
+                           </children>
+                        </HBox>
+                        <VBox fx:id="activitesSelectionneesContainer" spacing="8" style="-fx-background-color: #F8FAFC; -fx-background-radius: 8; -fx-padding: 12; -fx-border-color: #E2E8F0; -fx-border-width: 1; -fx-border-radius: 8;">
+                           <children>
+                              <Label style="-fx-font-size: 13px; -fx-text-fill: #94A3B8; -fx-font-style: italic;" text="Aucune activité sélectionnée" />
+                           </children>
+                        </VBox>
+                     </children>
+                  </VBox>
+
+                  <!-- Section: Informations pratiques -->
+                  <VBox spacing="15" style="-fx-background-color: white; -fx-background-radius: 12; -fx-padding: 25; -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.06), 10, 0, 0, 4);">
+                     <children>
+                        <Label style="-fx-font-size: 18px; -fx-font-weight: bold; -fx-text-fill: #0F2C4F;" text="Informations pratiques" />
+                        <Separator style="-fx-background-color: #e2e8f0;" />
+                        <HBox spacing="20">
+                           <children>
+                              <VBox spacing="6" HBox.hgrow="ALWAYS">
+                                 <children>
+                                    <Label style="-fx-font-size: 14px; -fx-font-weight: bold; -fx-text-fill: #334155;" text="Prix (TND)" />
+                                    <TextField fx:id="prixField" promptText="0.00" style="-fx-background-color: #F8FAFC; -fx-border-color: #CBD5E1; -fx-border-radius: 8; -fx-background-radius: 8; -fx-padding: 12 15; -fx-font-size: 14px;" />
+                                 </children>
+                              </VBox>
+                              <VBox spacing="6" HBox.hgrow="ALWAYS">
+                                 <children>
+                                    <Label style="-fx-font-size: 14px; -fx-font-weight: bold; -fx-text-fill: #334155;" text="Capacité maximale" />
+                                    <TextField fx:id="capaciteField" promptText="Nombre de places" style="-fx-background-color: #F8FAFC; -fx-border-color: #CBD5E1; -fx-border-radius: 8; -fx-background-radius: 8; -fx-padding: 12 15; -fx-font-size: 14px;" />
+                                 </children>
+                              </VBox>
+                           </children>
+                        </HBox>
+                        <VBox spacing="6">
+                           <children>
+                              <Label style="-fx-font-size: 14px; -fx-font-weight: bold; -fx-text-fill: #334155;" text="Organisateur" />
+                              <TextField fx:id="nomorgField" promptText="Nom de l'organisateur" style="-fx-background-color: #F8FAFC; -fx-border-color: #CBD5E1; -fx-border-radius: 8; -fx-background-radius: 8; -fx-padding: 12 15; -fx-font-size: 14px;" />
+                           </children>
+                        </VBox>
+                        <HBox spacing="20">
+                           <children>
+                              <VBox spacing="6" HBox.hgrow="ALWAYS">
+                                 <children>
+                                    <Label style="-fx-font-size: 14px; -fx-font-weight: bold; -fx-text-fill: #334155;" text="Téléphone" />
+                                    <TextField fx:id="telephoneorgField" promptText="+216 XX XXX XXX" style="-fx-background-color: #F8FAFC; -fx-border-color: #CBD5E1; -fx-border-radius: 8; -fx-background-radius: 8; -fx-padding: 12 15; -fx-font-size: 14px;" />
+                                 </children>
+                              </VBox>
+                              <VBox spacing="6" HBox.hgrow="ALWAYS">
+                                 <children>
+                                    <Label style="-fx-font-size: 14px; -fx-font-weight: bold; -fx-text-fill: #334155;" text="Email" />
+                                    <TextField fx:id="emailField" promptText="contact@exemple.com" style="-fx-background-color: #F8FAFC; -fx-border-color: #CBD5E1; -fx-border-radius: 8; -fx-background-radius: 8; -fx-padding: 12 15; -fx-font-size: 14px;" />
+                                 </children>
+                              </VBox>
+                           </children>
+                        </HBox>
+                     </children>
+                  </VBox>
+
+                  <!-- Section: Médias -->
+                  <VBox spacing="15" style="-fx-background-color: white; -fx-background-radius: 12; -fx-padding: 25; -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.06), 10, 0, 0, 4);">
+                     <children>
+                        <Label style="-fx-font-size: 18px; -fx-font-weight: bold; -fx-text-fill: #0F2C4F;" text="Médias" />
+                        <Separator style="-fx-background-color: #e2e8f0;" />
+                        <VBox spacing="8">
+                           <children>
+                              <Label style="-fx-font-size: 14px; -fx-font-weight: bold; -fx-text-fill: #334155;" text="Images" />
+                              <VBox fx:id="imageDropZone" alignment="CENTER" spacing="10" onMouseClicked="#importerImages" style="-fx-background-color: #F8FAFC; -fx-border-color: #CBD5E1; -fx-border-style: dashed; -fx-border-radius: 10; -fx-border-width: 2; -fx-padding: 30; -fx-cursor: hand; -fx-background-radius: 10;">
+                                 <children>
+                                    <Label style="-fx-font-size: 32px;" text="🖼️" />
+                                    <Label style="-fx-font-size: 14px; -fx-text-fill: #2D70B3; -fx-font-weight: bold;" text="Cliquez ou glissez vos images ici" />
+                                    <Label style="-fx-font-size: 12px; -fx-text-fill: #94A3B8;" text="JPG, PNG, WEBP — max 5 Mo par image" />
+                                 </children>
+                              </VBox>
+                              <Label style="-fx-font-size: 12px; -fx-text-fill: #2D70B3; -fx-font-style: italic;" text="Conseil : Vous pouvez sélectionner plusieurs images en même temps" />
+                              <ScrollPane fx:id="photosScrollPane" fitToWidth="true" hbarPolicy="NEVER" managed="false" prefHeight="110" style="-fx-background-color: transparent; -fx-border-color: transparent;" visible="false">
+                                 <content>
+                                    <HBox fx:id="photosContainer" alignment="CENTER_LEFT" spacing="10" style="-fx-padding: 5;" />
+                                 </content>
+                              </ScrollPane>
+                           </children>
+                        </VBox>
+                        <VBox spacing="6">
+                           <children>
+                              <Label style="-fx-font-size: 14px; -fx-font-weight: bold; -fx-text-fill: #334155;" text="Vidéo (optionnel)" />
+                              <TextField fx:id="videoYoutubeField" promptText="https://youtube.com/..." style="-fx-background-color: #F8FAFC; -fx-border-color: #CBD5E1; -fx-border-radius: 8; -fx-background-radius: 8; -fx-padding: 12 15; -fx-font-size: 14px;" />
+                              <Label style="-fx-font-size: 12px; -fx-text-fill: #94A3B8;" text="Lien YouTube, Vimeo... (optionnel)" />
+                           </children>
+                        </VBox>
+                     </children>
+                  </VBox>
+
+                  <!-- Section: Matériels nécessaires -->
+                  <VBox spacing="15" style="-fx-background-color: white; -fx-background-radius: 12; -fx-padding: 25; -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.06), 10, 0, 0, 4);">
+                     <children>
+                        <Label style="-fx-font-size: 18px; -fx-font-weight: bold; -fx-text-fill: #0F2C4F;" text="Matériels nécessaires" />
+                        <Separator style="-fx-background-color: #e2e8f0;" />
+                        <TextArea fx:id="equipementField" prefHeight="120" promptText="Listez les matériels requis..." style="-fx-background-color: #F8FAFC; -fx-border-color: #CBD5E1; -fx-border-radius: 8; -fx-background-radius: 8; -fx-padding: 12; -fx-font-size: 14px;" wrapText="true" />
+                        <Button fx:id="genererEquipementBtn" onAction="#genererEquipement" style="-fx-background-color: linear-gradient(to right, #F59E0B, #D97706); -fx-text-fill: white; -fx-background-radius: 25; -fx-padding: 12 25; -fx-font-size: 14px; -fx-font-weight: bold; -fx-cursor: hand; -fx-effect: dropshadow(gaussian, rgba(217,119,6,0.35), 8, 0, 0, 3);" text="✨ Générer les équipements avec l'IA" />
+                        <Label style="-fx-font-size: 12px; -fx-text-fill: #94A3B8;" text="💡 Basé sur les activités sélectionnées ci-dessus" />
+                     </children>
+                  </VBox>
+
+                  <!-- Section: Règles et conditions -->
+                  <VBox spacing="15" style="-fx-background-color: white; -fx-background-radius: 12; -fx-padding: 25; -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.06), 10, 0, 0, 4);">
+                     <children>
+                        <Label style="-fx-font-size: 18px; -fx-font-weight: bold; -fx-text-fill: #0F2C4F;" text="Règles et conditions" />
+                        <Separator style="-fx-background-color: #e2e8f0;" />
+                        <VBox spacing="12">
+                           <children>
+                              <CheckBox fx:id="check1" style="-fx-font-size: 14px; -fx-text-fill: #334155;" text="Je m'engage à respecter les normes de sécurité" />
+                              <CheckBox fx:id="check2" style="-fx-font-size: 14px; -fx-text-fill: #334155;" text="Je confirme être qualifié pour encadrer cet événement" />
+                              <CheckBox fx:id="check3" style="-fx-font-size: 14px; -fx-text-fill: #334155;" text="J'accepte que Wanderlust vérifie les informations fournies" />
+                              <CheckBox fx:id="check4" style="-fx-font-size: 14px; -fx-text-fill: #334155;" text="Je m'engage à informer les participants de tous les risques" />
+                           </children>
+                        </VBox>
+                     </children>
+                  </VBox>
+
+                  <!-- Buttons -->
+                  <Button fx:id="ajouterEventButton" maxWidth="Infinity" onAction="#ajouterEvent" style="-fx-background-color: #2D70B3; -fx-text-fill: white; -fx-background-radius: 12; -fx-padding: 16; -fx-font-size: 17px; -fx-font-weight: bold; -fx-cursor: hand; -fx-effect: dropshadow(gaussian, rgba(45,112,179,0.4), 10, 0, 0, 4);" text="Créer l'événement" />
+                  <Button fx:id="annulerEventButton" maxWidth="Infinity" onAction="#annulerEvent" style="-fx-background-color: white; -fx-text-fill: #64748B; -fx-border-color: #CBD5E1; -fx-border-width: 1; -fx-border-radius: 12; -fx-background-radius: 12; -fx-padding: 14; -fx-font-size: 15px; -fx-cursor: hand;" text="❌ Annuler" />
+
                </children>
             </VBox>
          </content>

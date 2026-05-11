@@ -40,46 +40,49 @@
             <content>
                 <VBox alignment="TOP_CENTER" maxWidth="700" style="-fx-padding: 40; -fx-spacing: 25;">
                     <children>
-                        <VBox spacing="20" style="-fx-background-color: white; -fx-background-radius: 12; -fx-border-color: #e0e0e0; -fx-border-width: 1; -fx-padding: 30;">
+                        <VBox spacing="25" style="-fx-background-color: white; -fx-background-radius: 16; -fx-padding: 40; -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.08), 20, 0, 0, 8);">
                             <children>
-                                <Label style="-fx-font-size: 20px; -fx-font-weight: bold; -fx-text-fill: #0F2C4F;" text="📋 Modifier l'activité" />
-                                <Separator style="-fx-background-color: #e0e0e0;" />
+                                <Label style="-fx-font-size: 24px; -fx-font-weight: bold; -fx-text-fill: #0F2C4F;" text="✨ Modifier l'activité" />
+                                <Separator style="-fx-background-color: #e2e8f0;" />
 
                                 <!-- Catégorie -->
                                 <VBox spacing="8">
                                     <children>
-                                        <Label style="-fx-font-size: 13px; -fx-font-weight: bold; -fx-text-fill: #0F2C4F;" text="Catégorie" />
-                                        <ComboBox fx:id="categorieCombo" prefHeight="40" prefWidth="300" promptText="Sélectionner une catégorie" style="-fx-border-color: #2D70B3; -fx-border-radius: 6; -fx-background-radius: 6; -fx-padding: 10 14; -fx-font-size: 13px;" />
+                                        <Label style="-fx-font-size: 14px; -fx-font-weight: bold; -fx-text-fill: #334155;" text="Catégorie" />
+                                        <ComboBox fx:id="categorieCombo" prefHeight="45" prefWidth="320" promptText="Sélectionner une catégorie" style="-fx-background-color: #F8FAFC; -fx-border-color: #CBD5E1; -fx-border-radius: 8; -fx-background-radius: 8; -fx-padding: 5 10; -fx-font-size: 14px;" />
                                     </children>
                                 </VBox>
 
                                 <!-- Type d'activité -->
                                 <VBox spacing="8">
                                     <children>
-                                        <Label style="-fx-font-size: 13px; -fx-font-weight: bold; -fx-text-fill: #0F2C4F;" text="Type d'activité" />
-                                        <ComboBox fx:id="typeactField" prefHeight="40" prefWidth="300" promptText="Sélectionner un type" style="-fx-border-color: #2D70B3; -fx-border-radius: 6; -fx-background-radius: 6; -fx-padding: 10 14; -fx-font-size: 13px;" />
+                                        <Label style="-fx-font-size: 14px; -fx-font-weight: bold; -fx-text-fill: #334155;" text="Type d'activité" />
+                                        <ComboBox fx:id="typeactField" prefHeight="45" prefWidth="320" promptText="Sélectionner un type" style="-fx-background-color: #F8FAFC; -fx-border-color: #CBD5E1; -fx-border-radius: 8; -fx-background-radius: 8; -fx-padding: 5 10; -fx-font-size: 14px;" />
                                     </children>
                                 </VBox>
 
                                 <VBox spacing="8">
                                     <children>
-                                        <Label style="-fx-font-size: 13px; -fx-font-weight: bold; -fx-text-fill: #0F2C4F;" text="Titre *" />
-                                        <TextField fx:id="titreField" promptText="Titre de l'activité" style="-fx-border-color: #2D70B3; -fx-border-radius: 6; -fx-background-radius: 6; -fx-padding: 10 14; -fx-font-size: 13px;" />
+                                        <Label style="-fx-font-size: 14px; -fx-font-weight: bold; -fx-text-fill: #334155;" text="Titre *" />
+                                        <TextField fx:id="titreField" promptText="Titre de l'activité" style="-fx-background-color: #F8FAFC; -fx-border-color: #CBD5E1; -fx-border-radius: 8; -fx-background-radius: 8; -fx-padding: 12 15; -fx-font-size: 14px;" />
                                     </children>
                                 </VBox>
                                 <VBox spacing="8">
                                     <children>
-                                        <Label style="-fx-font-size: 13px; -fx-font-weight: bold; -fx-text-fill: #0F2C4F;" text="Description" />
-                                        <TextArea fx:id="descriptionArea" prefRowCount="4" promptText="Description..." style="-fx-border-color: #2D70B3; -fx-border-radius: 6; -fx-background-radius: 6; -fx-padding: 10 14; -fx-font-size: 13px;" wrapText="true" />
+                                        <Label style="-fx-font-size: 14px; -fx-font-weight: bold; -fx-text-fill: #334155;" text="Description" />
+                                        <TextArea fx:id="descriptionArea" prefRowCount="4" promptText="Description..." style="-fx-background-color: #F8FAFC; -fx-border-color: #CBD5E1; -fx-border-radius: 8; -fx-background-radius: 8; -fx-padding: 10; -fx-font-size: 14px;" wrapText="true" />
+                                        <HBox alignment="CENTER_RIGHT">
+                                            <Button fx:id="enhanceDescBtn" onAction="#enhanceDescription" style="-fx-background-color: linear-gradient(to right, #8b5cf6, #6366f1); -fx-text-fill: white; -fx-font-size: 12px; -fx-background-radius: 8; -fx-padding: 8 15; -fx-cursor: hand; -fx-font-weight: bold; -fx-effect: dropshadow(gaussian, rgba(99,102,241,0.4), 10, 0, 0, 4);" text="✨ Améliorer avec l'IA" />
+                                        </HBox>
                                     </children>
                                 </VBox>
                                 <VBox spacing="8">
                                     <children>
-                                        <Label style="-fx-font-size: 13px; -fx-font-weight: bold; -fx-text-fill: #0F2C4F;" text="Image de l'activité" />
+                                        <Label style="-fx-font-size: 14px; -fx-font-weight: bold; -fx-text-fill: #334155;" text="Image de l'activité" />
                                         <HBox spacing="10" alignment="CENTER_LEFT">
                                             <children>
-                                                <TextField fx:id="imageField1" promptText="Aucune image sélectionnée" editable="false" style="-fx-border-color: #2D70B3; -fx-border-radius: 6; -fx-background-radius: 6; -fx-padding: 10 14; -fx-font-size: 13px; -fx-background-color: #f8f9fa;" HBox.hgrow="ALWAYS" />
-                                                <Button fx:id="importImageButton" onAction="#importerImage" style="-fx-background-color: #2D70B3; -fx-text-fill: white; -fx-border-radius: 6; -fx-background-radius: 6; -fx-padding: 10 16; -fx-font-size: 12px; -fx-cursor: hand;" text="📁 Importer" />
+                                                <TextField fx:id="imageField1" promptText="Aucune image sélectionnée" editable="false" style="-fx-background-color: #F8FAFC; -fx-border-color: #CBD5E1; -fx-border-radius: 8; -fx-background-radius: 8; -fx-padding: 12 15; -fx-font-size: 14px;" HBox.hgrow="ALWAYS" />
+                                                <Button fx:id="importImageButton" onAction="#importerImage" style="-fx-background-color: #0F766E; -fx-text-fill: white; -fx-background-radius: 8; -fx-padding: 12 20; -fx-font-size: 14px; -fx-font-weight: bold; -fx-cursor: hand; -fx-effect: dropshadow(gaussian, rgba(15,118,110,0.3), 5, 0, 0, 2);" text="📁 Importer" />
                                             </children>
                                         </HBox>
                                     </children>
@@ -87,14 +90,14 @@
                                 <!-- Age minimum -->
                                 <VBox spacing="8">
                                     <children>
-                                        <Label style="-fx-font-size: 13px; -fx-font-weight: bold; -fx-text-fill: #0F2C4F;" text="Âge minimum" />
-                                        <TextField fx:id="ageMinField" promptText="Âge minimum (laisser vide si aucun)" style="-fx-border-color: #2D70B3; -fx-border-radius: 6; -fx-background-radius: 6; -fx-padding: 10 14; -fx-font-size: 13px;" />
+                                        <Label style="-fx-font-size: 14px; -fx-font-weight: bold; -fx-text-fill: #334155;" text="Âge minimum" />
+                                        <TextField fx:id="ageMinField" promptText="Âge minimum (laisser vide si aucun)" style="-fx-background-color: #F8FAFC; -fx-border-color: #CBD5E1; -fx-border-radius: 8; -fx-background-radius: 8; -fx-padding: 12 15; -fx-font-size: 14px;" />
                                     </children>
                                 </VBox>
-                                <HBox alignment="CENTER" spacing="15">
+                                <HBox alignment="CENTER" spacing="20" style="-fx-padding: 20 0 0 0;">
                                     <children>
-                                        <Button fx:id="modifierButton" onAction="#modifier" style="-fx-background-color: linear-gradient(to bottom right, #1A4E85, #0F2C4F); -fx-text-fill: white; -fx-background-radius: 25; -fx-border-radius: 25; -fx-padding: 15 30; -fx-font-size: 16px; -fx-font-weight: bold; -fx-cursor: hand;" text="💾 Modifier" />
-                                        <Button fx:id="annulerButton" onAction="#annuler" style="-fx-background-color: #6c757d; -fx-text-fill: white; -fx-background-radius: 25; -fx-border-radius: 25; -fx-padding: 15 30; -fx-font-size: 16px; -fx-font-weight: bold; -fx-cursor: hand;" text="❌ Annuler" />
+                                        <Button fx:id="modifierButton" onAction="#modifier" style="-fx-background-color: linear-gradient(to right, #2D70B3, #1A4E85); -fx-text-fill: white; -fx-background-radius: 25; -fx-padding: 12 40; -fx-font-size: 15px; -fx-font-weight: bold; -fx-cursor: hand; -fx-effect: dropshadow(gaussian, rgba(26,78,133,0.4), 10, 0, 0, 4);" text="💾 Modifier" />
+                                        <Button fx:id="annulerButton" onAction="#annuler" style="-fx-background-color: white; -fx-text-fill: #64748B; -fx-border-color: #CBD5E1; -fx-border-radius: 25; -fx-background-radius: 25; -fx-padding: 11 35; -fx-font-size: 15px; -fx-font-weight: bold; -fx-cursor: hand;" text="❌ Annuler" />
                                     </children>
                                 </HBox>
                             </children>

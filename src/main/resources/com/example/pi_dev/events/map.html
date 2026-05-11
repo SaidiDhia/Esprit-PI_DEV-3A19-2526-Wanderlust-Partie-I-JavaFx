@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Wanderlust Map</title>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <style>
+        body, html { margin: 0; padding: 0; height: 100%; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #1e293b; }
+        #map { height: 100vh; width: 100vw; }
+        .leaflet-popup-content-wrapper {
+            background: #1e293b;
+            color: white;
+            border-radius: 12px;
+            padding: 0;
+            overflow: hidden;
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.5);
+        }
+        .leaflet-popup-tip-container { margin-top: -1px; }
+        .leaflet-popup-tip { background: #1e293b; }
+        .leaflet-popup-content { margin: 0; width: 240px !important; }
+        .custom-popup { width: 100%; }
+        .popup-header { background: #1e293b; padding: 15px; text-align: center; }
+        .popup-header span { font-size: 32px; }
+        .popup-body { padding: 15px; background: white; color: #334155; }
+        .popup-lieu { font-weight: bold; color: #e11d48; margin-bottom: 5px; font-size: 14px; }
+        .popup-date, .popup-places, .popup-org { font-size: 12px; color: #64748b; margin-bottom: 3px; }
+        .popup-price { font-weight: bold; font-size: 16px; color: #0f172a; margin-top: 10px; margin-bottom: 15px; }
+        .popup-btn { background: #3b82f6; color: white; border: none; width: 100%; padding: 10px; border-radius: 8px; cursor: pointer; font-weight: bold; transition: background 0.3s; }
+        .popup-btn:hover { background: #2563eb; }
+        #loadingOverlay {
+            position: fixed; top: 0; left: 0; right: 0; padding: 15px;
+            background: rgba(30, 41, 59, 0.95); color: #fbbf24;
+            font-weight: bold; z-index: 1000; display: none;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+        }
+        .header-bar {
+            position: fixed; top: 0; left: 0; right: 0;
+            background: #0f172a; color: white; padding: 15px 20px;
+            z-index: 999; display: flex; align-items: center;
+            font-size: 16px; font-weight: bold;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+        }
+        .header-badge {
+            background: #ca8a04; color: #fff; padding: 4px 10px;
+            border-radius: 12px; font-size: 12px; margin-left: 10px;
+        }
+        #map-container { margin-top: 54px; height: calc(100vh - 54px); }
+    </style>
+</head>
+<body>
+    <div class="header-bar">
+        🗺️ Événements sur la carte <span class="header-badge" id="eventCountBadge">0 événements</span>
+    </div>
+    <div id="loadingOverlay">📍 Géolocalisation des événements en cours... (<span id="loadProgress">0</span>%)</div>
+    <div id="map-container">
+        <div id="map"></div>
+    </div>
+
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <script>
+        var map = L.map('map').setView([33.8869, 9.5375], 6);
+
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            attribution: '&copy; OpenStreetMap contributors',
+            maxZoom: 19
+        }).addTo(map);
+
+        // Force Leaflet to recalculate the map size, fixing the grey tile issue
+        setTimeout(() => {
+            map.invalidateSize();
+        }, 500);
+        
+        window.addEventListener("resize", function() {
+            map.invalidateSize();
+        });
+
+        var customIcon = L.icon({
+            iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-orange.png',
+            shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/0.7.7/images/marker-shadow.png',
+            iconSize: [25, 41], iconAnchor: [12, 41], popupAnchor: [1, -34], shadowSize: [41, 41]
+        });
+
+        var geocodeCache = {
+            "tunis": [36.8065, 10.1815], "ariana": [36.8625, 10.1956],
+            "sousse": [35.8254, 10.6369], "sfax": [34.7406, 10.7603],
+            "bizerte": [37.2744, 9.8739], "nabeul": [36.4561, 10.7376],
+            "kairouan": [35.6781, 10.0963], "gabes": [33.8815, 10.0982],
+            "monastir": [35.77799, 10.82617], "mahdia": [35.50472, 11.06222]
+        };
+
+        async function geocode(lieu) {
+            if (!lieu) return null;
+            let cleanLieu = lieu.toLowerCase().trim();
+            if (geocodeCache[cleanLieu]) return geocodeCache[cleanLieu];
+
+            try {
+                let response = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(lieu + ", Tunisia")}`);
+                let data = await response.json();
+                if (data && data.length > 0) {
+                    let coords = [parseFloat(data[0].lat), parseFloat(data[0].lon)];
+                    geocodeCache[cleanLieu] = coords;
+                    return coords;
+                }
+            } catch(e) { console.error("Geocoding error", e); }
+            return null;
+        }
+
+        async function loadEventsData(eventsList) {
+            document.getElementById('eventCountBadge').innerText = eventsList.length + " événements";
+            document.getElementById('loadingOverlay').style.display = 'block';
+            
+            let bounds = [];
+            let total = eventsList.length;
+            let processed = 0;
+
+            for (let event of eventsList) {
+                let coords = await geocode(event.lieu);
+                if (!coords) {
+                    let lat = 33.8 + (Math.random() - 0.5) * 4;
+                    let lon = 9.5 + (Math.random() - 0.5) * 2;
+                    coords = [lat, lon];
+                }
+
+                let popupContent = `
+                    <div class="custom-popup">
+                        <div class="popup-header"><span>📅</span></div>
+                        <div class="popup-body">
+                            <div class="popup-lieu">📍 ${event.lieu || 'Lieu inconnu'}</div>
+                            <div class="popup-date">🗓️ ${event.dateDebut || 'Date non définie'}</div>
+                            <div class="popup-places">👥 ${event.places} places</div>
+                            <div class="popup-org">👤 ${event.organisateur || 'Wanderlust'}</div>
+                            <div class="popup-price">${event.prix}</div>
+                            <button class="popup-btn" onclick="openEventDetails(${event.id})">Voir l'événement ➔</button>
+                        </div>
+                    </div>
+                `;
+
+                L.marker(coords, {icon: customIcon}).addTo(map)
+                 .bindPopup(popupContent, {className: 'custom-popup-wrapper'});
+                bounds.push(coords);
+
+                processed++;
+                document.getElementById('loadProgress').innerText = Math.round((processed/total)*100);
+                
+                // Nominatim rate limit safety
+                if (!geocodeCache[event.lieu?.toLowerCase().trim()]) {
+                    await new Promise(r => setTimeout(r, 600));
+                }
+            }
+
+            document.getElementById('loadingOverlay').style.display = 'none';
+            if (bounds.length > 0) {
+                map.fitBounds(bounds, {padding: [50, 50]});
+                setTimeout(() => { map.invalidateSize(); }, 300);
+            }
+        }
+
+        function openEventDetails(eventId) {
+            if (typeof javaBridge !== 'undefined') {
+                javaBridge.openEvent(eventId);
+            } else {
+                alert("Erreur de liaison avec l'application.");
+            }
+        }
+    </script>
+</body>
+</html>
