@@ -204,6 +204,12 @@ public class SignupController {
                 String fileName = UUID.randomUUID().toString() + "_" + selectedImageFile.getName();
                 File destFile = new File(uploadDir, fileName);
                 Files.copy(selectedImageFile.toPath(), destFile.toPath(), StandardCopyOption.REPLACE_EXISTING);
+
+                // Dual sync: Copy to Symfony dir
+                File symfonyDir = new File("C:\\Users\\jacer\\Desktop\\dev\\Esprit-PI_DEV-3A19-2526-Wanderlust - Copie\\public\\uploads\\profiles");
+                if (!symfonyDir.exists()) symfonyDir.mkdirs();
+                File symfonyDestFile = new File(symfonyDir, fileName);
+                Files.copy(selectedImageFile.toPath(), symfonyDestFile.toPath(), StandardCopyOption.REPLACE_EXISTING);
                 newUser.setProfilePicture(fileName);
             } catch (IOException e) {
                 e.printStackTrace();

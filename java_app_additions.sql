@@ -25,9 +25,18 @@ CREATE TABLE IF NOT EXISTS tfa_secrets (
 -- ============================================================
 -- Activity logs
 -- ============================================================
-ALTER TABLE activity_logs
-ADD COLUMN IF NOT EXISTS user_email VARCHAR(255) NULL
-AFTER log_id;
+ALTER TABLE activity_log
+ADD COLUMN IF NOT EXISTS user_id VARCHAR(36) NULL,
+ADD COLUMN IF NOT EXISTS user_name VARCHAR(255) NULL,
+ADD COLUMN IF NOT EXISTS user_avatar VARCHAR(255) NULL,
+ADD COLUMN IF NOT EXISTS target_type VARCHAR(80) NULL,
+ADD COLUMN IF NOT EXISTS target_id VARCHAR(120) NULL,
+ADD COLUMN IF NOT EXISTS target_name VARCHAR(255) NULL,
+ADD COLUMN IF NOT EXISTS target_image VARCHAR(255) NULL,
+ADD COLUMN IF NOT EXISTS content LONGTEXT NULL,
+ADD COLUMN IF NOT EXISTS destination VARCHAR(255) NULL,
+ADD COLUMN IF NOT EXISTS metadata_json LONGTEXT NULL,
+ADD COLUMN IF NOT EXISTS created_at DATETIME NULL;
 -- ============================================================
 -- Blog notifications
 -- ============================================================

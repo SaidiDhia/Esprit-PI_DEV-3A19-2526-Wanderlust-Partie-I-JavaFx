@@ -408,20 +408,35 @@ public class PlaceDetailsController {
             if (url.startsWith("http://") || url.startsWith("https://")) {
                 return new Image(url, true);
             } else {
-                java.io.File file;
-                if (url.startsWith("file:")) {
-                    file = new java.io.File(java.net.URI.create(url));
+                String normalized = url.trim().replace('\\', '/');
+                java.util.List<java.io.File> candidates = new java.util.ArrayList<>();
+
+                if (normalized.startsWith("file:")) {
+                    candidates.add(new java.io.File(java.net.URI.create(normalized)));
                 } else {
-                    file = new java.io.File(url);
+                    candidates.add(new java.io.File(normalized));
                 }
-                System.out.println("DEBUG details loading: " + file.getAbsolutePath() + " exists=" + file.exists());
-                if (file.exists()) {
-                    try (java.io.FileInputStream fis = new java.io.FileInputStream(file)) {
-                        return new Image(fis);
+
+                if (normalized.startsWith("/uploads/")) {
+                    normalized = "uploads/" + normalized.substring("/uploads/".length());
+                }
+
+                String fileName = new java.io.File(normalized).getName();
+                candidates.add(new java.io.File(normalized));
+                candidates.add(new java.io.File("uploads", fileName));
+                candidates.add(new java.io.File("uploads/places", fileName));
+                candidates.add(new java.io.File("C:\\Users\\jacer\\Desktop\\dev\\Esprit-PI_DEV-3A19-2526-Wanderlust - Copie\\public\\uploads\\places", fileName));
+
+                for (java.io.File candidate : candidates) {
+                    System.out.println("DEBUG details loading: " + candidate.getAbsolutePath() + " exists=" + candidate.exists());
+                    if (candidate.exists()) {
+                        try (java.io.FileInputStream fis = new java.io.FileInputStream(candidate)) {
+                            return new Image(fis);
+                        }
                     }
-                } else {
-                    System.err.println("❌ File not found (details): " + file.getAbsolutePath());
                 }
+
+                System.err.println("❌ File not found (details): " + normalized + " (filename=" + fileName + ")");
             }
         } catch (Exception e) {
             System.err.println("❌ loadLocalFile error url=" + url + ": " + e.getMessage());

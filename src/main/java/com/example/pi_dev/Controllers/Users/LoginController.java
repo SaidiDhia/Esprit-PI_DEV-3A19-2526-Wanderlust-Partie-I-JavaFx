@@ -77,7 +77,7 @@ public class LoginController implements javafx.fxml.Initializable {
                 System.out.println("JWT Token: " + token);
 
                 // Check for 2FA
-                if (user.getTfaMethod() != null) {
+                if (userService.shouldRequireTwoFactor(user.getUserId())) {
                     // Navigate to 2FA Verify
                     FXMLLoader loader = new FXMLLoader(getClass().getResource("/com/example/pi_dev/user/2fa.fxml"));
                     Parent root = loader.load();
@@ -139,6 +139,11 @@ public class LoginController implements javafx.fxml.Initializable {
             e.printStackTrace();
             errorLabel.setText("Navigation error: " + e.getMessage());
         }
+    }
+
+    @FXML
+    void goToFaceLogin(ActionEvent event) {
+        navigateTo("/com/example/pi_dev/user/face_login.fxml", event);
     }
 
     private void navigateTo(String fxmlPath, ActionEvent event) {

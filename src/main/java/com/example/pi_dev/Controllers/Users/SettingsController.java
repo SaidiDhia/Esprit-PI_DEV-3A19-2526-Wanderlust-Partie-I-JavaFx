@@ -2,6 +2,7 @@ package com.example.pi_dev.Controllers.Users;
 
 import com.example.pi_dev.Controllers.Main.MainLayoutController;
 import com.example.pi_dev.enums.RoleEnum;
+import com.example.pi_dev.enums.TFAMethod;
 import com.example.pi_dev.Entities.Users.User;
 import com.example.pi_dev.Services.Users.UserService;
 import com.example.pi_dev.Utils.Users.UserSession;
@@ -115,6 +116,12 @@ public class SettingsController {
                 File destFile = new File(uploadDir, fileName);
                 Files.copy(selectedFile.toPath(), destFile.toPath(), StandardCopyOption.REPLACE_EXISTING);
 
+                // Dual sync: Copy to Symfony dir
+                File symfonyDir = new File("C:\\Users\\jacer\\Desktop\\dev\\Esprit-PI_DEV-3A19-2526-Wanderlust - Copie\\public\\uploads\\profiles");
+                if (!symfonyDir.exists()) symfonyDir.mkdirs();
+                File symfonyDestFile = new File(symfonyDir, fileName);
+                Files.copy(selectedFile.toPath(), symfonyDestFile.toPath(), StandardCopyOption.REPLACE_EXISTING);
+
                 currentUser.setProfilePicture(fileName);
                 userService.updateUser(currentUser);
                 activityLogService.log(currentUser.getEmail(), "PROFILE_PIC_UPDATE", "Updated profile picture");
@@ -127,7 +134,7 @@ public class SettingsController {
     }
     
     private void updateTfaStatus() {
-        boolean isTfaEnabled = currentUser.getTfaMethod() != null;
+        boolean isTfaEnabled = currentUser.getTfaMethod() != null && currentUser.getTfaMethod() != TFAMethod.NONE;
         if (isTfaEnabled) {
             tfaStatusLabel.setText("ON (" + currentUser.getTfaMethod() + ")");
             tfaStatusLabel.getStyleClass().clear();
@@ -136,7 +143,7 @@ public class SettingsController {
         } else {
             tfaStatusLabel.setText("OFF");
             tfaStatusLabel.getStyleClass().clear();
-            tfaStatusLabel.getStyleClass().add("badge-tfa-on");
+            tfaStatusLabel.getStyleClass().add("badge-tfa-off");
             tfaStatusLabel.setStyle("-fx-background-color: #EF4444;"); // Error RED
         }
     }
@@ -217,7 +224,7 @@ public class SettingsController {
     @FXML
     void handleDisable2FA(ActionEvent event) {
         if (currentUser != null) {
-            currentUser.setTfaMethod(null);
+            currentUser.setTfaMethod(TFAMethod.NONE);
             userService.updateUser(currentUser);
             activityLogService.log(currentUser.getEmail(), "2FA_DISABLE", "Disabled two-factor authentication");
             updateTfaStatus();

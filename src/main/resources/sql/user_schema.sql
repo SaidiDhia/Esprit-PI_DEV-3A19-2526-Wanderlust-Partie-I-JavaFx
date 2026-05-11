@@ -30,10 +30,19 @@ CREATE TABLE IF NOT EXISTS tfa_secrets (
 );
 
 -- Activity Log Table
-CREATE TABLE IF NOT EXISTS activity_logs (
-    log_id INT AUTO_INCREMENT PRIMARY KEY,
-    user_email VARCHAR(255) NOT NULL,
-    action VARCHAR(255) NOT NULL,
-    details TEXT,
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+CREATE TABLE IF NOT EXISTS activity_log (
+    id BIGINT AUTO_INCREMENT PRIMARY KEY,
+    module VARCHAR(50) NOT NULL,
+    action VARCHAR(120) NOT NULL,
+    user_id VARCHAR(36) NULL,
+    user_name VARCHAR(255) NULL,
+    user_avatar VARCHAR(255) NULL,
+    target_type VARCHAR(80) NULL,
+    target_id VARCHAR(120) NULL,
+    target_name VARCHAR(255) NULL,
+    target_image VARCHAR(255) NULL,
+    content LONGTEXT NULL,
+    destination VARCHAR(255) NULL,
+    metadata_json LONGTEXT NULL,
+    created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP
 );

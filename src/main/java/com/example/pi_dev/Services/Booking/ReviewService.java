@@ -6,6 +6,7 @@ import com.example.pi_dev.Utils.Booking.Mydatabase;
 import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
+import java.time.LocalDateTime;
 
 /**
  * JDBC-based service for Place reviews and ratings.
@@ -29,8 +30,37 @@ public class ReviewService {
         if (rating < 1 || rating > 5)
             throw new IllegalArgumentException("Rating must be between 1 and 5.");
 
+        // --- Pre-insert Security & Risk Checks ---
+        try {
+            if (comment != null && !comment.isEmpty()) {
+                double toxScore = new com.example.pi_dev.Services.Users.MessageToxicityService(com.example.pi_dev.common.ApiConfiguration.TOXICITY_API_URL).score(comment);
+                if (toxScore > 80.0) {
+                    comment = "[Review removed for violating community guidelines]";
+                    
+                    String uEmail = userId;
+                    if (uEmail != null && !uEmail.contains("@")) {
+                        try { uEmail = com.example.pi_dev.Utils.Users.UserSession.getInstance().getCurrentUser().getEmail(); } catch(Exception ignored) {}
+                    }
+                    if (uEmail != null && uEmail.contains("@")) {
+                        new com.example.pi_dev.Services.Users.EmailService().sendEmail(
+                            uEmail, 
+                            "Toxicity Alert on WonderLust", 
+                            "A recent review you posted was flagged by our Toxicity AI (Score: " + String.format("%.1f", toxScore) + "). It was filtered out. Warning: Repeated violations may result in a ban!"
+                        );
+                    }
+                }
+            }
+            new com.example.pi_dev.common.services.ActivityLogService().log(
+                userId, 
+                "ADDREVIEW", 
+                "User rated place ID " + placeId + " with " + rating + " stars."
+            );
+        } catch (Exception x) {
+            x.printStackTrace();
+        }
+
         // Try INSERT first; on duplicate, update and then fetch the existing id
-        String insertSql = "INSERT INTO review (place_id, user_id, rating, comment) VALUES (?, ?, ?, ?) " +
+        String insertSql = "INSERT INTO review (place_id, user_id, rating, comment, created_at) VALUES (?, ?, ?, ?, ?) " +
                 "ON DUPLICATE KEY UPDATE rating=VALUES(rating), comment=VALUES(comment)";
 
         try (PreparedStatement ps = con.prepareStatement(insertSql, Statement.RETURN_GENERATED_KEYS)) {
@@ -38,6 +68,8 @@ public class ReviewService {
             ps.setString(2, userId);
             ps.setInt(3, rating);
             ps.setString(4, comment);
+            ps.setTimestamp(5, Timestamp.valueOf(LocalDateTime.now()));
+            System.out.println("[ReviewService] Executing INSERT: placeId=" + placeId + ", userId=" + userId + ", rating=" + rating + ", comment=" + (comment != null ? comment.substring(0, Math.min(50, comment.length())) : "null"));
             ps.executeUpdate();
 
             // If a new row was inserted, LAST_INSERT_ID() > 0
@@ -45,8 +77,7 @@ public class ReviewService {
                 if (keys.next()) {
                     long id = keys.getLong(1);
                     if (id > 0) {
-                        System.out
-                                .println("Review saved (new): id=" + id + " placeId=" + placeId + " userId=" + userId);
+                        System.out.println("Review saved (new): id=" + id + " placeId=" + placeId + " userId=" + userId);
                         return (int) id;
                     }
                 }
@@ -66,7 +97,9 @@ public class ReviewService {
                 }
             }
         } catch (SQLException e) {
-            throw new RuntimeException("Erreur ajout review", e);
+            System.err.println("[ReviewService] SQLException while adding review: " + e.getMessage());
+            e.printStackTrace();
+            throw new RuntimeException("Erreur ajout review: " + e.getMessage(), e);
         }
 
         throw new RuntimeException("Could not retrieve review ID after insert/update.");

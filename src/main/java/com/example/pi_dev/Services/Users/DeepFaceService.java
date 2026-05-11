@@ -5,6 +5,7 @@ import java.net.HttpURLConnection;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
+import com.example.pi_dev.common.ApiConfiguration;
 
 /**
  * Service to communicate with the DeepFace Python API.
@@ -13,16 +14,14 @@ import java.nio.file.Files;
  */
 public class DeepFaceService {
 
-    private static final String DEFAULT_BASE_URL = "http://localhost:5000";
     private final String baseUrl;
 
     public DeepFaceService() {
-        String url = System.getenv("DEEPFACE_API_URL");
-        this.baseUrl = (url != null && !url.isEmpty()) ? url.replaceAll("/$", "") : DEFAULT_BASE_URL;
+        this.baseUrl = ApiConfiguration.DEEPFACE_API_URL;
     }
 
     public DeepFaceService(String baseUrl) {
-        this.baseUrl = (baseUrl != null && !baseUrl.isEmpty()) ? baseUrl.replaceAll("/$", "") : DEFAULT_BASE_URL;
+        this.baseUrl = (baseUrl != null && !baseUrl.isEmpty()) ? baseUrl : ApiConfiguration.DEEPFACE_API_URL;
     }
 
     /**
@@ -46,9 +45,9 @@ public class DeepFaceService {
         }
 
         try {
-            // 2. Setup HTTP Request to DeepFace /verify endpoint
+            // 2. Setup HTTP Request to DeepFace endpoint
             String boundary = "----DeepFaceBoundary" + System.currentTimeMillis();
-            URL url = new URL(baseUrl + "/verify");
+            URL url = new URL(baseUrl); // baseUrl is already http://127.0.0.1:5000/verify
             HttpURLConnection conn = (HttpURLConnection) url.openConnection();
             conn.setRequestMethod("POST");
             conn.setDoOutput(true);

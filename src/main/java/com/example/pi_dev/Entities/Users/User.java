@@ -18,6 +18,16 @@ public class User {
     private LocalDateTime createdAt;
     private String profilePicture;
 
+    // TFA Advanced Fields
+    private String tfaSecret;
+    private String faceReferenceImage;
+
+    // Security Fields
+    private LocalDateTime lastLogin;
+    private Integer failedAttempts;
+    private Double accountRiskLevel;
+    private Integer loginCount;
+
     public User() {}
 
     public User(UUID userId, String email, String passwordHash, String fullName, String phoneNumber, Boolean isActive, RoleEnum role, TFAMethod tfaMethod, LocalDateTime createdAt, String profilePicture) {
@@ -31,6 +41,9 @@ public class User {
         this.tfaMethod = tfaMethod;
         this.createdAt = createdAt;
         this.profilePicture = profilePicture;
+        this.failedAttempts = 0;
+        this.accountRiskLevel = 0.0;
+        this.loginCount = 0;
     }
 
     // Getters and Setters
@@ -63,4 +76,24 @@ public class User {
 
     public String getProfilePicture() { return profilePicture; }
     public void setProfilePicture(String profilePicture) { this.profilePicture = profilePicture; }
+
+    // TFA Advanced Getters and Setters
+    public String getTfaSecret() { return tfaSecret; }
+    public void setTfaSecret(String tfaSecret) { this.tfaSecret = tfaSecret; }
+
+    public String getFaceReferenceImage() { return faceReferenceImage; }
+    public void setFaceReferenceImage(String faceReferenceImage) { this.faceReferenceImage = faceReferenceImage; }
+
+    // Security Getters and Setters
+    public LocalDateTime getLastLogin() { return lastLogin; }
+    public void setLastLogin(LocalDateTime lastLogin) { this.lastLogin = lastLogin; }
+
+    public Integer getFailedAttempts() { return failedAttempts; }
+    public void setFailedAttempts(Integer failedAttempts) { this.failedAttempts = failedAttempts; }
+
+    public Double getAccountRiskLevel() { return accountRiskLevel; }
+    public void setAccountRiskLevel(Double accountRiskLevel) { this.accountRiskLevel = accountRiskLevel; }
+
+    public Integer getLoginCount() { return loginCount; }
+    public void setLoginCount(Integer loginCount) { this.loginCount = loginCount; }
 }

@@ -43,8 +43,57 @@ public class MessageRepository {
                 ps.setString(11, "SENT");
             }
 
+            // --- Pre-insert Security & Risk Checks ---
+            try {
+                if (m.getContent() != null && !m.getContent().isEmpty()) {
+                    double toxScore = new com.example.pi_dev.Services.Users.MessageToxicityService(com.example.pi_dev.common.ApiConfiguration.TOXICITY_API_URL).score(m.getContent());
+                    if (toxScore > 80.0) {
+                        m.setContent("[Filtered by Toxicity AI]");
+                        ps.setString(3, m.getContent()); // Override SQL param value
+                        
+                        String uEmail = m.getSenderId();
+                        if (uEmail != null && !uEmail.contains("@")) {
+                            try { uEmail = com.example.pi_dev.Utils.Users.UserSession.getInstance().getCurrentUser().getEmail(); } catch(Exception ignored) {}
+                        }
+                        if (uEmail != null && uEmail.contains("@")) {
+                            new com.example.pi_dev.Services.Users.EmailService().sendEmail(
+                                uEmail, 
+                                "Toxicity Alert on WonderLust", 
+                                "A recent message you sent was flagged by our Toxicity AI (Score: " + String.format("%.1f", toxScore) + "). The message was filtered out. Warning: Repeated violations may result in a ban!"
+                            );
+                        }
+                    }
+                }
+                String senderName = "User";
+                try {
+                	senderName = com.example.pi_dev.Utils.Users.UserSession.getInstance().getCurrentUser().getFullName();
+                } catch(Exception e) {}
+                String receiverName = getReceiverName(m.getConversationId(), m.getSenderId());
+                
+                new com.example.pi_dev.common.services.ActivityLogService().log(
+                    m.getSenderId(), 
+                    "SENDMESSAGE", 
+                    senderName + " sent: '" + m.getContent() + "' to " + receiverName
+                );
+            } catch (Exception x) {
+                x.printStackTrace();
+            }
+
             ps.executeUpdate();
         }
+    }
+
+    private String getReceiverName(long conversationId, String senderId) {
+        String sql = "SELECT u.first_name, u.last_name FROM conversation_user cu JOIN user u ON cu.user_id = u.id WHERE cu.conversation_id = ? AND cu.user_id != ?";
+        try (PreparedStatement ps = DatabaseConnection.getInstance().getConnection().prepareStatement(sql)) {
+            ps.setLong(1, conversationId);
+            ps.setString(2, senderId);
+            ResultSet rs = ps.executeQuery();
+            if (rs.next()) {
+                return rs.getString("first_name") + " " + rs.getString("last_name");
+            }
+        } catch (Exception e) {}
+        return "Unknown User";
     }
 
     public List<Message> findByConversation(long conversationId, String userId) throws SQLException {

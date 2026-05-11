@@ -70,7 +70,7 @@ public class ReviewDialogController {
             if (!canReview) {
                 if (errorLabel != null)
                     errorLabel.setText(
-                            "❌ You can only review this place after your stay is completed or confirmed and past the end date.");
+                            "❌ You must have a reservation for this place to review it.");
                 return;
             }
         } catch (Exception e) {
@@ -91,11 +91,19 @@ public class ReviewDialogController {
         // 1. Insert review synchronously
         int reviewId;
         try {
+            System.out.println("[ReviewDialog] Saving review for placeId=" + placeId + ", userId=" + userId + ", rating=" + rating);
             reviewId = reviewService.addReview(placeId, userId, rating, comment);
+            System.out.println("[ReviewDialog] Review saved successfully with id=" + reviewId);
             reviewService.refreshPlaceRatingStats(placeId);
         } catch (Exception e) {
+            System.err.println("[ReviewDialog] Error saving review: " + e.getMessage());
+            e.printStackTrace();
+            String errorMsg = e.getMessage() != null ? e.getMessage() : "Unknown error occurred";
+            if (e.getCause() != null) {
+                errorMsg += " (Cause: " + e.getCause().getMessage() + ")";
+            }
             if (errorLabel != null)
-                errorLabel.setText("Error saving review: " + e.getMessage());
+                errorLabel.setText("Error saving review: " + errorMsg);
             return;
         }
 

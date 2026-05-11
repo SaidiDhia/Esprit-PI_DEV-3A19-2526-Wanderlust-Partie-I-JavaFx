@@ -174,17 +174,32 @@ public class UserService implements IUserService {
     // This is called when the user configures Face ID. It saves the snapshot image.
     public void setupTwoFactorFace(UUID userId, byte[] imageBytes) throws SQLException {
         try {
-            // 1. Save the image to the local file system (e.g. ~/.pi_dev_faces/)
             String fileName = "face_" + userId + ".png";
-            java.nio.file.Path path = java.nio.file.Paths.get(System.getProperty("user.home"), ".pi_dev_faces",
-                    fileName);
-            java.nio.file.Files.createDirectories(path.getParent());
-            java.nio.file.Files.write(path, imageBytes);
 
-            // 2. Store the absolute path in the DB so we know where this user's reference
-            // photo is
-            String secretValue = "FACE:" + path.toAbsolutePath().toString();
+            // 1. Save to Java local path
+            java.io.File javaDir = new java.io.File("uploads/faces");
+            if (!javaDir.exists()) javaDir.mkdirs();
+            java.io.File javaFile = new java.io.File(javaDir, fileName);
+            java.nio.file.Files.write(javaFile.toPath(), imageBytes);
+
+            // 2. Save to Symfony path
+            java.io.File symfonyDir = new java.io.File("C:\\Users\\jacer\\Desktop\\dev\\Esprit-PI_DEV-3A19-2526-Wanderlust - Copie\\public\\uploads\\faces");
+            if (!symfonyDir.exists()) symfonyDir.mkdirs();
+            java.io.File symfonyFile = new java.io.File(symfonyDir, fileName);
+            java.nio.file.Files.write(symfonyFile.toPath(), imageBytes);
+
+            // Copy to Symfony profiles path so website displays it
+            java.io.File symfonyDirProf = new java.io.File("C:\\Users\\jacer\\Desktop\\dev\\Esprit-PI_DEV-3A19-2526-Wanderlust - Copie\\public\\uploads\\profiles");
+            if (!symfonyDirProf.exists()) symfonyDirProf.mkdirs();
+            java.io.File symfonyFileProf = new java.io.File(symfonyDirProf, fileName);
+            java.nio.file.Files.write(symfonyFileProf.toPath(), imageBytes);
+
+            // 3. Store relative path identifier
+            String secretValue = "FACE:" + fileName;
             userRepository.saveTfaSecret(userId, secretValue);
+            
+            // 4. Set Face Reference specifically for Symfony User Database
+            userRepository.updateFaceReferenceImage(userId, fileName);
         } catch (IOException e) {
             e.printStackTrace();
             throw new RuntimeException("Failed to save face image", e);
@@ -243,12 +258,25 @@ public class UserService implements IUserService {
             if (capturedImage == null || capturedImage.length == 0)
                 return false;
 
-            // 2. Extract the actual filesystem path
-            String storedPath = storedSecret.substring(5).trim();
+            String storedFilename = storedSecret.substring(5).trim();
+
+            // Locate file in dual paths or fallback to legacy absolute path
+            java.io.File storedFile = new java.io.File("uploads/faces", storedFilename);
+            if (!storedFile.exists()) {
+                storedFile = new java.io.File("C:\\Users\\jacer\\Desktop\\dev\\Esprit-PI_DEV-3A19-2526-Wanderlust - Copie\\public\\uploads\\faces", storedFilename);
+            }
+            if (!storedFile.exists()) {
+                storedFile = new java.io.File(storedFilename); // legacy absolute path
+            }
+
+            if (!storedFile.exists()) {
+                System.err.println("Reference face image not found in any path.");
+                return false;
+            }
 
             // 3. Send both the stored image and the new snapshot to DeepFace implementation
             DeepFaceService deepFace = new DeepFaceService();
-            return deepFace.verify(storedPath, capturedImage);
+            return deepFace.verify(storedFile.getAbsolutePath(), capturedImage);
         } catch (SQLException e) {
             e.printStackTrace();
             return false;
@@ -265,6 +293,45 @@ public class UserService implements IUserService {
             }
         } catch (Exception e) {
             e.printStackTrace();
+        }
+    }
+
+    public boolean isTwoFactorActive(User user) {
+        if (user == null) {
+            return false;
+        }
+
+        TFAMethod method = user.getTfaMethod();
+        if (method == null || method == TFAMethod.NONE) {
+            return false;
+        }
+
+        try {
+            String storedSecret = userRepository.getTfaSecret(user.getUserId());
+            if (storedSecret == null || storedSecret.isBlank()) {
+                return false;
+            }
+
+            if (method == TFAMethod.EMAIL) {
+                return storedSecret.startsWith("EMAIL:");
+            }
+
+            if (method == TFAMethod.FACE_ID) {
+                return storedSecret.startsWith("FACE:");
+            }
+
+            return !storedSecret.startsWith("EMAIL:") && !storedSecret.startsWith("FACE:");
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return false;
+        }
+    }
+
+    public boolean shouldRequireTwoFactor(UUID userId) {
+        try {
+            return isTwoFactorActive(getUserById(userId));
+        } catch (Exception e) {
+            return false;
         }
     }
 

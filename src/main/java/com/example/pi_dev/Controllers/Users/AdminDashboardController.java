@@ -6,6 +6,10 @@ import com.example.pi_dev.Services.Users.UserService;
 import com.example.pi_dev.Utils.Users.UserSession;
 import com.example.pi_dev.common.services.ActivityLogService;
 import com.example.pi_dev.common.models.ActivityLog;
+import com.example.pi_dev.common.ApiConfiguration;
+import com.example.pi_dev.Services.Users.*;
+import com.example.pi_dev.Entities.Users.RiskScore;
+import com.example.pi_dev.Repositories.Users.InMemoryRiskScoreRepository;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.collections.FXCollections;
@@ -20,8 +24,12 @@ import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.scene.image.Image;
+import javafx.application.Platform;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
+import javafx.scene.layout.FlowPane;
+import javafx.scene.layout.Priority;
+import javafx.scene.layout.Region;
 import javafx.scene.paint.ImagePattern;
 import javafx.scene.shape.Circle;
 import javafx.stage.Modality;
@@ -56,8 +64,24 @@ public class AdminDashboardController {
     @FXML private TableColumn<User, Void> colActions;
     @FXML private VBox activityLogContainer;
 
+    @FXML private Tab tabRiskManagement;
+    @FXML private FlowPane riskCardsContainer;
+
     private final UserService userService = new UserService();
     private final ActivityLogService activityLogService = new ActivityLogService();
+    private final ActivityLoggerService activityLoggerService = new ActivityLoggerService(new com.example.pi_dev.Repositories.Users.InMemoryActivityLogRepository());
+    private final RiskMonitor riskMonitor;
+    
+    public AdminDashboardController() {
+        this.riskMonitor = new RiskMonitor(
+            new RiskScoringEngine(),
+            new AnomalyDetectionService(ApiConfiguration.ANOMALY_API_URL),
+            new MessageToxicityService(ApiConfiguration.TOXICITY_API_URL),
+            new BotBehaviorService(ApiConfiguration.BOT_BEHAVIOR_API_URL),
+            new InMemoryRiskScoreRepository(),
+            activityLoggerService
+        );
+    }
     private ObservableList<User> masterData = FXCollections.observableArrayList();
     private FilteredList<User> filteredData;
 
@@ -74,9 +98,23 @@ public class AdminDashboardController {
     public void initialize() {
         setupTable();
         setupFilters();
+        // Cards logic driven dynamically on data load
         loadData();
         loadActivityLogs();
         updateDashboardDistribution();
+        Platform.runLater(() -> handleRefreshRiskScores(null));
+    }
+
+    // Unused if we ditch table view, remaining for backward compatibility
+    public static class RiskScoreItem {
+        private final User user;
+        private final RiskScore riskScore;
+        public RiskScoreItem(User user, RiskScore riskScore) {
+            this.user = user;
+            this.riskScore = riskScore;
+        }
+        public User getUser() { return user; }
+        public RiskScore getRiskScore() { return riskScore; }
     }
 
     @FXML
@@ -308,6 +346,114 @@ public class AdminDashboardController {
                 }
             }
         });
+    }
+
+    private void handleAlertUser(User user) {
+        Alert alert = new Alert(Alert.AlertType.INFORMATION);
+        alert.setTitle("Alert User");
+        alert.setHeaderText("Sending Alert to User");
+        alert.setContentText("A risk alert has been sent to " + user.getEmail());
+        alert.showAndWait();
+        activityLoggerService.log("SECURITY", "RISK_ALERT", UserSession.getInstance().getCurrentUser().getUserId(), "Sent warning due to high risk score to user: " + user.getEmail());
+        loadActivityLogs();
+    }
+
+    @FXML
+    void handleRefreshRiskScores(ActionEvent event) {
+        try {
+            List<ActivityLog> allLogs = activityLogService.findAll();
+            riskCardsContainer.getChildren().clear();
+
+            for (User user : masterData) {
+                // Determine user's explicit logs to compile Risk signals
+                List<ActivityLog> userLogs = allLogs.stream()
+                     .filter(l -> user.getEmail().equals(l.getUserName()) || (l.getUserId() != null && user.getUserId().toString().equals(l.getUserId())))
+                     .toList();
+                
+                int recentCancellations = 0;
+                StringBuilder toxicContent = new StringBuilder();
+                int bookingHits = 0;
+                int messageHits = 0;
+                int reviewHits = 0;
+                
+                for(ActivityLog log : userLogs) {
+                    String mod = log.getModule() != null ? log.getModule().toUpperCase() : "";
+                    String act = log.getAction() != null ? log.getAction().toUpperCase() : "";
+                    
+                    if ("BOOKING".equals(mod) || act.contains("BOOK")) {
+                        bookingHits++;
+                        if (act.contains("CANCEL")) {
+                            recentCancellations++;
+                        }
+                    } else if ("MESSAGING".equals(mod) || act.contains("MESSAGE")) {
+                        messageHits++;
+                        if (log.getContent() != null) toxicContent.append(log.getContent()).append(". ");
+                    } else if ("REVIEWS".equals(mod) || act.contains("REVIEW")) {
+                        reviewHits++;
+                        if (log.getContent() != null) toxicContent.append(log.getContent()).append(". ");
+                    }
+                }
+                
+                java.util.Map<String, Object> metrics = new java.util.HashMap<>();
+                metrics.put("time_between_actions_ms", 1000L); // Default safe MS
+                metrics.put("click_speed", 0.0);
+                metrics.put("recent_cancellations", recentCancellations);
+                if (toxicContent.length() > 0) {
+                    metrics.put("message_content", toxicContent.toString()); 
+                }
+
+                RiskScore score = riskMonitor.assessUserRisk(user, metrics);
+                VBox card = createRiskCard(user, score, bookingHits, messageHits, reviewHits);
+                riskCardsContainer.getChildren().add(card);
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    private VBox createRiskCard(User user, RiskScore score, int bookingC, int messageC, int reviewC) {
+        VBox card = new VBox(15);
+        card.setStyle("-fx-background-color: white; -fx-padding: 20; -fx-background-radius: 12; -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.1), 10, 0, 0, 5); -fx-min-width: 290; -fx-max-width: 320;");
+        
+        Label lblName = new Label(user.getEmail());
+        lblName.setStyle("-fx-font-weight: bold; -fx-font-size: 16px;");
+        
+        Label lblBand = new Label(score.getRiskBand().toUpperCase());
+        String bandColor;
+        switch(score.getRiskBand()) {
+            case "normal": bandColor = "#10B981"; break;
+            case "suspicious": bandColor = "#F59E0B"; break;
+            case "abusive": bandColor = "#EF4444"; break;
+            case "critical": bandColor = "#991B1B"; break;
+            default: bandColor = "#6B7280"; break;
+        }
+        lblBand.setStyle("-fx-background-color: " + bandColor + "; -fx-text-fill: white; -fx-padding: 4 8; -fx-background-radius: 4; -fx-font-size: 10px; -fx-font-weight: bold;");
+        
+        HBox header = new HBox(10, lblName, new Region(), lblBand);
+        HBox.setHgrow(header.getChildren().get(1), Priority.ALWAYS);
+        header.setAlignment(javafx.geometry.Pos.CENTER_LEFT);
+        
+        Label lblScore = new Label("Overall Risk: " + score.getOverallRiskScore() + "/100");
+        lblScore.setStyle("-fx-text-fill: " + bandColor + "; -fx-font-weight: bold; -fx-font-size: 14px;");
+        
+        VBox metricsBox = new VBox(5);
+        metricsBox.getChildren().add(new Label(String.format("Anomaly: %.1f | Bot Behavior: %.1f", score.getAnomalyScore() != null ? score.getAnomalyScore() : 0.0, score.getClickSpeedScore() != null ? score.getClickSpeedScore() : 0.0)));
+        metricsBox.getChildren().add(new Label(String.format("Toxicity: %.1f | Cancellation: %.1f", score.getMessageToxicityScore() != null ? score.getMessageToxicityScore() : 0.0, score.getCancellationAbuseScore() != null ? score.getCancellationAbuseScore() : 0.0)));
+        metricsBox.setStyle("-fx-padding: 10; -fx-background-color: #F8FAFC; -fx-background-radius: 8; -fx-font-size: 11px; -fx-text-fill: #475569;");
+        
+        VBox activityBox = new VBox(5);
+        activityBox.getChildren().add(new Label("Booking Interactions: " + bookingC));
+        activityBox.getChildren().add(new Label("Messaging Interactions: " + messageC));
+        activityBox.getChildren().add(new Label("Review Interactions: " + reviewC));
+        activityBox.setStyle("-fx-padding: 10; -fx-background-color: #EFF6FF; -fx-background-radius: 8; -fx-font-size: 11px; -fx-text-fill: #1E40AF;");
+        
+        Button alertBtn = new Button("Dispatch Alert");
+        alertBtn.setStyle("-fx-background-color: #EF4444; -fx-text-fill: white; -fx-font-weight: bold; -fx-padding: 8; -fx-background-radius: 6;");
+        alertBtn.setOnAction(e -> handleAlertUser(user));
+        alertBtn.setMaxWidth(Double.MAX_VALUE);
+        
+        card.getChildren().addAll(header, lblScore, metricsBox, activityBox, alertBtn);
+        return card;
     }
 
     private void setupFilters() {

@@ -13,6 +13,7 @@
 <?import javafx.scene.layout.BorderPane?>
 <?import javafx.scene.layout.HBox?>
 <?import javafx.scene.layout.VBox?>
+<?import javafx.scene.layout.FlowPane?>
 <?import javafx.scene.layout.StackPane?>
 <?import javafx.scene.layout.Region?>
 <?import javafx.scene.shape.Circle?>
@@ -176,6 +177,35 @@
                                                 <ScrollPane fitToWidth="true" style="-fx-background-color: transparent;" VBox.vgrow="ALWAYS">
                                                     <content>
                                                         <VBox fx:id="activityLogContainer" spacing="15.0" />
+                                                    </content>
+                                                </ScrollPane>
+                                            </children>
+                                        </VBox>
+                                    </children>
+                                </StackPane>
+                            </content>
+                        </Tab>
+                        
+                        <!-- Risk Management Tab -->
+                        <Tab fx:id="tabRiskManagement" text="Risk Management">
+                            <content>
+                                <StackPane>
+                                    <padding>
+                                        <Insets bottom="30.0" left="30.0" right="30.0" top="30.0" />
+                                    </padding>
+                                    <children>
+                                        <VBox spacing="20.0" styleClass="card" style="-fx-padding: 20; -fx-background-color: white; -fx-background-radius: 12; -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.05), 10, 0, 0, 5);">
+                                            <children>
+                                                <HBox alignment="CENTER_LEFT" spacing="15.0">
+                                                    <children>
+                                                        <Label styleClass="text-h3" text="User Risk Assessment" />
+                                                        <Region HBox.hgrow="ALWAYS" />
+                                                        <Button onAction="#handleRefreshRiskScores" styleClass="btn-solid-blue" text="Re-assess All Users" />
+                                                    </children>
+                                                </HBox>
+                                                <ScrollPane fitToWidth="true" VBox.vgrow="ALWAYS" style="-fx-background-color: transparent; -fx-border-width: 0;">
+                                                    <content>
+                                                        <FlowPane fx:id="riskCardsContainer" hgap="20.0" vgap="20.0" style="-fx-padding: 10;" />
                                                     </content>
                                                 </ScrollPane>
                                             </children>

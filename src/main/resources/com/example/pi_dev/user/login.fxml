@@ -105,6 +105,7 @@
                         <Label fx:id="errorLabel" styleClass="error-label" wrapText="true" />
             
                         <Button onAction="#handleLogin" styleClass="btn-solid-blue" text="Sign In" maxWidth="1.7976931348623157E308" style="-fx-font-size: 15px; -fx-padding: 12;" />
+                        <Button onAction="#goToFaceLogin" styleClass="btn-outline-blue" text="Login with Face ID" maxWidth="1.7976931348623157E308" style="-fx-font-size: 14px; -fx-padding: 8;" />
                     </VBox>
                     
                     <!-- Social Login Options -->

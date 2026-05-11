@@ -2,6 +2,7 @@ package com.example.pi_dev.Controllers.Booking.Host;
 
 import com.example.pi_dev.Entities.Booking.GeoPoint;
 import com.example.pi_dev.Entities.Booking.Place;
+import com.example.pi_dev.Services.Booking.FileUploadSyncService;
 import com.example.pi_dev.Services.Booking.GeoService;
 import com.example.pi_dev.Services.Booking.PlaceService;
 import com.example.pi_dev.Utils.Booking.Session;
@@ -49,9 +50,12 @@ public class PlaceFormController {
     private Place editingPlace;
     private Double pendingLat;
     private Double pendingLng;
+    private java.io.File selectedImageFile;
 
     private final PlaceService placeService = new PlaceService();
     private final GeoService geoService = new GeoService();
+    private final FileUploadSyncService fileUploadSyncService = new FileUploadSyncService(
+        "http://localhost:8000", "dummy-token");
 
     @FXML
     public void initialize() {
@@ -136,6 +140,9 @@ public class PlaceFormController {
         );
         java.util.List<java.io.File> files = chooser.showOpenMultipleDialog(null);
         if (files != null && !files.isEmpty()) {
+            // Store the first selected file for later syncing
+            selectedImageFile = files.get(0);
+            
             if (photoCountLabel != null) {
                 photoCountLabel.setText(files.size() + " photo(s) selected");
             }
@@ -149,7 +156,8 @@ public class PlaceFormController {
                 }
             }
             if (!files.isEmpty() && imageUrlField != null) {
-                imageUrlField.setText(files.get(0).toURI().toString());
+                // Display the filename as placeholder
+                imageUrlField.setText("[Selected: " + files.get(0).getName() + "]");
             }
         }
     }
@@ -176,6 +184,43 @@ public class PlaceFormController {
             if (errorLabel != null)
                 errorLabel.setText("All fields are required.");
             return;
+        }
+        
+        // Sync image to Symfony if a file was selected
+        if (selectedImageFile != null && selectedImageFile.exists()) {
+            System.out.println("[PlaceForm] Processing image: " + selectedImageFile.getName());
+            try {
+                // Generate unique filename with timestamp
+                String timestamp = String.valueOf(System.currentTimeMillis());
+                String fileName = timestamp + "_" + selectedImageFile.getName();
+                
+                // Copy to local uploads directory
+                java.io.File uploadsDir = new java.io.File("uploads");
+                if (!uploadsDir.exists()) {
+                    uploadsDir.mkdirs();
+                }
+                java.io.File destFile = new java.io.File(uploadsDir, fileName);
+                java.nio.file.Files.copy(
+                    selectedImageFile.toPath(),
+                    destFile.toPath(),
+                    java.nio.file.StandardCopyOption.REPLACE_EXISTING
+                );
+                
+                // Sync to Symfony (placeId will be set after insertion, -1 is placeholder)
+                System.out.println("[PlaceForm] Syncing image to Symfony: " + fileName);
+                if (fileUploadSyncService.uploadPlaceImage(-1, destFile)) {
+                    imageUrl = "/uploads/" + fileName;
+                    System.out.println("[PlaceForm] Image synced successfully: " + imageUrl);
+                } else {
+                    System.err.println("[PlaceForm] Failed to sync image to Symfony, but saved locally");
+                    imageUrl = "/uploads/" + fileName;
+                }
+            } catch (Exception e) {
+                System.err.println("[PlaceForm] Error processing image: " + e.getMessage());
+                e.printStackTrace();
+                if (errorLabel != null)
+                    errorLabel.setText("Error uploading image: " + e.getMessage());
+            }
         }
 
         double price;
@@ -227,6 +272,9 @@ public class PlaceFormController {
                 successLabel.setText("Place submitted for approval!");
             clearForm();
         }
+        
+        // Reset selected file after submission
+        selectedImageFile = null;
     }
 
     @FXML
@@ -235,6 +283,7 @@ public class PlaceFormController {
         editingPlace = null;
         pendingLat = null;
         pendingLng = null;
+        selectedImageFile = null;
     }
 
     private void clearForm() {
@@ -253,6 +302,11 @@ public class PlaceFormController {
             errorLabel.setText("");
         if (successLabel != null)
             successLabel.setText("");
+        if (photosPreview != null)
+            photosPreview.getChildren().clear();
+        if (photoCountLabel != null)
+            photoCountLabel.setText("");
+        selectedImageFile = null;
         if (geoStatusLabel != null)
             geoStatusLabel.setText("");
         pendingLat = null;

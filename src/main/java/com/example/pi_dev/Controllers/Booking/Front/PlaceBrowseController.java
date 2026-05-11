@@ -234,7 +234,14 @@ public class PlaceBrowseController {
                         iv.setImage(new Image(fis));
                     }
                 } else {
-                    System.err.println("❌ File not found: " + file.getAbsolutePath());
+                    java.io.File symfonyFile = new java.io.File("C:\\Users\\jacer\\Desktop\\dev\\Esprit-PI_DEV-3A19-2526-Wanderlust - Copie\\public\\uploads\\places", file.getName());
+                    if (symfonyFile.exists()) {
+                        try (java.io.FileInputStream fis = new java.io.FileInputStream(symfonyFile)) {
+                            iv.setImage(new Image(fis));
+                        }
+                    } else {
+                        System.err.println("❌ File not found: " + file.getAbsolutePath());
+                    }
                 }
             }
         } catch (Exception e) {

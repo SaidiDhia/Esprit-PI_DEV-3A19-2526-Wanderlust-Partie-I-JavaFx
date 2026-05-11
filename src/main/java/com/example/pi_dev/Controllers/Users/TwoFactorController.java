@@ -148,14 +148,17 @@ public class TwoFactorController {
     }
     
     private void setupForVerify(User user) {
-        TFAMethod userMethod = user.getTfaMethod();
-        if (userMethod == null) userMethod = TFAMethod.QR; // Fallback
-        
+        TFAMethod userMethod = user != null ? user.getTfaMethod() : null;
+        if (userMethod == null || userMethod == TFAMethod.NONE) {
+            navigateToHome(null);
+            return;
+        }
+
         // If verify mode, method might be passed in or we use user's method
         // But here we rely on user's stored method mainly, unless we want to force one?
         // Let's assume we use user's method.
         
-        if (userMethod == TFAMethod.QR) {
+        if (userMethod == TFAMethod.QR || userMethod == TFAMethod.GOOGLE_AUTHENTICATOR) {
             instructionLabel.setText("Enter the 6-digit code from your authenticator app.");
             inputContainer.setVisible(true);
             inputContainer.setManaged(true);
@@ -170,7 +173,7 @@ public class TwoFactorController {
             } catch (Exception e) {
                 errorLabel.setText("Error sending email.");
             }
-        } else if (userMethod == TFAMethod.FACE) {
+        } else if (userMethod == TFAMethod.FACE_ID) {
             instructionLabel.setText("Position your face to verify.");
             faceContainer.setVisible(true);
             faceContainer.setManaged(true);
@@ -181,6 +184,8 @@ public class TwoFactorController {
             verifyButton.setManaged(false);
             this.method = "FACE";
             startWebcam();
+        } else {
+            navigateToHome(null);
         }
     }
 
@@ -287,8 +292,8 @@ public class TwoFactorController {
                     // 1. Save the captured image as the reference photo for DeepFace comparison later
                     userService.setupTwoFactorFace(user.getUserId(), capturedImageBytes);
                     // 2. Mark Face ID as the chosen 2FA method
-                    userService.finalizeTwoFactorSetup(user.getUserId(), TFAMethod.FACE);
-                    user.setTfaMethod(TFAMethod.FACE); 
+                    userService.finalizeTwoFactorSetup(user.getUserId(), TFAMethod.FACE_ID);
+                    user.setTfaMethod(TFAMethod.FACE_ID); 
                     
                     activityLogService.log(user.getEmail(), "2FA_SETUP", "Enabled Face ID 2FA");
                     navigateTo("/com/example/pi_dev/user/settings.fxml", event);

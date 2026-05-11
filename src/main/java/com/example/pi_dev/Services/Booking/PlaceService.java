@@ -50,6 +50,15 @@ public class PlaceService implements IPlaceService {
                     int newId = keys.getInt(1);
                     p.setId(newId);
                     System.out.println("Place ajoutée id=" + newId);
+                    
+                    try {
+                        new com.example.pi_dev.common.services.ActivityLogService().log(
+                            p.getHostId(), 
+                            "ADDPLACE", 
+                            "Created new place listing titled '" + p.getTitle() + "' in " + p.getCity() + "."
+                        );
+                    } catch (Exception x) { x.printStackTrace(); }
+                    
                     return newId;
                 }
             }
@@ -200,6 +209,18 @@ public class PlaceService implements IPlaceService {
             ps.setInt(2, placeId);
             ps.executeUpdate();
             System.out.println("Place status updated: id=" + placeId + " -> " + status);
+            
+            try {
+                String adminEmail = null;
+                try { adminEmail = com.example.pi_dev.Utils.Users.UserSession.getInstance().getCurrentUser().getEmail(); } catch(Exception ignored) {}
+                if (adminEmail != null) {
+                    new com.example.pi_dev.common.services.ActivityLogService().log(
+                        adminEmail, 
+                        "STATUS_UPDATE", 
+                        "Accepted a place request for ID " + placeId + " (Status => " + status.name() + ")"
+                    );
+                }
+            } catch (Exception x) { x.printStackTrace(); }
         } catch (SQLException e) {
             throw new RuntimeException("Erreur updateStatus place", e);
         }

@@ -139,6 +139,15 @@ public class UserRepository {
         }
     }
 
+    public void updateFaceReferenceImage(UUID userId, String filename) throws SQLException {
+        String sql = "UPDATE users SET face_reference_image = ? WHERE user_id = ?";
+        try (PreparedStatement ps = UserDatabaseConnection.getInstance().getConnection().prepareStatement(sql)) {
+            ps.setString(1, filename);
+            ps.setString(2, userId.toString());
+            ps.executeUpdate();
+        }
+    }
+
     public String getTfaSecret(UUID userId) throws SQLException {
         String sql = "SELECT secret_key FROM tfa_secrets WHERE user_id = ?";
         try (PreparedStatement ps = UserDatabaseConnection.getInstance().getConnection().prepareStatement(sql)) {

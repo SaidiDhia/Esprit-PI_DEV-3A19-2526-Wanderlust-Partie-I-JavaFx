@@ -10,7 +10,7 @@ import java.util.List;
 
 public class ReservationService {
 
-    private Connection cnx;
+    private final Connection cnx;
 
     public ReservationService() {
         cnx = Mydatabase.getInstance().getConnextion();
@@ -22,6 +22,13 @@ public class ReservationService {
             st.executeUpdate("ALTER TABLE reservations ADD COLUMN IF NOT EXISTS user_id VARCHAR(36) NULL AFTER id_event");
         } catch (SQLException e) {
             System.err.println("Impossible de vérifier la colonne user_id des réservations: " + e.getMessage());
+        }
+    }
+
+    private boolean hasDateModificationColumn() throws SQLException {
+        DatabaseMetaData metaData = cnx.getMetaData();
+        try (ResultSet rs = metaData.getColumns(cnx.getCatalog(), null, "reservations", "date_modification")) {
+            return rs.next();
         }
     }
 
@@ -246,7 +253,11 @@ public class ReservationService {
         }
 
         r.setDateCreation(rs.getTimestamp("date_creation"));
-        r.setDateModification(rs.getTimestamp("date_modification"));
+        if (hasDateModificationColumn()) {
+            r.setDateModification(rs.getTimestamp("date_modification"));
+        } else {
+            r.setDateModification(null);
+        }
         return r;
     }
 }

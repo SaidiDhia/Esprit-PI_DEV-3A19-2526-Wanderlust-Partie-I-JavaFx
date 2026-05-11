@@ -77,9 +77,9 @@ public class BookingService implements IBookingService {
             throw new RuntimeException("Erreur lors de la récupération du host_id", e);
         }
 
-        String sql = "INSERT INTO booking (place_id, user_id, host_id, start_date, end_date, total_price, guests_count, status) "
+        String sql = "INSERT INTO booking (place_id, user_id, host_id, start_date, end_date, total_price, guests_count, status, created_at) "
                 +
-                "VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
+                "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)";
 
         try (PreparedStatement ps = con.prepareStatement(sql)) {
             ps.setInt(1, b.getPlaceId());
@@ -90,9 +90,31 @@ public class BookingService implements IBookingService {
             ps.setDouble(6, b.getTotalPrice());
             ps.setInt(7, b.getGuestsCount());
             ps.setString(8, Booking.Status.PENDING.name());
+            ps.setTimestamp(9, Timestamp.valueOf(LocalDateTime.now()));
 
             ps.executeUpdate();
             System.out.println("Booking ajouté");
+            
+            // Log Activity
+            try {
+                String placeName = "a place";
+                String placeSqlTitle = "SELECT title FROM place WHERE id = ?";
+                try (PreparedStatement psP = con.prepareStatement(placeSqlTitle)) {
+                    psP.setInt(1, b.getPlaceId());
+                    ResultSet rp = psP.executeQuery();
+                    if(rp.next()) placeName = rp.getString("title");
+                } catch(Exception e){}
+                
+                String userName = "User";
+                try {
+                	userName = com.example.pi_dev.Utils.Users.UserSession.getInstance().getCurrentUser().getFullName();
+                } catch(Exception e){}
+
+                com.example.pi_dev.common.services.ActivityLogService as = new com.example.pi_dev.common.services.ActivityLogService();
+                as.log(b.getUserId(), "BOOKBOOKING", userName + " booked '" + placeName + "'");
+            } catch (Exception x) {
+                x.printStackTrace();
+            }
         } catch (SQLException e) {
             throw new RuntimeException("Erreur ajout booking", e);
         }
@@ -269,11 +291,12 @@ public class BookingService implements IBookingService {
 
     /**
      * Checks if a user is eligible to review a place.
+     * Allows review if user has any reservation (PENDING, CONFIRMED, or COMPLETED)
      */
     public boolean canReview(String userId, int placeId) {
         String sql = "SELECT COUNT(*) FROM booking " +
                 "WHERE user_id=? AND place_id=? " +
-                "AND (status='COMPLETED' OR (status='CONFIRMED' AND end_date < CURDATE()))";
+                "AND status IN ('PENDING', 'CONFIRMED', 'COMPLETED')";
         try (PreparedStatement ps = con.prepareStatement(sql)) {
             ps.setString(1, userId);
             ps.setInt(2, placeId);
