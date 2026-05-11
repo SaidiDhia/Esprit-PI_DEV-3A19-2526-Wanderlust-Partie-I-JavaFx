@@ -3,5 +3,9 @@
   <component name="SqlDialectMappings">
     <file url="file://$PROJECT_DIR$/ai_review_migration.sql" dialect="GenericSQL" />
     <file url="file://$PROJECT_DIR$/migration_features.sql" dialect="GenericSQL" />
+    <file url="file://$PROJECT_DIR$/src/main/java/com/example/pi_dev/uploadssymfony/1775467698_69d37cb22c5ab.sql" dialect="GenericSQL" />
+    <file url="file://$PROJECT_DIR$/src/main/java/com/example/pi_dev/uploadssymfony/1775467796_69d37d1439b53.sql" dialect="GenericSQL" />
+    <file url="file://$PROJECT_DIR$/uploadssymfony/1775467698_69d37cb22c5ab.sql" dialect="GenericSQL" />
+    <file url="file://$PROJECT_DIR$/uploadssymfony/1775467796_69d37d1439b53.sql" dialect="GenericSQL" />
   </component>
 </project>
